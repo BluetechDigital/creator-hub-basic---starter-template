@@ -13,13 +13,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
+import { getAllFlexibleContentComponents } from "@/graphql/CMS/GetAllFlexibleContentComponents";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import PageContextProvider from "@/context/providers/PageContextProvider";
-import { getAllFlexibleContentComponents } from "@/graphql/CMS/GetAllFlexibleContentComponents";
+import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -125,6 +126,7 @@ const HomePage: NextPage = async () => {
           </div>
         </main>
       </div>
+      <RenderFlexibleContent />
     </PageContextProvider>
   );
 }

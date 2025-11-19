@@ -44,6 +44,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Other Components
 import SmoothScrolling from "@/components/Global/SmoothScrolling";
+import CookiePolicy from "@/components/Global/CookiePolicy/CookiePolicy";
 import BlurryCursorMouse from "@/components/Global/BlurryCursorMouse/BlurryCursorMouse";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/Global/Analytics/GoogleTagManager";
 
@@ -141,7 +142,8 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
                 <main>
                   {children}
                 </main>
-                <BlurryCursorMouse/>
+                <BlurryCursorMouse />
+                <CookiePolicy />
               </SmoothScrolling>
             </GlobalContextProvider>
           </CookiePolicyContextProvider>

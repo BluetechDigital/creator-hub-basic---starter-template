@@ -1,0 +1,46 @@
+@import "tailwindcss/theme"; 
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.cookiePolicy {
+	@apply fixed bottom-0 right-0 p-0 mx-4 max-w-6xl px-0 md:max-w-sm z-999;
+
+	.content {
+		@apply p-4 mb-3 bg-white rounded-md flex flex-col items-baseline justify-center gap-2;
+
+		.titleSection {
+			@apply flex flex-col items-baseline justify-center gap-1;
+
+			.title {
+				@apply uppercase text-xs 2xl:text-sm text-black;
+			}
+
+			.paragraph {
+				@apply text-black text-[.65rem] 2xl:text-xs text-left leading-normal;
+
+				p {
+					@apply p-0;
+				}
+			}
+		}
+
+		.buttonSection {
+			@apply w-full flex items-center justify-start gap-2;
+
+			.acceptButton,
+			.refuseButton {
+				@apply inline-block py-[3px] 2xl:py-[5px] px-4 xl:px-6 w-full md:w-fit cursor-pointer rounded-full uppercase text-[.5rem] text-center border 2xl:border-2 border-solid transition-all ease-in-out duration-500;
+			}
+
+			.acceptButton {
+				@apply text-[#f7f7f7] border-black bg-black hover:border-black hover:bg-black;
+			}
+
+			.refuseButton {
+				@apply text-black border-black bg-transparent hover:text-white hover:border-black hover:bg-black;
+			}
+		}
+	}
+}
