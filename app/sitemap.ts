@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import {MetadataRoute} from "next";
+import { MetadataRoute } from "next";
 
 // Pages
 import { getAllPagesSlugs } from "@/graphql/CMS/GetAllPagesSlugs";
@@ -38,7 +38,7 @@ type IObject = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Sitemap XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const sitemap = async () => {
+const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	const siteUrl: string | undefined = SITE_URL;
 
 	const [pagesSlugs] = await Promise.all([getAllPagesSlugs()]) as [IKeys[]];
@@ -63,7 +63,7 @@ const sitemap = async () => {
 	// Arrays with your all dynamic links
 	const allLinks: MetadataRoute.Sitemap = [...pagesLinks,];
 
-	return allLinks;
+	return allLinks as MetadataRoute.Sitemap;
 };
 
 export default sitemap;
