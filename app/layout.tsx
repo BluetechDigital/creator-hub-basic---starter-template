@@ -74,9 +74,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Root Layout Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.Element> => {
 
-  /* PUBLIC PAGES
-	  Fetch all global content simultaneously using Promise.all Ensure all functions 
-    being awaited are indeed Promise-returning functions. */
+  /* PUBLIC PAGES  */
+	/*  Fetch all global content simultaneously using Promise.all Ensure all functions 
+  being awaited are indeed Promise-returning functions. */
   const promises: Promise<unknown>[] = [
     // Custom Post Types
 		getThemesOptionsContent(),
@@ -89,6 +89,7 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
 
 	];
 
+  // Await all promises to resolve
 	const [
 		themesOptionsContent,
 
@@ -115,20 +116,26 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
   
   return (
     <html lang="en">
+      
       <head>
         <Suspense fallback={null}>
           <GoogleTagManager />
         </Suspense>
       </head>
+
+      {/* Google Tag Manager NoScript */}
       <GoogleTagManagerNoScript />
+
       {/* Vercel Analytics */}
-    	<Analytics />
+      <Analytics />
+      
     	{/* Vercel Speed Insights */}
-    	<SpeedInsights />
+      <SpeedInsights />
+      
       <body>
         <ApolloContextProvider>
           <CookiePolicyContextProvider>
-            <GlobalContextProvider  globalProps={globalProps}>
+            <GlobalContextProvider globalProps={globalProps}>
               <SmoothScrolling>
                 <main>
                   {children}
