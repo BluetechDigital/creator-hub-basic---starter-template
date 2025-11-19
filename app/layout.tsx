@@ -14,6 +14,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 // Context Providers Components
 import ApolloContextProvider from "@/context/providers/ApolloContextProvider";
+import CookiePolicyContextProvider from "@/context/providers/CookiePolicyContextProvider";
 
 // Vercel Analytics & Speed Insights
 import { Analytics } from "@vercel/analytics/react";
@@ -68,11 +69,13 @@ export default function RootLayout({
     	<SpeedInsights />
       <body>
         <ApolloContextProvider>
-          <SmoothScrolling>
-            <main>
-              {children}
-            </main>
-          </SmoothScrolling>
+          <CookiePolicyContextProvider>
+            <SmoothScrolling>
+              <main>
+                {children}
+              </main>
+            </SmoothScrolling>
+          </CookiePolicyContextProvider>
 				</ApolloContextProvider>
       </body>
     </html>
