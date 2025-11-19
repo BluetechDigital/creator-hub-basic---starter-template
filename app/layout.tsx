@@ -22,7 +22,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScrolling from "@/components/Global/SmoothScrolling";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/Global/Analytics/GoogleTagManager";
 
-
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
