@@ -5,6 +5,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import Image from "next/image";
 import { Metadata, NextPage } from "next";
 import * as ISeo from "@/graphql/CMS/types/seo";
+import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
+import { postType, flexibleContentType, pageType } from "@/context/constants";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -21,6 +23,32 @@ import PageContextProvider from "@/context/providers/PageContextProvider";
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
+
+export const generateMetadata = async (): Promise<Metadata> => {
+
+  const seo = await getAllSeoContent(pageType?.home, postType.pages) as ISeo.IProps;
+
+  console.log(seo)
+
+	return {
+		title: seo.title,
+		description: seo.metaDesc,
+		openGraph: {
+			type: 'website',
+			url: seo.opengraphUrl,
+			title: seo.opengraphTitle,
+			siteName: seo.opengraphSiteName,
+			description: seo.opengraphDescription
+		},
+		alternates: {
+			canonical: seo?.canonical,
+		},
+		robots: {
+			follow: true,
+			index: true
+		}
+	};
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX Home Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

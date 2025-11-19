@@ -7,10 +7,10 @@ export type IResponse = {
         edges: Array<{
             node: {
                 seo: IProps;
-            } | null;
-        } | null> | null;
-    } | null;
-} | null;
+            };
+        }>;
+    };
+};
 
 /* Defines the comprehensive SEO metadata for a page or post. */
 export type IProps = {
