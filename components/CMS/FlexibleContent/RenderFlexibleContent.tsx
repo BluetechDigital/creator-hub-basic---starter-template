@@ -27,17 +27,34 @@ const RenderFlexibleContent: FC = memo(() => {
     const postTypeFlexibleContent = memoizedValues.postTypeFlexibleContent;
 
 	// Memoize the Components Key Value Pairs
-	const componentMapping = useMemo(() => {
-		const mapping: IFlexibleContent.IMapping = {
+	const componentMapping: IFlexibleContent.IMapping = useMemo(() => {
+		
+        const mapping: IFlexibleContent.IMapping = {
             [`${postTypeFlexibleContent}_TitleParagraph`]: TitleParagraph as IFlexibleContent.IGenericComponentType,
         };
-        return mapping as IFlexibleContent.IMapping;
+
+        return mapping;
         
     }, [postTypeFlexibleContent]); // Recreate mapping only if postTypeFlexibleContent changes
-    
 
 	return (
-		<>
+        <>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {content.map((item: any, index: number) => (
+				<Fragment key={item.fieldGroupName || index}>
+					{item.displaySection === true ? (
+						<section>
+							{componentMapping[item.fieldGroupName] && (
+								<>
+									{React.createElement(componentMapping[item.fieldGroupName], {
+										...item,
+									})}
+								</>
+							)}
+						</section>
+					) : (null )}
+				</Fragment>
+			))}
         </>
 	);
 });
