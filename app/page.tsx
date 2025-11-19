@@ -19,6 +19,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import PageContextProvider from "@/context/providers/PageContextProvider";
+import { getAllFlexibleContentComponents } from "@/graphql/CMS/GetAllFlexibleContentComponents";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -27,8 +28,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const generateMetadata = async (): Promise<Metadata> => {
 
   const seo = await getAllSeoContent(pageType?.home, postType.pages) as ISeo.IProps;
-
-  console.log(seo)
 
 	return {
 		title: seo.title,
@@ -55,6 +54,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Home Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 const HomePage: NextPage = async () => {
+  // Fetch priority content
+  const flexibleContentComponents = await getAllFlexibleContentComponents(
+  	pageType.home,
+  	postType.pages,
+  	flexibleContentType.pages
+  ) as IFlexibleContent.IProps;
+
   return (
     <div className="flex min-h-scree items-center justify-center bg-zinc-50 font-sans dark:bg-white">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-white sm:items-start">
