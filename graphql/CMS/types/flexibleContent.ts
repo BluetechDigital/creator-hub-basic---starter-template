@@ -8,9 +8,7 @@ export type IQueryResponse = {
                         node: {
                                 template: { 
                                      flexibleContent: {
-                                             flexibleContent: {
-                                                     __typename: string;
-                                             }[];
+                                             flexibleContent: IProps;
                                      };   
                                 };
                         };
@@ -20,6 +18,12 @@ export type IQueryResponse = {
 
 /* Represents an array structure for rich content ACF blocks.
  The inner 'content: any' is deliberately simplified here. */
-export type IProps = {
-        __typename: string;
-}[];
+export type IProps = Record<string, unknown>[];
+
+/* Mapping type for flexible content components */
+export type IMapping = {
+    [key: string]: IGenericComponentType;
+};
+
+/* Generic component type for flexible content components */
+export type IGenericComponentType = React.ComponentType<Record<string, unknown>>;

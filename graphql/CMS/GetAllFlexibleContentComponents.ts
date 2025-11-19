@@ -6,10 +6,7 @@ import { client } from "@/config/apollo";
 import { ApolloClient, DocumentNode, gql } from "@apollo/client";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXX GraphQL Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
+// Components: ACF Flexible Content Post Types
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 
 /* -----------------------------------------------------------------------------
@@ -25,7 +22,8 @@ export const getAllFlexibleContentComponents = async (
 	slug: string,
 	postType: string,
 	postTypeFlexibleContent: string
-): Promise<IFlexibleContent.IProps | null> => {
+
+): Promise<IFlexibleContent.IProps | unknown> => {
 	try {
 		const content: DocumentNode = gql`
 			{
@@ -36,7 +34,7 @@ export const getAllFlexibleContentComponents = async (
 								... on DefaultTemplate {
 									flexibleContent {
 										flexibleContent {
-                							... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
+											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
 										}
 									}
 								}
@@ -51,28 +49,23 @@ export const getAllFlexibleContentComponents = async (
 			query: content,
 		});
 
-		// 1. Check if data object or errors exist
+		// 1. Check for data and errors
         if (!response.data || response.error) {
             console.error("GraphQL query failed or returned data errors.", response.error);
             return null;
 		}
 		
-		// Destructure to safely access the nested data and explicitly check for it.
-		const pageEdges = response.data.flexibleComponents?.edges;
-		
-		// 2. Check if the edges array is empty or undefined (meaning the page wasn't found)
-        if (!pageEdges || pageEdges.length === 0) {
-            console.log(`No content found for slug: ${slug}`);
-            return null;
-		}
-		
-		// Safely extract the deep array structure using optional chaining, 
-        // relying on the type definitions to guide the path.
+		// 2. Safely extract the deep array structure
         const flexibleContentArray = 
-            pageEdges[0].node?.template?.flexibleContent?.flexibleContent;
+            response.data.flexibleComponents?.edges?.[0]?.node?.template?.flexibleContent?.flexibleContent;
+
+		// 3. Check if content was actually retrieved
+        if (!flexibleContentArray) {
+            console.log(`No flexible content found for slug: ${slug}`);
+            return null;
+        }
 
 		return flexibleContentArray as IFlexibleContent.IProps;
-
 	} catch (error) {
 		console.log(error);
 		throw new Error(

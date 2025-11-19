@@ -18,23 +18,23 @@ const nextConfig: NextConfig = {
 	async headers() {
 		return [
 			// Specific rule for /search to disable caching
-      {
-        source: "/search",
-        headers: [
             {
-                key: "Cache-Control",
-                value: "no-store, no-cache, must-revalidate, proxy-revalidate",
+                source: "/search",
+                headers: [
+                    {
+                        key: "Cache-Control",
+                        value: "no-store, no-cache, must-revalidate, proxy-revalidate",
+                    },
+                    {
+                        key: "Pragma",
+                        value: "no-cache",
+                    },
+                    {
+                        key: "Expires",
+                        value: "0",
+                    },
+                ],
             },
-            {
-                key: "Pragma",
-                value: "no-cache",
-            },
-            {
-                key: "Expires",
-                value: "0",
-            },
-        ],
-      },
 			{
 				source: "/(.*)", // Match all routes (adjust as necessary)
 				headers: [
@@ -109,7 +109,7 @@ const nextConfig: NextConfig = {
 				],
 			},
 		];
-  },
+	},
   
   /* Force HTTPS Redirects */
   async redirects() {
@@ -130,7 +130,7 @@ const nextConfig: NextConfig = {
 				destination: `${process.env.SITE_URL}/$1`,
 			},
 		];
-  },
+	},
   
   /* Image Optimization Configuration */
   images: {

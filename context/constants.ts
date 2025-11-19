@@ -13,7 +13,7 @@ XXXXXXXXXXXXXXXX PUBLIC PAGES & POSTS & PREVIEW PAGES & POSTS XXXXXXXXXXXXXXXXXX
 export const postType: IPost.ITypes = {
     // Public pages
     pages: "pages",
-    posts: "posts",
+	posts: "posts",
 
     // Preview pages
     previewPage: "page",
@@ -30,7 +30,7 @@ export const pageType: IPage.ITypes = {
 export const flexibleContentType: IFlexibleContentType.ITypes = {
     // Public pages
     pages: "DefaultTemplate_Flexiblecontent_FlexibleContent",
-    // Preview pages
-    previewPage: "Page_Flexiblecontent_FlexibleContent",
-    previewPost: "Post_Flexiblecontent_FlexibleContent",
+	// Preview pages
+	previewPage: "Page_Flexiblecontent_FlexibleContent",
+	previewPost: "Post_Flexiblecontent_FlexibleContent",
 };
