@@ -9,10 +9,32 @@ import { Suspense, ReactNode, JSX } from 'react';
 import "@/styles/globals.css";
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXX Global Context Provider Types XXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+import * as IGlobal from "@/context/types/global";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX CMS Query Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// Menu Links
+import { 
+	getAllMobileLinks,
+	getAllCopyrightLinks,
+	getAllNavbarMenuLinks,
+	getAllFooterMenuLinks,
+} from "@/graphql/CMS/GetAllMenuLinks";
+
+// Themes Options
+import { getThemesOptionsContent } from "@/graphql/CMS/GetAllThemesOptions";
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 // Context Providers Components
+import GlobalContextProvider from "@/context/providers/GlobalContextProvider";
 import ApolloContextProvider from "@/context/providers/ApolloContextProvider";
 import CookiePolicyContextProvider from "@/context/providers/CookiePolicyContextProvider";
 
@@ -50,11 +72,47 @@ export const metadata: Metadata = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Root Layout Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.Element> => {
+
+  /* PUBLIC PAGES
+	  Fetch all global content simultaneously using Promise.all Ensure all functions 
+    being awaited are indeed Promise-returning functions. */
+  const promises: Promise<unknown>[] = [
+    // Custom Post Types
+		getThemesOptionsContent(),
+
+		// Website Links
+		getAllMobileLinks(),
+		getAllCopyrightLinks(),
+		getAllNavbarMenuLinks(),
+		getAllFooterMenuLinks(),
+
+	];
+
+	const [
+		themesOptionsContent,
+
+		// Website Links
+		mobileLinks,
+		copyrightLinks,
+		navbarMenuLinks,
+		footerMenuLinks,
+
+	] = await Promise.all(promises);
+
+	/* Construct the globalProps object, ensuring it matches IGlobal.IProps structure.
+    TypeScript will help validate this. */
+	const globalProps: IGlobal.IProps = {
+		themesOptionsContent: themesOptionsContent as IGlobal.IProps["themesOptionsContent"],
+
+		// Website Links
+		mobileLinks: mobileLinks as IGlobal.IProps["mobileLinks"],
+		copyrightLinks: copyrightLinks as IGlobal.IProps["copyrightLinks"],
+		navbarMenuLinks: navbarMenuLinks as IGlobal.IProps["navbarMenuLinks"],
+		footerMenuLinks: footerMenuLinks as IGlobal.IProps["footerMenuLinks"],
+
+  };
+  
   return (
     <html lang="en">
       <head>
@@ -70,14 +128,18 @@ export default function RootLayout({
       <body>
         <ApolloContextProvider>
           <CookiePolicyContextProvider>
-            <SmoothScrolling>
-              <main>
-                {children}
-              </main>
-            </SmoothScrolling>
+            <GlobalContextProvider  globalProps={globalProps}>
+              <SmoothScrolling>
+                <main>
+                  {children}
+                </main>
+              </SmoothScrolling>
+            </GlobalContextProvider>
           </CookiePolicyContextProvider>
 				</ApolloContextProvider>
       </body>
     </html>
   );
 }
+
+export default RootLayout;
