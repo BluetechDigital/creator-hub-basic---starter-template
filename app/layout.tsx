@@ -9,6 +9,21 @@ import { Suspense, ReactNode, JSX } from 'react';
 import "@/styles/globals.css";
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// Context Providers Components
+
+// Vercel Analytics & Speed Insights
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+// Other Components
+import SmoothScrolling from "@/components/Global/SmoothScrolling";
+import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/Global/Analytics/GoogleTagManager";
+
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -41,8 +56,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Suspense fallback={null}>
+          <GoogleTagManager />
+        </Suspense>
+      </head>
+      <GoogleTagManagerNoScript />
+      {/* Vercel Analytics */}
+    	<Analytics />
+    	{/* Vercel Speed Insights */}
+    	<SpeedInsights />
       <body>
-        {children}
+        <SmoothScrolling>
+					<main>
+						{children}
+					</main>
+				</SmoothScrolling>
       </body>
     </html>
   );
