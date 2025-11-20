@@ -1,5 +1,17 @@
+@import "tailwindcss/theme"; 
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-.titleParagraph {}
+.titleParagraph {
+    @apply bg-white lg:max-w-[1700px] py-10 px-4 mx-auto min-h-[50vh] flex flex-col items-center justify-center;
+
+    .title {
+        @apply mb-10 text-center font-semibold leading-tight text-lg lg:text-3xl text-black;
+    }
+    
+    .paragraph {
+        @apply lg:max-w-6xl mx-auto text-black leading-7;
+    }
+}
