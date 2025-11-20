@@ -18,7 +18,12 @@ export type IQueryResponse = {
 
 /* Represents an array structure for rich content ACF blocks.
  The inner 'content: any' is deliberately simplified here. */
-export type IProps = Record<string, unknown>[];
+export type IProps = {
+        __typename: string;
+        fieldGroupName: string;
+        displaySection?: boolean;
+        [key: string]: unknown;
+}[];
 
 /* Mapping type for flexible content components */
 export type IMapping = {
