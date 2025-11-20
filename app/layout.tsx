@@ -123,10 +123,10 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
         <Suspense fallback={null}>
           <GoogleTagManager />
         </Suspense>
-      </head>
 
-      {/* Google Tag Manager NoScript */}
-      <GoogleTagManagerNoScript />
+        {/* Google Tag Manager NoScript */}
+        <GoogleTagManagerNoScript />
+      </head>
 
       {/* Vercel Analytics */}
       <Analytics />
