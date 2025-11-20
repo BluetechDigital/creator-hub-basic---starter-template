@@ -41,6 +41,61 @@ export const getThemesOptionsContent =
 										title
 										target
 									}
+									lineLink {
+										url
+										title
+										target
+									}
+									spotifyLink {
+										url
+										title
+										target
+									}
+									snapchatLink {
+										url
+										title
+										target
+									}
+									discordLink {
+										url
+										title
+										target
+									}
+									tiktokLink {
+										url
+										title
+										target
+									}
+									twitchLink {
+										url
+										title
+										target
+									}
+									threadsLink {
+										url
+										title
+										target
+									}
+									pinterestLink {
+										url
+										title
+										target
+									}
+									redditLink {
+										url
+										title
+										target
+									}
+									whatsappLink {
+										url
+										title
+										target
+									}
+									wechatLink {
+										url
+										title
+										target
+									}
 									errorPageContent {
 										displaySection
 										title
