@@ -62,12 +62,12 @@ const HomePage: NextPage = async () => {
   ) as IFlexibleContent.IProps;
 
   return (
-     <PageContextProvider
+    <PageContextProvider
       content={flexibleContentComponents}
       postTypeFlexibleContent={flexibleContentType.pages}
     >
       <RenderFlexibleContent />
-	  </PageContextProvider>
+	</PageContextProvider>
   );
 }
 

@@ -3,12 +3,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { client } from "@/config/apollo";
-import { ApolloClient, DocumentNode, gql } from "@apollo/client";
-import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import { 
     getAllComponentsGrapghQLFragments, // The MAP of loader functions
     allComponentsGrapghQLFragmentsObjectKeys // The ARRAY of keys
 } from "@/graphql/CMS/GetAllComponentsFragments";
+import { ApolloClient, DocumentNode, gql } from "@apollo/client";
+import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -91,7 +91,6 @@ const getAllComponentFieldGroupNames = async (
     return fieldGroupNameListQueryResponse as ApolloClient.QueryResult<IFlexibleContent.IQueryResponse>;
 };
 
-
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXX 2. PROCESS ARRAY: Extract unique component names XXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -129,7 +128,6 @@ const extractActiveComponentNames = (
 	
 	return activeComponentNamesArray as string[];
 };
-
 
 /* -----------------------------------------------------------------------------
 XXXXX 3. getAllFlexibleContentComponents: Orchestrator and Optimized Pass 2 Query XXXXX

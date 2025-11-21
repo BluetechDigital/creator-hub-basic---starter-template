@@ -25,9 +25,11 @@ import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexib
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-export const generateMetadata = async ({params}: {params: {slug: string}}): Promise<Metadata> => {
+export const generateMetadata = async ({ params }: { params: { slug: string } }): Promise<Metadata> => {
+	
+	const { slug } = await params;
 
-  const seo = await getAllSeoContent(params?.slug, postType.pages) as ISeo.IProps;
+  const seo = await getAllSeoContent(slug, postType.pages) as ISeo.IProps;
 
 	return {
 		title: seo.title,
@@ -53,15 +55,21 @@ export const generateMetadata = async ({params}: {params: {slug: string}}): Prom
 XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Pages Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const DynamicPages = async ({params}: {params: {slug: string}}) => {
+const DynamicPages = async ({ params }: { params: { slug: string } }) => {
+	
+	/* Extract slug directly from params to ensure it's resolved before use. */
+	const { slug } = await params;
+
 	// Fetch priority content
-	  const flexibleContentComponents = await getAllFlexibleContentComponents(
-		params.slug,
+	const flexibleContentComponents = await getAllFlexibleContentComponents(
+		slug,
 		postType.pages,
 		flexibleContentType.pages
-	  ) as IFlexibleContent.IProps;
+	) as IFlexibleContent.IProps;
 
-	return (
+	console.log(flexibleContentComponents);
+
+		return (
 		<PageContextProvider
 			content={flexibleContentComponents}
 			postTypeFlexibleContent={flexibleContentType.pages}
@@ -69,8 +77,8 @@ const DynamicPages = async ({params}: {params: {slug: string}}) => {
 			<RenderFlexibleContent />
 		</PageContextProvider>
 	);
-};
+}
 
-DynamicPages.displayName = 'DynamicPages';
+	DynamicPages.displayName = 'DynamicPages';
 
 export default DynamicPages;
