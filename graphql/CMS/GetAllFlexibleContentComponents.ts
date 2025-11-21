@@ -17,6 +17,7 @@ import { CallToActionTwo } from "@/components/CMS/CallToActionTwo/graphql/index"
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 import { YoutubeVideoGrid } from "@/components/CMS/YoutubeVideoGrid/graphql/index";
 import { AllYoutubeVideos } from "@/components/CMS/AllYoutubeVideos/graphql/index";
+import { AllYoutubeShortsVideos } from "@/components/CMS/AllYoutubeShortsVideos/graphql/index";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXX Function to fetch all flexible content components XXXXXXXXXXXXXXX
@@ -53,6 +54,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 											... on ${postTypeFlexibleContent}_YoutubeVideoGrid {${YoutubeVideoGrid}}
 											... on ${postTypeFlexibleContent}_AllYoutubeVideos {${AllYoutubeVideos}}
+											... on ${postTypeFlexibleContent}_AllYoutubeShortsVideos {${AllYoutubeShortsVideos}}
 										}
 									}
 								}
