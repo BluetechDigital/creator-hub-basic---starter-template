@@ -67,8 +67,6 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 		flexibleContentType.pages
 	) as IFlexibleContent.IProps;
 
-	console.log(flexibleContentComponents);
-
 		return (
 		<PageContextProvider
 			content={flexibleContentComponents}
