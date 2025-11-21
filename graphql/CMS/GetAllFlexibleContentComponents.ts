@@ -12,7 +12,7 @@ import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
-import { YouTubeVideoGrid } from "@/components/CMS/YouTubeVideoGrid/graphql/index";
+import { YoutubeVideoGrid } from "@/components/CMS/YoutubeVideoGrid/graphql/index";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXX Function to fetch all flexible content components XXXXXXXXXXXXXXX
@@ -44,7 +44,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
-											... on ${postTypeFlexibleContent}_YouTubeVideoGrid {${YouTubeVideoGrid}}
+											... on ${postTypeFlexibleContent}_YoutubeVideoGrid {${YoutubeVideoGrid}}
 										}
 									}
 								}
@@ -74,8 +74,6 @@ export const getAllFlexibleContentComponents = async (
             console.log(`No flexible content found for slug: ${slug}`);
             return null;
 		}
-		
-		console.log(flexibleContentArray)
 
 		return flexibleContentArray as IFlexibleContent.IProps;
 	} catch (error) {

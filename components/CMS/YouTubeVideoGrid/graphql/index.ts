@@ -2,7 +2,7 @@
 XXXXXXXXXXXXX GraphQL Fragments for TitleParagraph ACF Component XXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-export const YouTubeVideoGrid = `
+export const YoutubeVideoGrid = `
     fieldGroupName
     displaySection
 `;

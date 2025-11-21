@@ -3,13 +3,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, memo } from "react";
-import * as IYouTubeVideoGrid from "@/components/CMS/YouTubeVideoGrid/types/youTubeVideoGrid";
+import * as IYoutubeVideoGrid from "@/components/CMS/YoutubeVideoGrid/types/youTubeVideoGrid";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import styles from "@/components/CMS/YouTubeVideoGrid/styles/YouTubeVideoGrid.module.css";
+import styles from "@/components/CMS/YoutubeVideoGrid/styles/YoutubeVideoGrid.module.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -17,17 +17,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXX YouTubeVideoGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXX YoutubeVideoGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const YouTubeVideoGrid: FC<IYouTubeVideoGrid.IProps> = memo(({}) => {
+const YoutubeVideoGrid: FC<IYoutubeVideoGrid.IProps> = memo(({}) => {
 
 	return (
-		<div className={styles.youTubeVideoGrid}>
+		<div className={styles.youtubeVideoGrid}>
 		</div>
 	);
 });
 
-YouTubeVideoGrid.displayName = 'YouTubeVideoGrid';
+YoutubeVideoGrid.displayName = 'YoutubeVideoGrid';
 
-export default YouTubeVideoGrid;
+export default YoutubeVideoGrid;
