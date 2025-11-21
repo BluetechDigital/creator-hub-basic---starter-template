@@ -10,6 +10,7 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import { Hero } from "@/components/CMS/Hero/graphql/index";
 import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
+import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXX Function to fetch all flexible content components XXXXXXXXXXXXXXX
@@ -39,6 +40,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_Hero {${Hero}}
 											... on ${postTypeFlexibleContent}_AboutUs {${AboutUs}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
+											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 										}
 									}
 								}
