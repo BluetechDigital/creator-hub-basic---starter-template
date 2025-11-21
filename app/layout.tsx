@@ -138,9 +138,7 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
           <CookiePolicyContextProvider>
             <GlobalContextProvider globalProps={globalProps}>
               <SmoothScrolling>
-                <main>
                   {children}
-                </main>
                 <BlurryCursorMouse />
                 <CookiePolicy />
               </SmoothScrolling>

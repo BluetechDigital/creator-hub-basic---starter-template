@@ -10,6 +10,7 @@ import {
  } from "@/animations/animations";
 import { FC, memo } from "react";
 import { motion } from "framer-motion";
+import * as ITitleParagraph from "@/components/CMS/TitleParagraph/types/titleParagraph";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -25,20 +26,10 @@ import Paragraph from "@/components/Global/Elements/Paragraph/Paragraph";
 import ScrollYProgressReveal from "@/components/Animations/ScrollYProgressReveal";
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXX TitleParagraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-type ITitleParagraph = {
-	title: string;
-	paragraph: string;
-	displayParagraph: boolean;
-};
-
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXX TitleParagraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
-const TitleParagraph: FC<ITitleParagraph> = memo(({
+const TitleParagraph: FC<ITitleParagraph.IProps> = memo(({
 	title,
 	paragraph,
 	displayParagraph,

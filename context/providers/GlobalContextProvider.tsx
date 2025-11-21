@@ -30,13 +30,13 @@ const GlobalContextProvider: FC<IGlobal.IContextProvider> = memo(({
 				footerMenuLinks: globalProps.footerMenuLinks,
 			}}
 		>
-			<motion.div
+			<motion.main
 				initial="initial"
 				animate="animate"
 				exit={{opacity: 0}}
 			>
 				{children}
-			</motion.div>
+			</motion.main>
 		</GlobalContext.Provider>
 	);
 });
