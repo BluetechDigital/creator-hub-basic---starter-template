@@ -67,7 +67,7 @@ const HomePage: NextPage = async () => {
       postTypeFlexibleContent={flexibleContentType.pages}
     >
       <RenderFlexibleContent />
-    </PageContextProvider>
+	  </PageContextProvider>
   );
 }
 

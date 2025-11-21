@@ -57,6 +57,6 @@ XXXXXXXXXXXXXXXXXXXX Export the configured Apollo Client XXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 export const client: ApolloClient = new ApolloClient({
-	link: new HttpLink({ uri: `${process.env.CMS_API_URL}` }),
+	link: new HttpLink({ uri: `${process.env.NEXT_PUBLIC_CMS_API_URL}` }),
 	cache: cache,
 });

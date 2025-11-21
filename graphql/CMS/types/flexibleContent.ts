@@ -10,7 +10,7 @@ export type IQueryResponse = {
                                 template: { 
                                      flexibleContent: {
                                              flexibleContent: IProps;
-                                     };   
+                                     };
                                 };
                         };
                 }[];
