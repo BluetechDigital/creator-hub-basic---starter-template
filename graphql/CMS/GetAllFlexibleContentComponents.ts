@@ -8,6 +8,7 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 
 // Components: ACF Flexible Content Post Types
 import { Hero } from "@/components/CMS/Hero/graphql/index";
+import { HeroTwo } from "@/components/CMS/HeroTwo/graphql/index";
 import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { InstagramFeed } from "@/components/CMS/InstagramFeed/graphql/index";
@@ -43,6 +44,7 @@ export const getAllFlexibleContentComponents = async (
 									flexibleContent {
 										flexibleContent {
 											... on ${postTypeFlexibleContent}_Hero {${Hero}}
+											... on ${postTypeFlexibleContent}_HeroTwo {${HeroTwo}}
 											... on ${postTypeFlexibleContent}_AboutUs {${AboutUs}}
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_InstagramFeed {${InstagramFeed}}

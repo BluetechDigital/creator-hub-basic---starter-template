@@ -1,0 +1,9 @@
+@import "tailwindcss/theme"; 
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.heroTwo {
+    @apply w-full h-full;
+}
