@@ -9,6 +9,7 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 // Components: ACF Flexible Content Post Types
 import { Hero } from "@/components/CMS/Hero/graphql/index";
 import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
+import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 
@@ -39,6 +40,7 @@ export const getAllFlexibleContentComponents = async (
 										flexibleContent {
 											... on ${postTypeFlexibleContent}_Hero {${Hero}}
 											... on ${postTypeFlexibleContent}_AboutUs {${AboutUs}}
+											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 										}
@@ -69,7 +71,9 @@ export const getAllFlexibleContentComponents = async (
         if (!flexibleContentArray) {
             console.log(`No flexible content found for slug: ${slug}`);
             return null;
-        }
+		}
+		
+		console.log(flexibleContentArray)
 
 		return flexibleContentArray as IFlexibleContent.IProps;
 	} catch (error) {
