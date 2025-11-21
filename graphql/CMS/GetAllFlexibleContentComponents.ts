@@ -10,6 +10,7 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import { Hero } from "@/components/CMS/Hero/graphql/index";
 import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
+import { InstagramFeed } from "@/components/CMS/InstagramFeed/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 import { YoutubeVideoGrid } from "@/components/CMS/YoutubeVideoGrid/graphql/index";
@@ -43,6 +44,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_Hero {${Hero}}
 											... on ${postTypeFlexibleContent}_AboutUs {${AboutUs}}
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
+											... on ${postTypeFlexibleContent}_InstagramFeed {${InstagramFeed}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 											... on ${postTypeFlexibleContent}_YoutubeVideoGrid {${YoutubeVideoGrid}}
