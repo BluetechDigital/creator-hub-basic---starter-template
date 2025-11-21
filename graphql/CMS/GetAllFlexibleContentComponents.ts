@@ -10,10 +10,12 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import { Hero } from "@/components/CMS/Hero/graphql/index";
 import { HeroTwo } from "@/components/CMS/HeroTwo/graphql/index";
 import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
+import { ContactForm } from "@/components/CMS/ContactForm/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { InstagramFeed } from "@/components/CMS/InstagramFeed/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 import { CallToActionTwo } from "@/components/CMS/CallToActionTwo/graphql/index";
+import { PrivacyPolicies } from "@/components/CMS/PrivacyPolicies/graphql/index";
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 import { YoutubeVideoGrid } from "@/components/CMS/YoutubeVideoGrid/graphql/index";
 import { AllYoutubeVideos } from "@/components/CMS/AllYoutubeVideos/graphql/index";
@@ -47,11 +49,13 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_Hero {${Hero}}
 											... on ${postTypeFlexibleContent}_HeroTwo {${HeroTwo}}
 											... on ${postTypeFlexibleContent}_AboutUs {${AboutUs}}
+											... on ${postTypeFlexibleContent}_ContactForm {${ContactForm}}
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_InstagramFeed {${InstagramFeed}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
 											... on ${postTypeFlexibleContent}_CallToActionTwo {${CallToActionTwo}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
+											... on ${postTypeFlexibleContent}_PrivacyPolicies {${PrivacyPolicies}}
 											... on ${postTypeFlexibleContent}_YoutubeVideoGrid {${YoutubeVideoGrid}}
 											... on ${postTypeFlexibleContent}_AllYoutubeVideos {${AllYoutubeVideos}}
 											... on ${postTypeFlexibleContent}_AllYoutubeShortsVideos {${AllYoutubeShortsVideos}}

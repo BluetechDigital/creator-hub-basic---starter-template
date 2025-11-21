@@ -1,0 +1,9 @@
+@import "tailwindcss/theme"; 
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.privacyPolicies {
+    @apply w-full h-full;
+}
