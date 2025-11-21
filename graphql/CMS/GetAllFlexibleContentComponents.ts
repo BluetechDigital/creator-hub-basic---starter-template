@@ -12,6 +12,7 @@ import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { InstagramFeed } from "@/components/CMS/InstagramFeed/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
+import { CallToActionTwo } from "@/components/CMS/CallToActionTwo/graphql/index";
 import { SponsorshipInfo } from "@/components/CMS/SponsorshipInfo/graphql/index";
 import { YoutubeVideoGrid } from "@/components/CMS/YoutubeVideoGrid/graphql/index";
 import { AllYoutubeVideos } from "@/components/CMS/AllYoutubeVideos/graphql/index";
@@ -46,6 +47,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_InstagramFeed {${InstagramFeed}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
+											... on ${postTypeFlexibleContent}_CallToActionTwo {${CallToActionTwo}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 											... on ${postTypeFlexibleContent}_YoutubeVideoGrid {${YoutubeVideoGrid}}
 											... on ${postTypeFlexibleContent}_AllYoutubeVideos {${AllYoutubeVideos}}
