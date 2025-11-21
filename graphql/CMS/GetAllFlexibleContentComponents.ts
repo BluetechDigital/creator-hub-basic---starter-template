@@ -13,6 +13,7 @@ import { AboutUs } from "@/components/CMS/AboutUs/graphql/index";
 import { ContactForm } from "@/components/CMS/ContactForm/graphql/index";
 import { CallToAction } from "@/components/CMS/CallToAction/graphql/index";
 import { InstagramFeed } from "@/components/CMS/InstagramFeed/graphql/index";
+import { CookiePolicies } from "@/components/CMS/CookiePolicies/graphql/index";
 import { TitleParagraph } from "@/components/CMS/TitleParagraph/graphql/index";
 import { CallToActionTwo } from "@/components/CMS/CallToActionTwo/graphql/index";
 import { PrivacyPolicies } from "@/components/CMS/PrivacyPolicies/graphql/index";
@@ -53,6 +54,7 @@ export const getAllFlexibleContentComponents = async (
 											... on ${postTypeFlexibleContent}_CallToAction {${CallToAction}}
 											... on ${postTypeFlexibleContent}_InstagramFeed {${InstagramFeed}}
 											... on ${postTypeFlexibleContent}_TitleParagraph {${TitleParagraph}}
+											... on ${postTypeFlexibleContent}_CookiePolicies {${CookiePolicies}}
 											... on ${postTypeFlexibleContent}_CallToActionTwo {${CallToActionTwo}}
 											... on ${postTypeFlexibleContent}_SponsorshipInfo {${SponsorshipInfo}}
 											... on ${postTypeFlexibleContent}_PrivacyPolicies {${PrivacyPolicies}}
