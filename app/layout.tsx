@@ -118,7 +118,6 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
   
   return (
     <html lang="en">
-      
       <head>
         <Suspense fallback={null}>
           <GoogleTagManager />

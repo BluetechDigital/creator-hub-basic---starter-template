@@ -8,7 +8,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     @apply bg-white lg:max-w-[1700px] py-10 px-4 mx-auto min-h-[50vh] flex flex-col items-center justify-center;
 
     .title {
-        @apply mb-10 text-center font-semibold leading-tight text-lg lg:text-3xl text-black;
+        @apply mb-10 text-center font-semibold leading-tight text-[min(10vw,30px)] text-black;
     }
     
     .paragraph {
