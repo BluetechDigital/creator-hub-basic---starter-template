@@ -3,30 +3,31 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, memo } from "react";
-import * as IHero from "@/components/CMS/Hero/types/hero";
+import * as IAboutUs from "@/components/CMS/AboutUs/types/aboutUs";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import styles from "@/components/CMS/Hero/styles/Hero.module.css";
+import styles from "@/components/CMS/AboutUs/styles/AboutUs.module.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Hero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX AboutUs Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const Hero: FC<IHero.IProps> = memo(({}) => {
+const AboutUs: FC<IAboutUs.IProps> = memo(({}) => {
 
 	return (
-		<div className={styles.hero}>
+		<div className={styles.aboutUs}>
 		</div>
 	);
 });
 
-Hero.displayName = 'Hero';
+AboutUs.displayName = 'AboutUs';
 
-export default Hero;
+export default AboutUs;
