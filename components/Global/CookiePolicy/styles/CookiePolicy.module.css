@@ -5,41 +5,33 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 .cookiePolicy {
-	@apply fixed bottom-0 right-0 p-0 mx-4 max-w-6xl px-0 md:max-w-sm z-999;
+	@apply fixed bottom-0 left-0 w-full p-6 z-998;
 
 	.content {
-		@apply p-4 mb-3 bg-white rounded-md flex flex-col items-baseline justify-center gap-2;
+		@apply bg-white rounded-2xl p-4 max-w-sm border border-gray-200;
 
-		.titleSection {
-			@apply flex flex-col items-baseline justify-center gap-1;
+		.paragraph {
+			@apply text-black text-[min(10vw,.8rem)] mb-4 max-w-xs;
 
-			.title {
-				@apply uppercase text-xs 2xl:text-sm text-black;
-			}
-
-			.paragraph {
-				@apply text-black text-[.65rem] 2xl:text-xs text-left leading-normal;
-
-				p {
-					@apply p-0;
-				}
+			p {
+				@apply p-0;
 			}
 		}
 
 		.buttonSection {
-			@apply w-full flex items-center justify-start gap-2;
+			@apply flex flex-wrap gap-2;
 
 			.acceptButton,
-			.refuseButton {
-				@apply inline-block py-[3px] 2xl:py-[5px] px-4 xl:px-6 w-full md:w-fit cursor-pointer rounded-full uppercase text-[.5rem] text-center border 2xl:border-2 border-solid transition-all ease-in-out duration-500;
+			.declineButton {
+				@apply bg-white h-8 cursor-pointer rounded-full px-5 py-2 inline-flex items-center justify-center tracking-tight text-[min(10vw,.75rem)] transition ease-in-out duration-500;
 			}
 
 			.acceptButton {
-				@apply text-[#f7f7f7] border-black bg-black hover:border-black hover:bg-black;
+				@apply bg-black hover:bg-orange-600 focus:bg-orange-500 focus:ring-4 focus:ring-orange-200 text-white;
 			}
 
-			.refuseButton {
-				@apply text-black border-black bg-transparent hover:text-white hover:border-black hover:bg-black;
+			.declineButton {
+				@apply bg-white border border-gray-200 hover:text-white hover:bg-black focus:bg-black focus:ring-4 focus:ring-gray-200;
 			}
 		}
 	}

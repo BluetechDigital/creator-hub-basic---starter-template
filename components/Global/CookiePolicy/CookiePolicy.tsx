@@ -7,7 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { FC } from "react";
 import { motion } from "framer-motion";
 import useCookiePolicy from "@/context/cookies";
-import { fadeInUp, initial, stagger } from "@/animations/animations";
+import { fadeInUp, initial } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -43,59 +43,33 @@ const CookiePolicy: FC<IProps> = () => {
     // Otherwise, render the cookie policy banner.
     return (
         <div className={styles.cookiePolicy}>
-            <div
-                className={styles.content}
-                style={{
-                    boxShadow: "0px 30px 2px -25px rgba(0,0,0,0.1)",
-                }}
-            >
-                <div className={styles.titleSection}>
-                    <motion.h3
+            <div className={styles.content}>
+                <Paragraph
+                    className={styles.paragraph}
+                    content={`<p>We use cookies to improve your browsing experience. Learn about our Privacy policy here.</p>`}
+                />
+                <div className={styles.buttonSection}>
+                    <motion.button
                         initial={initial}
                         whileInView={fadeInUp}
+                        onClick={acceptCookies}
                         viewport={{ once: true }}
-                        className={styles.title}
+                        aria-label="Accept cookies"
+                        className={styles.acceptButton}
                     >
-                        Cookie Policy
-                    </motion.h3>
-                    <motion.div
+                        Accept Cookies
+                    </motion.button>
+                    <motion.button
                         initial={initial}
                         whileInView={fadeInUp}
-                        viewport={{ once: true }}>
-                        <Paragraph
-                            className={styles.paragraph}
-                            content={`<p>This website uses cookies to enhance the user experience and ensure the proper functioning of the site. By using this website, you agree to the use of cookies in accordance with this CookiePolicy.</p>`}
-                        />
-                    </motion.div>
-                </div>
-                <motion.div
-                    initial={initial}
-                        variants={stagger}
-                        whileInView="animate"
+                        onClick={refuseCookies}
                         viewport={{ once: true }}
-                    className={styles.buttonSection}
-                >
-                    <motion.button
-                            initial={initial}
-                            whileInView={fadeInUp}
-                            onClick={acceptCookies}
-                            viewport={{ once: true }}
-                            aria-label="Accept cookies"
-                            className={styles.acceptButton}
-                        >
-                            Accept Cookies
+                        aria-label="Decline cookies"
+                        className={styles.declineButton}
+                    >
+                        Decline
                     </motion.button>
-                    <motion.button
-                            initial={initial}
-                            whileInView={fadeInUp}
-                            onClick={refuseCookies}
-                            viewport={{ once: true }}
-                            aria-label="Refuse cookies"
-                            className={styles.refuseButton}
-                        >
-                            Refuse Cookies
-                    </motion.button>
-                </motion.div>
+                </div>
             </div>
         </div>
     );
