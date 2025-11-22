@@ -12,7 +12,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
-import { getAllFlexibleContentComponents } from "@/graphql/CMS/GetAllFlexibleContentComponents";
+import { getAllPageACFFlexibleComponentsContent } from "@/graphql/CMS/GetAllPageACFFlexibleComponentsContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -54,8 +54,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Home Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 const HomePage: NextPage = async () => {
-  // Fetch priority content
-  const flexibleContentComponents = await getAllFlexibleContentComponents(
+	
+  // Current Page ACF Flexible Components Content
+  const pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
   	pageType.home,
   	postType.pages,
   	flexibleContentType.pages
@@ -63,7 +64,7 @@ const HomePage: NextPage = async () => {
 
   return (
     <PageContextProvider
-      content={flexibleContentComponents}
+      content={pageACFFlexibleComponentsContent}
       postTypeFlexibleContent={flexibleContentType.pages}
     >
       <RenderFlexibleContent />

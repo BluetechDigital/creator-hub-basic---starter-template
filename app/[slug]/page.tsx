@@ -12,7 +12,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
-import { getAllFlexibleContentComponents } from "@/graphql/CMS/GetAllFlexibleContentComponents";
+import { getAllPageACFFlexibleComponentsContent } from "@/graphql/CMS/GetAllPageACFFlexibleComponentsContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -60,8 +60,8 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 	/* Extract slug directly from params to ensure it's resolved before use. */
 	const { slug } = await params;
 
-	// Fetch priority content
-	const flexibleContentComponents = await getAllFlexibleContentComponents(
+  	// Current Page ACF Flexible Components Content
+	const pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
 		slug,
 		postType.pages,
 		flexibleContentType.pages
@@ -69,7 +69,7 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 
 		return (
 		<PageContextProvider
-			content={flexibleContentComponents}
+			content={pageACFFlexibleComponentsContent}
 			postTypeFlexibleContent={flexibleContentType.pages}
 		>
 			<RenderFlexibleContent />
