@@ -3,13 +3,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, memo } from "react";
-import * as IAllYoutubeShortsVideos from "@/components/CMS/AllYoutubeShortsVideos/types/allYoutubeShortsVideos";
+import * as IAllYouTubeShortsVideos from "@/components/CMS/AllYouTubeShortsVideos/types/allYouTubeShortsVideos";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import styles from "@/components/CMS/AllYoutubeShortsVideos/styles/AllYoutubeShortsVideos.module.css";
+import styles from "@/components/CMS/AllYouTubeShortsVideos/styles/AllYouTubeShortsVideos.module.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -17,17 +17,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXX AllYouTubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const AllYoutubeShortsVideos: FC<IAllYoutubeShortsVideos.IProps> = memo(({}) => {
+const AllYouTubeShortsVideos: FC<IAllYouTubeShortsVideos.IProps> = memo(({}) => {
 
 	return (
-		<div className={styles.allYoutubeShortsVideos}>
+		<div className={styles.allYouTubeShortsVideos}>
 		</div>
 	);
 });
 
-AllYoutubeShortsVideos.displayName = 'AllYoutubeShortsVideos';
+AllYouTubeShortsVideos.displayName = 'AllYouTubeShortsVideos';
 
-export default AllYoutubeShortsVideos;
+export default AllYouTubeShortsVideos;

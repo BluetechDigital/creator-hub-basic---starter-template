@@ -29,7 +29,7 @@ export const generateMetadata = async ({ params }: { params: { slug: string } })
 	
 	const { slug } = await params;
 
-  const seo = await getAllSeoContent(slug, postType.pages) as ISeo.IProps;
+	const seo = await getAllSeoContent(slug, postType.pages) as ISeo.IProps;
 
 	return {
 		title: seo.title,
@@ -67,7 +67,9 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 		flexibleContentType.pages
 	) as IFlexibleContent.IProps;
 
-		return (
+	console.log(pageACFFlexibleComponentsContent)
+
+	return (
 		<PageContextProvider
 			content={pageACFFlexibleComponentsContent}
 			postTypeFlexibleContent={flexibleContentType.pages}
