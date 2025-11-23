@@ -40,6 +40,12 @@ export const DynamicComponentLoaders: DynamicComponentMap = {
 };
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+import SVGLoader from "@/components/CMS/FlexibleContent/fragments/SVGLoader";
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXX Flexible Content Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -67,25 +73,25 @@ const RenderFlexibleContent: FC = memo(() => {
 	}, [postTypeFlexibleContent]); // Recreate mapping only if postTypeFlexibleContent changes
 
 	return (
-        <Suspense fallback={<div>Loading component...</div>}>
+        <Suspense fallback={<SVGLoader/>}>
 			{content.map((item: IFlexibleContent.IProps[number], index: number) => {
             
-            const Component = componentMapping[item.fieldGroupName];
-            
-            // Check component and displaySection status
-            if (!Component || item.displaySection !== true) {
-                return null; // Skip rendering if component doesn't exist or is hidden
-            }
+                const Component = componentMapping[item.fieldGroupName];
+                
+                // Check component and displaySection status
+                if (!Component || item.displaySection !== true) {
+                    return null; // Skip rendering if component doesn't exist or is hidden
+                }
 
-            return (
-                // Use a key that is unlikely to change (fieldGroupName + index as fallback)
-                <section key={item.fieldGroupName + "-" + index}>
-                    {createElement(Component, {
-                        ...item,
-                    })}
-                </section>
-            );
-        })}
+                return (
+                    // Use a key that is unlikely to change (fieldGroupName + index as fallback)
+                    <section key={item.fieldGroupName + "-" + index}>
+                        {createElement(Component, {
+                            ...item,
+                        })}
+                    </section>
+                );
+            })}
         </Suspense>
 	);
 });
