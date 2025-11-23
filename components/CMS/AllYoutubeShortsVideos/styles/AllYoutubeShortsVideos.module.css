@@ -1,0 +1,9 @@
+@import "tailwindcss/theme"; 
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.allYouTubeShortsVideos {
+    @apply w-full h-full;
+}

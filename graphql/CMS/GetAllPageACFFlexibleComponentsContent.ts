@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { client } from "@/config/apollo";
@@ -9,7 +9,7 @@ import {
 } from "@/graphql/CMS/GetAllACFFlexibleComponentsList";
 import { ApolloClient, DocumentNode, gql } from "@apollo/client";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
-import { getAllComponentsGrapghQLFragments } from "@/graphql/CMS/GetAllComponentsFragments";
+import { getAllComponentsGrapghQLFragments } from "@/graphql/CMS/GetAllComponentsGraphQLFragments";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

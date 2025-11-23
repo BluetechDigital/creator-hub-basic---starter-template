@@ -4,7 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { ApolloClient} from "@apollo/client";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
-import { allComponentsGrapghQLFragmentsObjectKeys } from "@/graphql/CMS/GetAllComponentsFragments";
+import { allComponentsGrapghQLFragmentsObjectKeys } from "@/graphql/CMS/GetAllComponentsGraphQLFragments";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

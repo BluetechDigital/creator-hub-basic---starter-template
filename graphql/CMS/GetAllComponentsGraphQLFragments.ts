@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXX Get All Components GrapghQL Fragments XXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /* The key is the component name (used to build the ACF field group name)
@@ -19,6 +19,7 @@ export const getAllComponentsGrapghQLFragments: Record<string, () => Promise<any
     SponsorshipInfo: () => import("@/components/CMS/SponsorshipInfo/graphql/index"),
     YoutubeVideoGrid: () => import("@/components/CMS/YoutubeVideoGrid/graphql/index"),
     AllYoutubeVideos: () => import("@/components/CMS/AllYoutubeVideos/graphql/index"),
+    AllYoutubeShortsVideos: () => import("@/components/CMS/AllYoutubeShortsVideos/graphql/index"),
 };
 
 // Exporting the list of all keys is useful for mapping/filtering

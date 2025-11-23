@@ -77,6 +77,6 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 	);
 }
 
-	DynamicPages.displayName = 'DynamicPages';
+DynamicPages.displayName = 'DynamicPages';
 
 export default DynamicPages;
