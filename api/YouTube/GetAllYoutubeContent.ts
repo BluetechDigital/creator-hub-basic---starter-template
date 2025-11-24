@@ -2,9 +2,9 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const YOUTUBE_API_BASE_URL: string | undefined = process.env.YOUTUBE_API;
-const YOUTUBE_KEY: string | undefined = process.env.YOUTUBE_KEY;
-const YOUTUBE_CHANNEL_ID: string | undefined = process.env.YOUTUBE_CHANNEL_ID;
+const YOUTUBE_API_BASE_URL: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_API_BASE_URL;
+const YOUTUBE_KEY: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_KEY;
+const YOUTUBE_CHANNEL_ID: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -118,7 +118,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Channel Info XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllYoutubeChannelInfo = async (): Promise<IYoutubeChannelInfo> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
-        throw new Error("Missing YouTube environment variables (API_BASE_URL, KEY, or CHANNEL_ID).");
+        throw new Error("Missing YouTube environment variables (YOUTUBE_API_BASE_URL, YOUTUBE_KEY, or YOUTUBE_CHANNEL_ID).");
     }
 
     try {
@@ -165,7 +165,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Playlists XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllYoutubePlaylists = async (): Promise<IYoutubePlaylists> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
-        throw new Error("Missing YouTube environment variables (API_BASE_URL, KEY, or CHANNEL_ID).");
+        throw new Error("Missing YouTube environment variables (YOUTUBE_API_BASE_URL, YOUTUBE_KEY, or YOUTUBE_CHANNEL_ID).");
     }
 
     try {
@@ -208,7 +208,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Videos XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
-        throw new Error("Missing YouTube environment variables (API_BASE_URL, KEY, or CHANNEL_ID).");
+        throw new Error("Missing YouTube environment variables (YOUTUBE_API_BASE_URL, YOUTUBE_KEY, or YOUTUBE_CHANNEL_ID).");
     }
     
     try {
