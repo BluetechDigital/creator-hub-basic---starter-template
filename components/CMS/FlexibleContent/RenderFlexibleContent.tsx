@@ -83,9 +83,14 @@ const RenderFlexibleContent: FC = memo(() => {
                     return null; // Skip rendering if component doesn't exist or is hidden
                 }
 
+                /* Efficiently extract the component's simple name (e.g., 'Hero', or 'AboutUs' or 'CallToAction')
+                by finding the index of the last underscore and slicing the string. Basically removing the long
+                Advanced Custom Fields (ACF) component fieldGroupName (e.g., "DefaultTemplate_Flexiblecontent_FlexibleContent_Hero"). */
+                const fieldGroupClassName = item.fieldGroupName.substring(item.fieldGroupName.lastIndexOf('_') + 1);
+
                 return (
                     // Use a key that is unlikely to change (fieldGroupName + index as fallback)
-                    <section key={item.fieldGroupName + "-" + index}>
+                    <section className={fieldGroupClassName} key={item.fieldGroupName + "-" + index}>
                         {createElement(Component, {
                             ...item,
                         })}

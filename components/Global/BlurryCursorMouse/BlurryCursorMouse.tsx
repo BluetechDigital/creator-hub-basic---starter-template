@@ -76,7 +76,7 @@ const BlurryCursorMouse: FC = () => {
     }, [animate, manageMouseMove]); // Depend on stable animate and manageMouseMove
 
     return (
-        <div className={styles.blurryCursorMouse}>
+        <section className={styles.blurryCursorMouse}>
             <div
                 ref={circle}
                 style={{
@@ -91,7 +91,7 @@ const BlurryCursorMouse: FC = () => {
             >
                 {/* Image/Content placeholder commented out */}
             </div>
-        </div>
+        </section>
     );
 };
 

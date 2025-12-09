@@ -3,7 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, memo } from "react";
-import * as IYoutubeVideoGrid from "@/components/CMS/YoutubeVideoGrid/types/toutubeVideoGrid";
+import * as IYoutubeVideoGrid from "@/components/CMS/YoutubeVideoGrid/types/youtubeVideoGrid";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

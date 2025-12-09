@@ -42,7 +42,7 @@ const CookiePolicy: FC<IProps> = () => {
 
     // Otherwise, render the cookie policy banner.
     return (
-        <div className={styles.cookiePolicy}>
+        <section className={styles.cookiePolicy}>
             <div className={styles.content}>
                 <Paragraph
                     className={styles.paragraph}
@@ -71,7 +71,7 @@ const CookiePolicy: FC<IProps> = () => {
                     </motion.button>
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 
