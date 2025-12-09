@@ -216,7 +216,7 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
         const searchUrl = `${YOUTUBE_API_BASE_URL}/search?key=${YOUTUBE_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=id&order=date&maxResults=50&type=video`;
         
         const searchResponse = await fetch(searchUrl, {
-            next: { revalidate: 3600 }, // 1 hour cache
+            next: { revalidate: 86400 }, // 24 Hours cache
         });
         
         if (!searchResponse.ok) {

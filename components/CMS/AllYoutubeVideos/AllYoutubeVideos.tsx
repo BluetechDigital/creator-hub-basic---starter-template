@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC, memo, Suspense } from "react";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 
 // Youtube Api Info
@@ -32,27 +32,29 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 const AllYoutubeVideos: FC<IAllYoutubeVideos.IProps> = memo(async ({ }) => {
-	
-	// Fetch all Youtube Creator Content simultaneously / in Parallel using Promise.all
-	// const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
-	// 	getAllYoutubeVideos(),
-	// 	getAllYoutubePlaylists(),
-	// 	getAllYoutubeChannelInfo(),
-	// ];
 
-	// const [
-	// 	youtubeVideos,
-	// 	youtubeChannelPlaylists,
-	// 	youtubeChannelInfo,
-	// ] = await Promise.all(promises);
+	// Fetch all Youtube Creator Content simultaneously using Promise.all
+	const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
+		getAllYoutubeVideos(),
+		getAllYoutubePlaylists(),
+		getAllYoutubeChannelInfo(),
+	];
+
+	const [
+		youtubeVideos,
+		youtubeChannelPlaylists,
+		youtubeChannelInfo,
+	] = await Promise.all(promises);
 
 	return (
 		<div className={styles.allYoutubeVideos}>
-			{/* <VideosGrid
-				youtubeVideos={youtubeVideos}
-				youtubeChannelInfo={youtubeChannelInfo}
-				youtubeChannelPlaylists={youtubeChannelPlaylists}
-			/> */}
+			<Suspense fallback={<div>Loading...</div>}>
+				<VideosGrid
+					youtubeVideos={youtubeVideos}
+					youtubeChannelInfo={youtubeChannelInfo}
+					youtubeChannelPlaylists={youtubeChannelPlaylists}
+				/>
+			</Suspense>
 		</div>
 	);
 });
