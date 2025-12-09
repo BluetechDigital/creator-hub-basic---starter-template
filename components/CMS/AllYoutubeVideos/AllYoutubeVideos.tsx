@@ -16,22 +16,6 @@ import {
 } from "@/api/YouTube/GetAllYoutubeContent";
 
 /* -----------------------------------------------------------------------------
-XXXXX Fetch all Youtube Creator Content simultaneously using Promise.all XXXXXXX
------------------------------------------------------------------------------ */
-
-const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
-	getAllYoutubeVideos(),
-	getAllYoutubePlaylists(),
-	getAllYoutubeChannelInfo(),
-];
-
-const [
-	youtubeVideos,
-	youtubeChannelPlaylists,
-	youtubeChannelInfo,
-] = await Promise.all(promises);
-
-/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -48,14 +32,27 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 const AllYoutubeVideos: FC<IAllYoutubeVideos.IProps> = memo(async ({ }) => {
+	
+	// Fetch all Youtube Creator Content simultaneously / in Parallel using Promise.all
+	// const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
+	// 	getAllYoutubeVideos(),
+	// 	getAllYoutubePlaylists(),
+	// 	getAllYoutubeChannelInfo(),
+	// ];
+
+	// const [
+	// 	youtubeVideos,
+	// 	youtubeChannelPlaylists,
+	// 	youtubeChannelInfo,
+	// ] = await Promise.all(promises);
 
 	return (
 		<div className={styles.allYoutubeVideos}>
-			<VideosGrid
+			{/* <VideosGrid
 				youtubeVideos={youtubeVideos}
 				youtubeChannelInfo={youtubeChannelInfo}
 				youtubeChannelPlaylists={youtubeChannelPlaylists}
-			/>
+			/> */}
 		</div>
 	);
 });

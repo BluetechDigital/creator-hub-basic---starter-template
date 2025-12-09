@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -22,6 +22,8 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 	youtubeChannelInfo,
 	youtubeChannelPlaylists,
 }) => {
+
+    // console.log(youtubeVideos, youtubeChannelInfo, youtubeChannelPlaylists);
     
     return (
         <div className={styles.videosGrid}></div>
