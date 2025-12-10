@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo, Suspense } from "react";
+import { FC, memo } from "react";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 
 // Youtube Api Info
@@ -14,6 +14,23 @@ import {
 	getAllYoutubePlaylists,
 	getAllYoutubeChannelInfo,
 } from "@/api/YouTube/GetAllYoutubeContent";
+
+
+/* -----------------------------------------------------------------------------
+XXXXX Fetch all Youtube Creator Content simultaneously using Promise.all XXXXXXX
+----------------------------------------------------------------------------- */
+
+const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
+	getAllYoutubeVideos(),
+	getAllYoutubePlaylists(),
+	getAllYoutubeChannelInfo(),
+];
+
+const [
+	youtubeVideos,
+	youtubeChannelPlaylists,
+	youtubeChannelInfo,
+] = await Promise.all(promises);
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -31,30 +48,15 @@ import VideosGrid from "@/components/CMS/AllYoutubeVideos/fragments/VideosGrid";
 XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const AllYoutubeVideos: FC<IAllYoutubeVideos.IProps> = memo(async ({ }) => {
-
-	// Fetch all Youtube Creator Content simultaneously using Promise.all
-	const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
-		getAllYoutubeVideos(),
-		getAllYoutubePlaylists(),
-		getAllYoutubeChannelInfo(),
-	];
-
-	const [
-		youtubeVideos,
-		youtubeChannelPlaylists,
-		youtubeChannelInfo,
-	] = await Promise.all(promises);
-
+const AllYoutubeVideos: FC<IAllYoutubeVideos.IProps> = memo(({}) => {
+	
 	return (
 		<div className={styles.allYoutubeVideos}>
-			<Suspense fallback={<div>Loading...</div>}>
-				<VideosGrid
-					youtubeVideos={youtubeVideos}
-					youtubeChannelInfo={youtubeChannelInfo}
-					youtubeChannelPlaylists={youtubeChannelPlaylists}
-				/>
-			</Suspense>
+			<VideosGrid
+				youtubeVideos={youtubeVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={youtubeChannelPlaylists}
+			/>
 		</div>
 	);
 });

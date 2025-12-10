@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const YOUTUBE_API_BASE_URL: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_API_BASE_URL;
 const YOUTUBE_KEY: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_KEY;
 const YOUTUBE_CHANNEL_ID: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
+const REVALIDATE_TIME = 86400; // Helper for consistent revalidation time, Cache Data for (24 Hours)
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -127,7 +128,7 @@ export const getAllYoutubeChannelInfo = async (): Promise<IYoutubeChannelInfo> =
         
         // Use a single fetch call with a reasonable revalidation time
         const response = await fetch(url, {
-            next: {revalidate: 86400}, // Cache Data for 24 Hours
+            next: {revalidate: REVALIDATE_TIME},
         });
 
         if (!response.ok) {
@@ -173,7 +174,7 @@ export const getAllYoutubePlaylists = async (): Promise<IYoutubePlaylists> => {
 
         // Cache Data for 24 Hours before refetching
         const response = await fetch(getPlaylistIdUrl, {
-            next: {revalidate: 86400},
+            next: {revalidate: REVALIDATE_TIME},
         });
 
         if (!response.ok) {
@@ -216,7 +217,7 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
         const searchUrl = `${YOUTUBE_API_BASE_URL}/search?key=${YOUTUBE_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=id&order=date&maxResults=50&type=video`;
         
         const searchResponse = await fetch(searchUrl, {
-            next: { revalidate: 86400 }, // 24 Hours cache
+            next: { revalidate: REVALIDATE_TIME },
         });
         
         if (!searchResponse.ok) {
