@@ -47,6 +47,9 @@ social API integrations are structured.
 | `npm run build` | Production build |
 | `npm start` | Serve the production build (run `build` first) |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run the Vitest suite once |
+| `npm run test:watch` | Run Vitest in watch mode |
+| `npm run test:coverage` | Run the suite with coverage |
 
 ## Environment Variables
 

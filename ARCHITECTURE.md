@@ -36,9 +36,27 @@ add its GraphQL fragment to `GetAllComponentsGraphQLFragments.ts`, and register 
 `DynamicComponentLoaders` in `RenderFlexibleContent.tsx` — the key must match the ACF field
 group's simple name exactly, since that's how the runtime lookup works.
 
+**`components/CMS/` is for reusable blocks, not client-specific ones.** Every folder here
+ships to every client this template is forked for. If a request only makes sense for one
+client (a one-off section, a bespoke layout variant, anything that wouldn't be reused), it
+does not belong in this tree — the "no bespoke features" line in the Basic-tier package is a
+business rule, and nothing in the registration mechanism itself stops a bespoke block from
+being added and wired up exactly like a real one, so this has to be enforced by not doing it,
+not by tooling. If a client's build genuinely needs one-off components (an Individual-tier
+build, for example), keep them in that client's own fork rather than merging them back into
+the shared starter — see [`blockRegistration.test.ts`](./components/CMS/FlexibleContent/blockRegistration.test.ts)
+for what *is* automatically checked here (a block folder and its `DynamicComponentLoaders`
+entry staying in sync) and what isn't (whether a block should exist in the shared tree at
+all — that's a review-time judgment call, not something a test can make for you).
+
 Most block components here are currently empty shells (they render a styled `<div>` and take
 their props from `IProps` but don't use them yet) — the wiring is what's built, not the
-per-block markup.
+per-block markup. [`blockSmokeTests.test.tsx`](./components/CMS/FlexibleContent/blockSmokeTests.test.tsx)
+covers all of them with a render-without-crashing + root-class assertion for now; as a block
+gets real markup, give it its own test file with real prop-behaviour assertions (see
+[`TitleParagraph.test.tsx`](./components/CMS/TitleParagraph/TitleParagraph.test.tsx) for the
+pattern — it's the one block with actual conditional logic today) rather than leaving it in
+the generic smoke-test list.
 
 ## 2. One folder per social platform
 
@@ -66,3 +84,26 @@ design, since each platform's auth flow and response shape differs enough that a
 interface would mostly be indirection. If you add a new platform, copy the shape of the
 closest existing one (Twitch and TikTok are the simplest examples) rather than inventing a
 new pattern.
+
+## Testing
+
+Vitest + React Testing Library (`npm test` / `npm run test:watch` / `npm run test:coverage`).
+Config: `vitest.config.mts`, `vitest.setup.ts`. There's no E2E/Playwright layer yet — this is
+component- and unit-level only.
+
+- **API layer** (`api/<Platform>/*.test.ts`): `global.fetch` is mocked with `vi.stubGlobal`.
+  Because each platform file reads its env vars into module-scope consts on import rather than
+  per-call, tests that need different env values have to `vi.resetModules()` and dynamically
+  `import()` a fresh copy of the module — see the comment at the top of
+  `GetAllYoutubeContent.test.ts` if you're adding a test for one of the other seven platforms.
+- **CMS blocks** (`components/CMS/**/*.test.tsx`): rendered with React Testing Library.
+  `AllYoutubeVideos`/`AllYoutubeShortsVideos` are excluded from render tests — they're async
+  Server Components, and RTL's `render()` doesn't support awaiting one; their data-fetching is
+  covered via the API-layer tests instead. Any component that renders `framer-motion`'s
+  `motion.*` elements needs `vitest.setup.ts`'s `ResizeObserver`/`IntersectionObserver`/
+  `matchMedia` stubs (jsdom implements none of them) — already wired up globally, nothing to
+  add per test.
+- **Block registration** (`blockRegistration.test.ts`): catches drift between
+  `components/CMS/` folders and `DynamicComponentLoaders` — the exact shape of bug this repo
+  shipped with (`YoutubeVideoGrid` vs `YouTubeVideoGrid` casing). Doesn't gate what's allowed
+  to be registered — see the note in [§1](#1-cms-flexible-content-blocks) above.
