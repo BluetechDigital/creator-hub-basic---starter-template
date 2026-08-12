@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as ICallToActionTwo from "@/components/CMS/CallToActionTwo/types/callToActionTwo";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXX CallToActionTwo Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const CallToActionTwo: FC<ICallToActionTwo.IProps> = memo(({}) => {
+const CallToActionTwo: FC<ICallToActionTwo.IProps> = ({}) => {
 
 	return (
 		<div className={styles.callToActionTwo}>
 		</div>
 	);
-});
+};
 
 CallToActionTwo.displayName = 'CallToActionTwo';
 

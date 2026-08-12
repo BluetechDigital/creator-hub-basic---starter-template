@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as IAboutUs from "@/components/CMS/AboutUs/types/aboutUs";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX AboutUs Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const AboutUs: FC<IAboutUs.IProps> = memo(({}) => {
+const AboutUs: FC<IAboutUs.IProps> = ({}) => {
 
 	return (
 		<div className={styles.aboutUs}>
 		</div>
 	);
-});
+};
 
 AboutUs.displayName = 'AboutUs';
 

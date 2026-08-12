@@ -1,5 +1,5 @@
-// SPOTIFY_API_URL is the base for API calls (e.g., https://api.spotify.com/v1)
-const SPOTIFY_API_BASE_URL: string | undefined = process.env.SPOTIFY_API_URL; 
+// SPOTIFY_API_BASE_URL is the base for API calls (e.g., https://api.spotify.com/v1)
+const SPOTIFY_API_BASE_URL: string | undefined = process.env.SPOTIFY_API_BASE_URL;
 const SPOTIFY_SHOW_ID: string | undefined = process.env.SPOTIFY_SHOW_ID;
 const SPOTIFY_CLIENT_ID: string | undefined = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET: string | undefined = process.env.SPOTIFY_CLIENT_SECRET;

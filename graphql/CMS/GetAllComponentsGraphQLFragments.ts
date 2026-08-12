@@ -17,7 +17,7 @@ export const getAllComponentsGrapghQLFragments: Record<string, () => Promise<any
     CallToActionTwo: () => import("@/components/CMS/CallToActionTwo/graphql/index"),
     PrivacyPolicies: () => import("@/components/CMS/PrivacyPolicies/graphql/index"),
     SponsorshipInfo: () => import("@/components/CMS/SponsorshipInfo/graphql/index"),
-    YoutubeVideoGrid: () => import("@/components/CMS/YoutubeVideoGrid/graphql/index"),
+    YoutubeVideoGrid: () => import("@/components/CMS/YouTubeVideoGrid/graphql/index"),
     AllYoutubeVideos: () => import("@/components/CMS/AllYoutubeVideos/graphql/index"),
     AllYoutubeShortsVideos: () => import("@/components/CMS/AllYoutubeShortsVideos/graphql/index"),
 };

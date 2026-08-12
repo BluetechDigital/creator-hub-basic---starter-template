@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as ICookiePolicies from "@/components/CMS/CookiePolicies/types/cookiePolicies";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXX CookiePolicies Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const CookiePolicies: FC<ICookiePolicies.IProps> = memo(({}) => {
+const CookiePolicies: FC<ICookiePolicies.IProps> = ({}) => {
 
 	return (
 		<div className={styles.cookiePolicies}>
 		</div>
 	);
-});
+};
 
 CookiePolicies.displayName = 'CookiePolicies';
 

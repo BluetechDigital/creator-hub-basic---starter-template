@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as IInstagramFeed from "@/components/CMS/InstagramFeed/types/instagramFeed";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXX InstagramFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const InstagramFeed: FC<IInstagramFeed.IProps> = memo(({}) => {
+const InstagramFeed: FC<IInstagramFeed.IProps> = ({}) => {
 
 	return (
 		<div className={styles.instagramFeed}>
 		</div>
 	);
-});
+};
 
 InstagramFeed.displayName = 'InstagramFeed';
 

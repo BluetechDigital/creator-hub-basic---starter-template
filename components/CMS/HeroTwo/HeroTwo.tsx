@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as IHeroTwo from "@/components/CMS/HeroTwo/types/heroTwo";
 
 /* -----------------------------------------------------------------------------
@@ -19,13 +19,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX HeroTwo Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const HeroTwo: FC<IHeroTwo.IProps> = memo(({}) => {
+const HeroTwo: FC<IHeroTwo.IProps> = ({}) => {
 
 	return (
 		<div className={styles.heroTwo}>
 		</div>
 	);
-});
+};
 
 HeroTwo.displayName = 'HeroTwo';
 

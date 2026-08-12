@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as IPrivacyPolicies from "@/components/CMS/PrivacyPolicies/types/privacyPolicies";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXX PrivacyPolicies Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const PrivacyPolicies: FC<IPrivacyPolicies.IProps> = memo(({}) => {
+const PrivacyPolicies: FC<IPrivacyPolicies.IProps> = ({}) => {
 
 	return (
 		<div className={styles.privacyPolicies}>
 		</div>
 	);
-});
+};
 
 PrivacyPolicies.displayName = 'PrivacyPolicies';
 

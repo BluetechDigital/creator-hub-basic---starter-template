@@ -8,7 +8,7 @@ import {
 	offsetStart,
 	offsetFinish,
  } from "@/animations/animations";
-import { FC, memo } from "react";
+import { FC } from "react";
 import { motion } from "framer-motion";
 import * as ITitleParagraph from "@/components/CMS/TitleParagraph/types/titleParagraph";
 
@@ -29,7 +29,7 @@ import ScrollYProgressReveal from "@/components/Animations/ScrollYProgressReveal
 XXXXXXXXXXXXXXXXXXXXXXXXXX TitleParagraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const TitleParagraph: FC<ITitleParagraph.IProps> = memo(({
+const TitleParagraph: FC<ITitleParagraph.IProps> = ({
 	title,
 	paragraph,
 	displayParagraph,
@@ -59,7 +59,7 @@ const TitleParagraph: FC<ITitleParagraph.IProps> = memo(({
 			/>
 		</ScrollYProgressReveal>
 	);
-});
+};
 
 TitleParagraph.displayName = 'TitleParagraph';
 

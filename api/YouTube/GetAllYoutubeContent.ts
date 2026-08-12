@@ -2,9 +2,9 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const YOUTUBE_API_BASE_URL: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_API_BASE_URL;
-const YOUTUBE_KEY: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_KEY;
-const YOUTUBE_CHANNEL_ID: string | undefined = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
+const YOUTUBE_API_BASE_URL: string | undefined = process.env.YOUTUBE_API_BASE_URL;
+const YOUTUBE_KEY: string | undefined = process.env.YOUTUBE_KEY;
+const YOUTUBE_CHANNEL_ID: string | undefined = process.env.YOUTUBE_CHANNEL_ID;
 const REVALIDATE_TIME = 86400; // Helper for consistent revalidation time, Cache Data for (24 Hours)
 
 /* -----------------------------------------------------------------------------

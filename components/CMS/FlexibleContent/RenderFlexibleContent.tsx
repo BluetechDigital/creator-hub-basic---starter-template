@@ -34,7 +34,7 @@ export const DynamicComponentLoaders: DynamicComponentMap = {
     CallToActionTwo: lazy(() => import("@/components/CMS/CallToActionTwo/CallToActionTwo")),
     PrivacyPolicies: lazy(() => import("@/components/CMS/PrivacyPolicies/PrivacyPolicies")),
     SponsorshipInfo: lazy(() => import("@/components/CMS/SponsorshipInfo/SponsorshipInfo")),
-    YoutubeVideoGrid: lazy(() => import("@/components/CMS/YoutubeVideoGrid/YoutubeVideoGrid")),
+    YoutubeVideoGrid: lazy(() => import("@/components/CMS/YouTubeVideoGrid/YouTubeVideoGrid")),
     AllYoutubeVideos: lazy(() => import("@/components/CMS/AllYoutubeVideos/AllYoutubeVideos")),
     AllYoutubeShortsVideos: lazy(() => import("@/components/CMS/AllYoutubeShortsVideos/AllYoutubeShortsVideos")),
 };

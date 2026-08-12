@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as ISponsorshipInfo from "@/components/CMS/SponsorshipInfo/types/sponsorshipInfo";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXX SponsorshipInfo Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const SponsorshipInfo: FC<ISponsorshipInfo.IProps> = memo(({}) => {
+const SponsorshipInfo: FC<ISponsorshipInfo.IProps> = ({}) => {
 
 	return (
 		<div className={styles.sponsorshipInfo}>
 		</div>
 	);
-});
+};
 
 SponsorshipInfo.displayName = 'SponsorshipInfo';
 

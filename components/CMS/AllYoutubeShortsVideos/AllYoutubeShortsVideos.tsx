@@ -2,34 +2,14 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
 import * as IAllYoutubeShortsVideos from "@/components/CMS/AllYoutubeShortsVideos/types/allYoutubeShortsVideos";
 
 // Youtube Api Info
 import {
-	IYoutubeVideos,
-	IYoutubePlaylists,
-	IYoutubeChannelInfo,
 	getAllYoutubeVideos,
 	getAllYoutubePlaylists,
 	getAllYoutubeChannelInfo,
 } from "@/api/YouTube/GetAllYoutubeContent";
-
-/* -----------------------------------------------------------------------------
-XXXXX Fetch all Youtube Creator Content simultaneously using Promise.all XXXXXXX
------------------------------------------------------------------------------ */
-
-const promises: (Promise<IYoutubeVideos> | Promise<IYoutubePlaylists> | Promise<IYoutubeChannelInfo>)[] = [
-	getAllYoutubeVideos(),
-	getAllYoutubePlaylists(),
-	getAllYoutubeChannelInfo(),
-];
-
-const [
-	youtubeVideos,
-	youtubeChannelPlaylists,
-	youtubeChannelInfo,
-] = await Promise.all(promises);
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -47,7 +27,19 @@ import VideosGrid from "@/components/CMS/AllYoutubeShortsVideos/fragments/Videos
 XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const AllYoutubeShortsVideos: FC<IAllYoutubeShortsVideos.IProps> = memo(({}) => {
+const AllYoutubeShortsVideos = async ({}: IAllYoutubeShortsVideos.IProps) => {
+
+	// Fetched inside the component so it runs per-request, matching Next's
+	// per-request fetch caching/revalidation instead of once at module load.
+	const [
+		youtubeVideos,
+		youtubeChannelPlaylists,
+		youtubeChannelInfo,
+	] = await Promise.all([
+		getAllYoutubeVideos(),
+		getAllYoutubePlaylists(),
+		getAllYoutubeChannelInfo(),
+	]);
 
 	return (
 		<div className={styles.allYouTubeShortsVideos}>
@@ -58,8 +50,6 @@ const AllYoutubeShortsVideos: FC<IAllYoutubeShortsVideos.IProps> = memo(({}) => 
 			/>
 		</div>
 	);
-});
-
-AllYoutubeShortsVideos.displayName = 'AllYoutubeShortsVideos';
+};
 
 export default AllYoutubeShortsVideos;

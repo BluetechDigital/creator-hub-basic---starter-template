@@ -2,7 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, memo } from "react";
+import { FC } from "react";
 import * as IContactForm from "@/components/CMS/ContactForm/types/contactForm";
 
 /* -----------------------------------------------------------------------------
@@ -20,13 +20,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX ContactForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const ContactForm: FC<IContactForm.IProps> = memo(({}) => {
+const ContactForm: FC<IContactForm.IProps> = ({}) => {
 
 	return (
 		<div className={styles.contactForm}>
 		</div>
 	);
-});
+};
 
 ContactForm.displayName = 'ContactForm';
 
