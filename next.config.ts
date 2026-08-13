@@ -63,11 +63,11 @@ const nextConfig: NextConfig = {
 						key: "Content-Security-Policy",
 						value: `
 							default-src 'self';
-							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} data:;
-							script-src 'self' 'unsafe-inline' 'unsafe-eval';
+							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} https://www.googletagmanager.com https://www.google-analytics.com data:;
+							script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
 							style-src 'self' 'unsafe-inline';
-							connect-src 'self' ${process.env.CMS_URL};
-							frame-src 'self' ${process.env.YOUTUBE_EMBED_REMOTE_PATTERNS_HOSTNAME}; /* Allow embedding YouTube videos */
+							connect-src 'self' ${process.env.CMS_URL} https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com;
+							frame-src 'self' ${process.env.YOUTUBE_EMBED_REMOTE_PATTERNS_HOSTNAME} https://www.googletagmanager.com; /* Allow embedding YouTube videos and the GTM noscript fallback */
 							object-src 'none';
 							frame-ancestors 'none';`
 							.replace(/\s{2,}/g, " ")

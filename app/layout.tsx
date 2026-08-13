@@ -41,10 +41,14 @@ import CookiePolicyContextProvider from "@/context/providers/CookiePolicyContext
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+// Page Transition Component
+import PixelatedWavePageTransition from "@/components/Global/PageTransition/PixelatedWave/PixelatedWave";
+
 // Other Components
 import SmoothScrolling from "@/components/Global/SmoothScrolling";
 import CookiePolicy from "@/components/Global/CookiePolicy/CookiePolicy";
-import BlurryCursorMouse from "@/components/Global/BlurryCursorMouse/BlurryCursorMouse";
+import ChangePageTitleOnLeave from "@/components/Global/Gimmicks/ChangePageTitleOnLeave";
+import BlurryCursorMouse from "@/components/Global/Gimmicks/BlurryCursorMouse/BlurryCursorMouse";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/Global/Analytics/GoogleTagManager";
 
 // Structured Data (JSON-LD)
@@ -87,7 +91,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Root Layout Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
  * Provider nesting order below is significant: `CookiePolicyContextProvider` is
  * outermost so `CookiePolicyContext` is available to everything nested inside it,
- * including the `CookiePolicy` banner rendered further down inside `SmoothScrolling`;
+ * including the `CookiePolicy` banner rendered further down inside `SmoothScrolling`
+ * and — just as importantly — `GoogleTagManager`, which reads consent from that same
+ * context to avoid loading its tracking script before the visitor has accepted;
  * `GlobalContextProvider` wraps `SmoothScrolling` (and therefore `children` and
  * `CookiePolicy`) so global content is available to the page content and the rest of the
  * tree. Reordering these would make global content or cookie-consent state unavailable
@@ -147,29 +153,38 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
   return (
     <html lang="en">
       <head>
-        <Suspense fallback={null}>
-          <GoogleTagManager />
-        </Suspense>
-
-        {/* Google Tag Manager NoScript */}
-        <GoogleTagManagerNoScript />
-
         {/* Structured Data (JSON-LD) */}
         <StructuredData data={structuredData} />
       </head>
 
       {/* Vercel Analytics */}
       <Analytics />
-      
+
     	{/* Vercel Speed Insights */}
       <SpeedInsights />
-      
+
       <body>
+        {/* Google Tag Manager NoScript — Google's convention places this immediately
+        after the opening <body> tag. Not consent-gated: see the note in
+        GoogleTagManagerNoScript's doc comment for why. */}
+        <GoogleTagManagerNoScript />
+
         <CookiePolicyContextProvider>
+          {/* GoogleTagManager reads consent from CookiePolicyContext, so it must be
+          rendered inside this provider — not in <head> — to never load before consent. */}
+          <Suspense fallback={null}>
+            <GoogleTagManager />
+          </Suspense>
+
+          {/* 1. Mouse Tracking, Loaders and Transitions (Mounted Globally) */}
+            <BlurryCursorMouse />
+            <ChangePageTitleOnLeave />
+            {/* <IntroLoadingAnimation /> */}
+            <PixelatedWavePageTransition />
+
           <GlobalContextProvider globalProps={globalProps}>
             <SmoothScrolling>
               {children}
-              <BlurryCursorMouse />
               <CookiePolicy />
             </SmoothScrolling>
           </GlobalContextProvider>
