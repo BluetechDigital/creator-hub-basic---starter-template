@@ -141,8 +141,8 @@ describe("getAllYoutubeVideos", () => {
 				ok: true,
 				json: async () => ({
 					items: [
-						{ id: "vid1", snippet: { title: "Video One" }, statistics: { viewCount: "10" }, status: {} },
-						{ id: "vid2", snippet: { title: "Video Two" }, statistics: { viewCount: "20" }, status: {} },
+						{ id: "vid1", snippet: { title: "Video One" }, statistics: { viewCount: "10" }, status: {}, contentDetails: { duration: "PT4M13S" } },
+						{ id: "vid2", snippet: { title: "Video Two" }, statistics: { viewCount: "20" }, status: {}, contentDetails: { duration: "PT45S" } },
 					],
 				}),
 			});
@@ -164,12 +164,14 @@ describe("getAllYoutubeVideos", () => {
 		);
 		expect(mockFetch).toHaveBeenNthCalledWith(
 			3,
-			expect.stringContaining("/videos?part=snippet,statistics,status&id=vid1,vid2"),
+			expect.stringContaining(
+				"/videos?part=snippet,statistics,status,contentDetails,player,topicDetails,liveStreamingDetails,recordingDetails,localizations&id=vid1,vid2",
+			),
 			expect.any(Object),
 		);
 		expect(result).toEqual([
-			{ id: "vid1", videoId: "vid1", snippet: { title: "Video One" }, statistics: { viewCount: "10" }, status: {} },
-			{ id: "vid2", videoId: "vid2", snippet: { title: "Video Two" }, statistics: { viewCount: "20" }, status: {} },
+			{ id: "vid1", videoId: "vid1", snippet: { title: "Video One" }, statistics: { viewCount: "10" }, status: {}, contentDetails: { duration: "PT4M13S" } },
+			{ id: "vid2", videoId: "vid2", snippet: { title: "Video Two" }, statistics: { viewCount: "20" }, status: {}, contentDetails: { duration: "PT45S" } },
 		]);
 	});
 
@@ -236,5 +238,30 @@ describe("getAllYoutubeVideos", () => {
 		await expect(getAllYoutubeVideos()).rejects.toThrow(
 			"Failed to retrieve YouTube videos content",
 		);
+	});
+});
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX ISO 8601 Duration XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+describe("iso8601DurationToSeconds", () => {
+	it.each([
+		["PT1M30S", 90],
+		["PT45S", 45],
+		["PT1H2M3S", 3723],
+		["PT10M", 600],
+		["PT2H", 7200],
+		["PT0S", 0],
+	])("converts %s to %i seconds", async (duration, expectedSeconds) => {
+		const { iso8601DurationToSeconds } = await importFreshModule();
+
+		expect(iso8601DurationToSeconds(duration)).toBe(expectedSeconds);
+	});
+
+	it("returns 0 for an unparseable duration", async () => {
+		const { iso8601DurationToSeconds } = await importFreshModule();
+
+		expect(iso8601DurationToSeconds("not-a-duration")).toBe(0);
 	});
 });

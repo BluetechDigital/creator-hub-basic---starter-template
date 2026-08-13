@@ -82,6 +82,15 @@ export const getAllComponentFieldGroupNames = async (
         
         const fieldGroupNameListQueryResponse: IGraphQLResponse<IFlexibleContent.IQueryResponse> = await nextJSFetchResponse.json();
 
+        /* A 200 OK HTTP response can still carry GraphQL-level validation errors (e.g. a
+        field that doesn't exist on the schema) with `data` left empty — check for that
+        separately from the HTTP-level check above, so a bad query fails loudly here
+        instead of surfacing later as a confusing downstream crash. */
+        if (fieldGroupNameListQueryResponse.errors) {
+            console.error("Pass 1 GraphQL query returned errors:", fieldGroupNameListQueryResponse.errors);
+            return [];
+        }
+
     return fieldGroupNameListQueryResponse;
 };
 

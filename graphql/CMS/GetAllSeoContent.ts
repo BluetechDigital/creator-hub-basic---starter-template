@@ -70,6 +70,11 @@ export const getAllSeoContent = async (
 
 		const response: IGraphQLResponse<ISeo.IResponse> = await nextJSFetchResponse.json();
 
+		if (response.errors) {
+			console.error(`SEO content query for slug "${slug}" returned errors:`, response.errors);
+			return undefined;
+		}
+
 		return response?.data?.seo?.edges?.[0]?.node?.seo;
 
 	} catch (error: unknown) {

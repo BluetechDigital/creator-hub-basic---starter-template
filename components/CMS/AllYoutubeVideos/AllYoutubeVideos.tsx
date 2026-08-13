@@ -9,6 +9,7 @@ import {
 	getAllYoutubeVideos,
 	getAllYoutubePlaylists,
 	getAllYoutubeChannelInfo,
+	iso8601DurationToSeconds,
 } from "@/api/YouTube/GetAllYoutubeContent";
 
 /* -----------------------------------------------------------------------------
@@ -22,6 +23,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import VideosGrid from "@/components/CMS/AllYoutubeVideos/fragments/VideosGrid";
+import StructuredData from "@/components/Global/StructuredData/StructuredData";
+import { buildVideoItemListSchema } from "@/components/Global/StructuredData/builders";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXX Youtube Watch URL Builder XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+const buildWatchUrl = (videoId: string): string => `https://www.youtube.com/watch?v=${videoId}`;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -32,7 +41,7 @@ const AllYoutubeVideos = async ({}: IAllYoutubeVideos.IProps) => {
 	// Fetched inside the component so it runs per-request, matching Next's
 	// per-request fetch caching/revalidation instead of once at module load.
 	const [
-		youtubeVideos,
+		allYoutubeVideos,
 		youtubeChannelPlaylists,
 		youtubeChannelInfo,
 	] = await Promise.all([
@@ -41,8 +50,17 @@ const AllYoutubeVideos = async ({}: IAllYoutubeVideos.IProps) => {
 		getAllYoutubeChannelInfo(),
 	]);
 
+	// getAllYoutubeVideos() returns every upload; Shorts (<=60s) belong on the Shorts
+	// feed (AllYoutubeShortsVideos), not here.
+	const youtubeVideos = allYoutubeVideos.filter(
+		(video) => iso8601DurationToSeconds(video.contentDetails.duration) > 60,
+	);
+
+	const videoListSchema = buildVideoItemListSchema(youtubeVideos, buildWatchUrl);
+
 	return (
 		<div className={styles.allYoutubeVideos}>
+			<StructuredData data={videoListSchema} />
 			<VideosGrid
 				youtubeVideos={youtubeVideos}
 				youtubeChannelInfo={youtubeChannelInfo}

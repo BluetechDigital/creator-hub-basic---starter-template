@@ -21,6 +21,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import PageContextProvider from "@/context/providers/PageContextProvider";
 import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
+// Structured Data (JSON-LD)
+import StructuredData from "@/components/Global/StructuredData/StructuredData";
+import { buildBreadcrumbListSchema } from "@/components/Global/StructuredData/builders";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+const SITE_URL: string | undefined = process.env.SITE_URL;
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -61,17 +71,27 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 	const { slug } = await params;
 
   	// Current Page ACF Flexible Components Content
-	const pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
+	const [pageACFFlexibleComponentsContent, seo] = await Promise.all([
+		getAllPageACFFlexibleComponentsContent(
+			slug,
+			postType.pages,
+			flexibleContentType.pages
+		) as Promise<IFlexibleContent.IProps>,
+		getAllSeoContent(slug, postType.pages) as Promise<ISeo.IProps>,
+	]);
+
+	const breadcrumbSchema = buildBreadcrumbListSchema({
+		siteUrl: SITE_URL!,
 		slug,
-		postType.pages,
-		flexibleContentType.pages
-	) as IFlexibleContent.IProps;
+		pageTitle: seo.title,
+	});
 
 	return (
 		<PageContextProvider
 			content={pageACFFlexibleComponentsContent}
 			postTypeFlexibleContent={flexibleContentType.pages}
 		>
+			<StructuredData data={breadcrumbSchema} />
 			<RenderFlexibleContent />
 		</PageContextProvider>
 	);

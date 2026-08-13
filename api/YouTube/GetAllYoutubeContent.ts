@@ -119,7 +119,56 @@ export type IYoutubeVideos = {
         favoriteCount: string;
         commentCount: string;
     };
+    contentDetails: {
+        duration: string; // ISO 8601, e.g. "PT4M13S" — see iso8601DurationToSeconds
+        dimension: string; // "2d" | "3d"
+        definition: string; // "hd" | "sd"
+        caption: string; // "true" | "false" (string, per the API)
+        licensedContent: boolean;
+        projection: string; // "rectangular" | "360"
+    };
+    player: {
+        embedHtml: string;
+    };
+    // Sparse in practice — most uploads never populate these.
+    topicDetails?: {
+        topicCategories?: string[];
+    };
+    liveStreamingDetails?: {
+        actualStartTime?: string;
+        actualEndTime?: string;
+        scheduledStartTime?: string;
+        scheduledEndTime?: string;
+        concurrentViewers?: string;
+    };
+    recordingDetails?: {
+        recordingDate?: string;
+        location?: {
+            latitude?: number;
+            longitude?: number;
+            altitude?: number;
+        };
+    };
+    localizations?: Record<string, { title: string; description: string }>;
 }[];
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX ISO 8601 Duration XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// Parses YouTube's ISO 8601 duration format (e.g. "PT1H2M3S" -> 3723) so callers can, e.g.,
+// tell Shorts (<=60s) apart from regular uploads without a second API call.
+export const iso8601DurationToSeconds = (duration: string): number => {
+    const match = duration.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+
+    if (!match) {
+        return 0;
+    }
+
+    const [, hours, minutes, seconds] = match;
+
+    return (Number(hours) || 0) * 3600 + (Number(minutes) || 0) * 60 + (Number(seconds) || 0);
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Channel Info XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -278,8 +327,12 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
             return [] as IYoutubeVideos; // Return empty array if no videos are found
         }
 
-        // 2. Fetch full video details using the collected IDs
-        const videosUrl = `${YOUTUBE_API_BASE_URL}/videos?part=snippet,statistics,status&id=${videoIds}&key=${YOUTUBE_KEY}`;
+        // 2. Fetch full video details using the collected IDs. Requesting every part a
+        // public API-key request can read costs no extra quota (videos.list is a flat 1 unit
+        // regardless of `part` count) — owner-only parts (fileDetails, processingDetails,
+        // suggestions) are excluded since they require OAuth + video ownership and don't work
+        // with this app's read-only API-key access.
+        const videosUrl = `${YOUTUBE_API_BASE_URL}/videos?part=snippet,statistics,status,contentDetails,player,topicDetails,liveStreamingDetails,recordingDetails,localizations&id=${videoIds}&key=${YOUTUBE_KEY}`;
 
         const videoDetailsResponse = await fetch(videosUrl, {
             next: { revalidate: 3600 },

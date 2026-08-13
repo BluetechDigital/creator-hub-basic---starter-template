@@ -10,5 +10,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 }
 
 .videosGrid {
-    @apply w-full h-full flex flex-col items-center justify-center;
+    @apply w-full grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.videoCard {
+    @apply flex flex-col gap-2;
+}
+
+.videoThumbnail {
+    @apply w-full h-auto rounded;
+}
+
+.videoTitle {
+    @apply text-base font-medium;
 }

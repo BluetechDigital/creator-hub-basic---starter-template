@@ -7,3 +7,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 .allYouTubeShortsVideos {
     @apply w-full h-full;
 }
+
+.videosGrid {
+    @apply w-full grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4;
+}
+
+.videoCard {
+    @apply flex flex-col gap-2;
+}
+
+.videoThumbnail {
+    @apply w-full h-auto rounded;
+}
+
+.videoTitle {
+    @apply text-sm font-medium;
+}

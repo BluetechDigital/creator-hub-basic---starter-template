@@ -43,6 +43,11 @@ export const getAllPagesSlugs = async (): Promise<IPages.IProps | unknown> => {
 
 		const response: IGraphQLResponse<IPages.IResponse> = await nextJSFetchResponse.json();
 
+		if (response.errors) {
+			console.error("Pages slugs query returned errors:", response.errors);
+			return undefined;
+		}
+
 		return response?.data?.pages?.nodes;
 
 	} catch (error: unknown) {

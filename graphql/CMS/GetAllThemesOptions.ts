@@ -137,6 +137,11 @@ export const getThemesOptionsContent =
 
 			const response: IGraphQLResponse<IThemesOptions.IResponse> = await nextJSFetchResponse.json();
 
+			if (response.errors) {
+				console.error("Theme options query returned errors:", response.errors);
+				return undefined;
+			}
+
 			return response?.data?.themeOptions?.edges?.[0]?.node?.themeOptions;
 
 		} catch (error: unknown) {

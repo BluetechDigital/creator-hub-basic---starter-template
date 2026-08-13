@@ -47,11 +47,16 @@ import CookiePolicy from "@/components/Global/CookiePolicy/CookiePolicy";
 import BlurryCursorMouse from "@/components/Global/BlurryCursorMouse/BlurryCursorMouse";
 import GoogleTagManager, { GoogleTagManagerNoScript } from "@/components/Global/Analytics/GoogleTagManager";
 
+// Structured Data (JSON-LD)
+import StructuredData from "@/components/Global/StructuredData/StructuredData";
+import { buildPersonSchema, buildWebsiteSchema } from "@/components/Global/StructuredData/builders";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 const SITE_NAME: string | undefined = process.env.SITE_NAME;
+const SITE_URL: string | undefined = process.env.SITE_URL;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -114,7 +119,18 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
 		footerMenuLinks: footerMenuLinks as IGlobal.IProps["footerMenuLinks"],
 
   };
-  
+
+	// Site-wide structured data (JSON-LD) — Person + WebSite, using the same
+	// global content already fetched above.
+	const structuredData = [
+		buildPersonSchema({
+			siteName: SITE_NAME!,
+			siteUrl: SITE_URL!,
+			themeOptions: globalProps.themesOptionsContent,
+		}),
+		buildWebsiteSchema({ siteName: SITE_NAME!, siteUrl: SITE_URL! }),
+	];
+
   return (
     <html lang="en">
       <head>
@@ -124,6 +140,9 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
 
         {/* Google Tag Manager NoScript */}
         <GoogleTagManagerNoScript />
+
+        {/* Structured Data (JSON-LD) */}
+        <StructuredData data={structuredData} />
       </head>
 
       {/* Vercel Analytics */}

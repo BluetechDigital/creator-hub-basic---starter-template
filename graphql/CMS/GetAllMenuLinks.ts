@@ -31,6 +31,11 @@ const runMenuLinksQuery = async (query: string): Promise<NonNullable<ILinks.IRes
 
 	const response: IGraphQLResponse<ILinks.IResponse> = await nextJSFetchResponse.json();
 
+	if (response.errors) {
+		console.error("Menu links query returned errors:", response.errors);
+		return null;
+	}
+
 	return response?.data?.menuLinks ?? null;
 };
 

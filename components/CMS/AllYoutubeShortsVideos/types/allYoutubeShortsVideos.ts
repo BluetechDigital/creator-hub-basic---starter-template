@@ -12,7 +12,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export type IProps = IFlexibleContent.IBaseFixedProps & object;
 
 export type IVideosGrid = {
-    youtubeVideos: IYoutubeVideos | unknown;
-    youtubeChannelInfo: IYoutubeChannelInfo | unknown;
-    youtubeChannelPlaylists: IYoutubePlaylists | unknown;
+    youtubeVideos: IYoutubeVideos;
+    youtubeChannelInfo: IYoutubeChannelInfo;
+    youtubeChannelPlaylists: IYoutubePlaylists;
 };
