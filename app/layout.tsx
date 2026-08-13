@@ -169,19 +169,21 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
         GoogleTagManagerNoScript's doc comment for why. */}
         <GoogleTagManagerNoScript />
 
+        {/* Mouse Tracking, Loaders and Transitions (Mounted Globally) */}
+        <BlurryCursorMouse />
+        <ChangePageTitleOnLeave />
+        
+        {/* <IntroLoadingAnimation /> */}
+        <PixelatedWavePageTransition />
+        
         <CookiePolicyContextProvider>
           {/* GoogleTagManager reads consent from CookiePolicyContext, so it must be
           rendered inside this provider — not in <head> — to never load before consent. */}
           <Suspense fallback={null}>
             <GoogleTagManager />
           </Suspense>
-
-          {/* 1. Mouse Tracking, Loaders and Transitions (Mounted Globally) */}
-            <BlurryCursorMouse />
-            <ChangePageTitleOnLeave />
-            {/* <IntroLoadingAnimation /> */}
-            <PixelatedWavePageTransition />
-
+          
+          {/* Main Page Content */}
           <GlobalContextProvider globalProps={globalProps}>
             <SmoothScrolling>
               {children}
