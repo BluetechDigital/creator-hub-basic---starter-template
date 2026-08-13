@@ -47,15 +47,16 @@ const useScrollYColorSwitch = ({
 				const containerHeight = containerRef.current.offsetHeight;
 				/* Slightly before 50% or Halfway Point ( divide by / 2)
 				 would be Halfway Point of the selected element / div */
-				const halfwayPoint = containerOffsetTop + containerHeight / 2.25;
+				const halfwayPointPx = containerOffsetTop + containerHeight / 2.25;
 
-				// FLAG (not fixed here): scrollYProgress is a framer-motion MotionValue in the
-				// 0–1 range, but halfwayPoint is computed from pixel offsets
-				// (containerOffsetTop/containerHeight) — comparing a 0–1 value against a pixel
-				// value looks like a unit mismatch bug. Left as-is pending review; see
-				// [related follow-up].
+				// scrollYProgress is a 0–1 MotionValue, so halfwayPointPx (a pixel offset) has
+				// to be converted to the same 0–1 scale — as a fraction of the total scrollable
+				// distance — before the two can be compared.
+				const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+				const halfwayPointProgress = maxScroll > 0 ? halfwayPointPx / maxScroll : 0;
+
 				setColor(
-					scrollYProgress.get() >= halfwayPoint ? colorAfter : colorBefore
+					scrollYProgress.get() >= halfwayPointProgress ? colorAfter : colorBefore
 				);
 			}
 		};

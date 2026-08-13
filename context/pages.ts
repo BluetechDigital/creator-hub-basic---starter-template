@@ -29,10 +29,7 @@ const usePageContext = () => {
 	const content = useContext(PageContext);
 
 	if (content === undefined) {
-		// FLAG (not fixed here): this error message references a stale hook name
-		// ("useDynamicPageContext") that no longer exists — should say usePageContext.
-		// Left as-is pending review.
-		throw new Error(`useDynamicPageContext must be used to render content.`);
+		throw new Error(`usePageContext must be used to render content.`);
 	}
 
 	return content;

@@ -24,12 +24,9 @@ const CookiePolicyContextProvider: FC<ICookiePolicy.IContextProvider> = ({
 	const [hasConsent, setHasConsent] = useState<boolean | null>(null); // null, true, or false
 
 	useEffect(() => {
-		// FLAG (not fixed here): reads the "cookies-accepted"/"cookies-refused" cookie
-		// keys, but acceptCookies/refuseCookies below write a "cookie-consent" key
-		// instead — these don't match, so consent likely never persists correctly
-		// across reloads. Left as-is pending review.
-		const cookiesAccepted = document.cookie.includes("cookies-accepted");
-		const cookiesRefused = document.cookie.includes("cookies-refused");
+		// Reads the same "cookie-consent" key that acceptCookies/refuseCookies write below.
+		const cookiesAccepted = document.cookie.includes("cookie-consent=accepted");
+		const cookiesRefused = document.cookie.includes("cookie-consent=refused");
 
 		queueMicrotask(() => {
 			if (cookiesAccepted) {
@@ -43,9 +40,6 @@ const CookiePolicyContextProvider: FC<ICookiePolicy.IContextProvider> = ({
 	}, []);
 
 	// Accept Cookies Duration is One Month (2,592,000 seconds)
-	// FLAG (not fixed here): writes a "cookie-consent" cookie key, which does not match
-	// the "cookies-accepted"/"cookies-refused" keys read above — see the flag note in
-	// the read logic. Left as-is pending review.
 	const acceptCookies = () => {
 		document.cookie = "cookie-consent=accepted; max-age=2592000; path=/";
 		setHasConsent(true);
