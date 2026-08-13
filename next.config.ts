@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
 						key: "Content-Security-Policy",
 						value: `
 							default-src 'self';
-							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} data:;
+							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} data:;
 							script-src 'self' 'unsafe-inline' 'unsafe-eval';
 							style-src 'self' 'unsafe-inline';
 							connect-src 'self' ${process.env.CMS_URL};
@@ -141,6 +141,24 @@ const nextConfig: NextConfig = {
 				hostname: `${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE}`,
 				port: "",
 				pathname: `${process.env.IMAGE_REMOTE_PATHNAME_ONE}/**`,
+			},
+			{
+				protocol: "https",
+				hostname: `${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO}`,
+				port: "",
+				pathname: `${process.env.IMAGE_REMOTE_PATHNAME_TWO}/**`,
+			},
+			{
+				protocol: "https",
+				hostname: `${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME}`,
+				port: "",
+				pathname: `${process.env.YOUTUBE_IMAGE_REMOTE_PATHNAME}/**`,
+			},
+			{
+				protocol: "https",
+				hostname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME}`,
+				port: "",
+				pathname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATHNAME}/**`,
 			},
 		],
 	}

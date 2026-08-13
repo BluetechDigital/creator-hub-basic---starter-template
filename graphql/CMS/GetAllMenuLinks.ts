@@ -2,9 +2,37 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { client } from "@/config/apollo";
 import * as ILinks from "@/graphql/CMS/types/links";
-import { ApolloClient, DocumentNode, gql } from "@apollo/client";
+import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
+if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Shared Query Runner XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+const runMenuLinksQuery = async (query: string): Promise<NonNullable<ILinks.IResponse>["menuLinks"]> => {
+	const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT!, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ query }),
+		next: { revalidate: 86400 },
+	});
+
+	if (!nextJSFetchResponse.ok) {
+		console.error(`Menu links fetch failed with status: ${nextJSFetchResponse.status}`);
+		return null;
+	}
+
+	const response: IGraphQLResponse<ILinks.IResponse> = await nextJSFetchResponse.json();
+
+	return response?.data?.menuLinks ?? null;
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Navbar Menu Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -13,7 +41,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Navbar Menu Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllNavbarMenuLinks =
 	async (): Promise<ILinks.INavbarMenuLinks | unknown> => {
 		try {
-			const content: DocumentNode = gql`
+			const content = `
 				{
 					menuLinks: menuItems(where: {location: PRIMARY}) {
 						edges {
@@ -27,11 +55,9 @@ export const getAllNavbarMenuLinks =
 				}
 			`;
 
-			const response: ApolloClient.QueryResult<ILinks.IResponse> = await client.query<ILinks.IResponse>({
-				query: content,
-			});
+			const menuLinks = await runMenuLinksQuery(content);
 
-			return response?.data?.menuLinks?.edges;
+			return menuLinks?.edges;
 
 		} catch (error: unknown) {
 			console.log(error);
@@ -47,7 +73,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Mobile Navbar Menu Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 export const getAllMobileLinks = async (): Promise<ILinks.IMobileLinks | unknown> => {
 	try {
-		const content: DocumentNode = gql`
+		const content = `
 			{
 				menuLinks: menuItems(where: {location: MOBILE_LINKS}, first: 10) {
 					edges {
@@ -61,11 +87,9 @@ export const getAllMobileLinks = async (): Promise<ILinks.IMobileLinks | unknown
 			}
 		`;
 
-		const response: ApolloClient.QueryResult<ILinks.IResponse> = await client.query<ILinks.IResponse>({
-			query: content,
-		});
+		const menuLinks = await runMenuLinksQuery(content);
 
-		return response?.data?.menuLinks?.edges;
+		return menuLinks?.edges;
 
 	} catch (error: unknown) {
 		console.log(error);
@@ -74,7 +98,7 @@ export const getAllMobileLinks = async (): Promise<ILinks.IMobileLinks | unknown
 		);
 	}
 };
-	
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Copyright Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -82,7 +106,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Copyright Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllCopyrightLinks =
 	async (): Promise<ILinks.ICopyrightLinks | unknown> => {
 		try {
-			const content: DocumentNode = gql`
+			const content = `
 				{
 					menuLinks: menuItems(
 						where: {location: COPYRIGHT_LINKS}
@@ -99,11 +123,9 @@ export const getAllCopyrightLinks =
 				}
 			`;
 
-			const response: ApolloClient.QueryResult<ILinks.IResponse> = await client.query<ILinks.IResponse>({
-				query: content,
-			});
+			const menuLinks = await runMenuLinksQuery(content);
 
-			return response?.data?.menuLinks?.edges;
+			return menuLinks?.edges;
 
 		} catch (error: unknown) {
 			console.log(error);
@@ -112,7 +134,7 @@ export const getAllCopyrightLinks =
 			);
 		}
 	};
-	
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Footer Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -120,7 +142,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Footer Links XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getAllFooterMenuLinks =
 	async (): Promise<ILinks.IFooterMenuLinks | unknown> => {
 		try {
-			const content: DocumentNode = gql`
+			const content = `
 				{
 					menuLinks: menuItems(where: {location: FOOTER}) {
 						edges {
@@ -134,11 +156,9 @@ export const getAllFooterMenuLinks =
 				}
 			`;
 
-			const response: ApolloClient.QueryResult<ILinks.IResponse> = await client.query<ILinks.IResponse>({
-				query: content,
-			});
+			const menuLinks = await runMenuLinksQuery(content);
 
-			return response?.data?.menuLinks?.edges;
+			return menuLinks?.edges;
 
 		} catch (error: unknown) {
 			console.log(error);
@@ -147,4 +167,3 @@ export const getAllFooterMenuLinks =
 			);
 		}
 	};
-

@@ -5,6 +5,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const YOUTUBE_API_BASE_URL: string | undefined = process.env.YOUTUBE_API_BASE_URL;
 const YOUTUBE_KEY: string | undefined = process.env.YOUTUBE_KEY;
 const YOUTUBE_CHANNEL_ID: string | undefined = process.env.YOUTUBE_CHANNEL_ID;
+// Optional: skips the contentDetails lookup below when a specific playlist is already known.
+const YOUTUBE_PLAYLIST_ID: string | undefined = process.env.YOUTUBE_PLAYLIST_ID;
 const REVALIDATE_TIME = 86400; // Helper for consistent revalidation time, Cache Data for (24 Hours)
 
 /* -----------------------------------------------------------------------------
@@ -60,13 +62,20 @@ export type IYoutubePlaylists = {
     id: string;
 }[];
 
-// Raw structure for a single item from the /search endpoint
-export type IRawSearchItem = {
-    id: {
-        videoId: string;
-        kind: string;
+// Raw response structure for the channel API call when resolving the uploads playlist ID
+type IRawChannelContentDetails = {
+    contentDetails: {
+        relatedPlaylists: {
+            uploads: string;
+        };
     };
-    [key: string]: unknown; // Includes snippet, etag, etc.
+};
+
+// Raw structure for a single item from the /playlistItems endpoint (contentDetails only)
+type IRawPlaylistItemContentDetails = {
+    contentDetails: {
+        videoId: string;
+    };
 };
 
 // Final Videos structure
@@ -203,6 +212,39 @@ export const getAllYoutubePlaylists = async (): Promise<IYoutubePlaylists> => {
 };
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXX Youtube Uploads Playlist ID XXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// Resolves the channel's "uploads" playlist ID (1 quota unit) so getAllYoutubeVideos can
+// list videos via playlistItems.list instead of search.list, which costs 100 units/call.
+// Set YOUTUBE_PLAYLIST_ID to skip this lookup entirely when a specific playlist is known.
+const resolveUploadsPlaylistId = async (): Promise<string> => {
+    if (YOUTUBE_PLAYLIST_ID) {
+        return YOUTUBE_PLAYLIST_ID;
+    }
+
+    const channelUrl = `${YOUTUBE_API_BASE_URL}/channels?part=contentDetails&id=${YOUTUBE_CHANNEL_ID}&key=${YOUTUBE_KEY}`;
+
+    const channelResponse = await fetch(channelUrl, {
+        next: { revalidate: REVALIDATE_TIME },
+    });
+
+    if (!channelResponse.ok) {
+        const errorData = await channelResponse.json();
+        throw new Error(`YouTube API Error (${channelResponse.status}): ${errorData?.error?.message || 'Failed to resolve uploads playlist.'}`);
+    }
+
+    const channelData = await channelResponse.json() as { items: IRawChannelContentDetails[] };
+    const uploadsPlaylistId = channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+
+    if (!uploadsPlaylistId) {
+        throw new Error("Could not resolve the channel's uploads playlist ID.");
+    }
+
+    return uploadsPlaylistId;
+};
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Videos XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -211,24 +253,27 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
         throw new Error("Missing YouTube environment variables (YOUTUBE_API_BASE_URL, YOUTUBE_KEY, or YOUTUBE_CHANNEL_ID).");
     }
-    
+
     try {
-        // 1. Search for video IDs (max 50)
-        const searchUrl = `${YOUTUBE_API_BASE_URL}/search?key=${YOUTUBE_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=id&order=date&maxResults=50&type=video`;
-        
-        const searchResponse = await fetch(searchUrl, {
+        // 1. List video IDs from the channel's uploads playlist (1 quota unit, vs. 100 for
+        // the equivalent search.list call).
+        const uploadsPlaylistId = await resolveUploadsPlaylistId();
+
+        const playlistItemsUrl = `${YOUTUBE_API_BASE_URL}/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${YOUTUBE_KEY}`;
+
+        const playlistItemsResponse = await fetch(playlistItemsUrl, {
             next: { revalidate: REVALIDATE_TIME },
         });
-        
-        if (!searchResponse.ok) {
-            const errorData = await searchResponse.json();
-            throw new Error(`YouTube API Error (${searchResponse.status}): ${errorData?.error?.message || 'Failed to fetch video IDs.'}`);
+
+        if (!playlistItemsResponse.ok) {
+            const errorData = await playlistItemsResponse.json();
+            throw new Error(`YouTube API Error (${playlistItemsResponse.status}): ${errorData?.error?.message || 'Failed to fetch video IDs.'}`);
         }
 
-        const searchData = await searchResponse.json() as { items: IRawSearchItem[] };
-        
-        const videoIds = searchData.items.map((item) => item.id.videoId).join(',');
-        
+        const playlistItemsData = await playlistItemsResponse.json() as { items: IRawPlaylistItemContentDetails[] };
+
+        const videoIds = playlistItemsData.items.map((item) => item.contentDetails.videoId).join(',');
+
         if (!videoIds) {
             return [] as IYoutubeVideos; // Return empty array if no videos are found
         }

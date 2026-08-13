@@ -2,15 +2,14 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { ApolloClient} from "@apollo/client";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
+import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import { allComponentsGrapghQLFragmentsObjectKeys } from "@/graphql/CMS/GetAllComponentsGraphQLFragments";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/* Apollo Client URL (You'll need this to use fetch) */
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
 
@@ -32,7 +31,7 @@ export const getAllComponentFieldGroupNames = async (
     slug: string,
     postType: string,
     postTypeFlexibleContent: string
-): Promise<ApolloClient.QueryResult<IFlexibleContent.IQueryResponse> | []> => {
+): Promise<IGraphQLResponse<IFlexibleContent.IQueryResponse> | []> => {
 
     /* -----------------------------------------------------------------------------
         XXXXXXXXXXXXXXXXXXXXXXXX 1. START: GET ALL COMPONENTS NAMES TO QUERY THE CMS FOR 
@@ -81,10 +80,9 @@ export const getAllComponentFieldGroupNames = async (
             return [];
         }
         
-        /* FIX 2: Correctly type the raw JSON response from fetch */
-        const fieldGroupNameListQueryResponse: ApolloClient.QueryResult<IFlexibleContent.IQueryResponse> = await nextJSFetchResponse.json();
-    
-    return fieldGroupNameListQueryResponse as ApolloClient.QueryResult<IFlexibleContent.IQueryResponse>;
+        const fieldGroupNameListQueryResponse: IGraphQLResponse<IFlexibleContent.IQueryResponse> = await nextJSFetchResponse.json();
+
+    return fieldGroupNameListQueryResponse;
 };
 
 /* -----------------------------------------------------------------------------
@@ -98,11 +96,13 @@ XXXXXXXXXXXXXX 2. PROCESS ARRAY: Extract unique component names XXXXXXXXXXXXXXXX
  * @returns An array of unique component name strings, or an empty array if none are found.
  */
 export const extractActiveComponentNames = (
-    fieldGroupNameListQueryResponse: ApolloClient.QueryResult<IFlexibleContent.IQueryResponse>
+    fieldGroupNameListQueryResponse: IGraphQLResponse<IFlexibleContent.IQueryResponse> | []
 ): string[] => {
     
     /* Extract unique component names (e.g. DefaultTemplate_Flexiblecontent_FlexibleContent_{ComponentName}) */
-        const fieldGroupNameStructureArray: { fieldGroupName: string }[] | undefined = fieldGroupNameListQueryResponse.data?.flexibleComponents?.edges?.[0].node.template.flexibleContent.flexibleContent;
+        const fieldGroupNameStructureArray: { fieldGroupName: string }[] | undefined = Array.isArray(fieldGroupNameListQueryResponse)
+            ? undefined
+            : fieldGroupNameListQueryResponse.data?.flexibleComponents?.edges?.[0].node.template.flexibleContent.flexibleContent;
         
         if (!fieldGroupNameStructureArray || fieldGroupNameStructureArray.length === 0) {
             return []; // Exit early

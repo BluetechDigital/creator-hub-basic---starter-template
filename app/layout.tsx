@@ -35,7 +35,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 // Context Providers Components
 import GlobalContextProvider from "@/context/providers/GlobalContextProvider";
-import ApolloContextProvider from "@/context/providers/ApolloContextProvider";
 import CookiePolicyContextProvider from "@/context/providers/CookiePolicyContextProvider";
 
 // Vercel Analytics & Speed Insights
@@ -134,17 +133,15 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
       <SpeedInsights />
       
       <body>
-        <ApolloContextProvider>
-          <CookiePolicyContextProvider>
-            <GlobalContextProvider globalProps={globalProps}>
-              <SmoothScrolling>
-                {children}
-                <BlurryCursorMouse />
-                <CookiePolicy />
-              </SmoothScrolling>
-            </GlobalContextProvider>
-          </CookiePolicyContextProvider>
-				</ApolloContextProvider>
+        <CookiePolicyContextProvider>
+          <GlobalContextProvider globalProps={globalProps}>
+            <SmoothScrolling>
+              {children}
+              <BlurryCursorMouse />
+              <CookiePolicy />
+            </SmoothScrolling>
+          </GlobalContextProvider>
+        </CookiePolicyContextProvider>
       </body>
     </html>
   );

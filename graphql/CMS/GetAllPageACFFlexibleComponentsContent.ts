@@ -2,20 +2,18 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { client } from "@/config/apollo";
 import {
 	extractActiveComponentNames,
-	getAllComponentFieldGroupNames 
+	getAllComponentFieldGroupNames
 } from "@/graphql/CMS/GetAllACFFlexibleComponentsList";
-import { ApolloClient, DocumentNode, gql } from "@apollo/client";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
+import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import { getAllComponentsGrapghQLFragments } from "@/graphql/CMS/GetAllComponentsGraphQLFragments";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/* Apollo Client URL (You'll need this to use fetch) */
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
 
@@ -45,8 +43,7 @@ export const getAllPageACFFlexibleComponentsContent = async (
         XXXXXXXXXXXX Step A: Execute Pass 1: Get raw field group names XXXXXXXXXXXXX
         ------------------------------------------------------------------------- */
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const rawResponse: ApolloClient.QueryResult<IFlexibleContent.IQueryResponse> | any = await getAllComponentFieldGroupNames(
+		const rawResponse: IGraphQLResponse<IFlexibleContent.IQueryResponse> | [] = await getAllComponentFieldGroupNames(
             slug, 
             postType, 
             postTypeFlexibleContent
@@ -90,7 +87,7 @@ export const getAllPageACFFlexibleComponentsContent = async (
 			})
 			.join('\n');
 		
-		const content: DocumentNode = gql`
+		const content = `
 			{
         		flexibleComponents: ${postType}(where: {name: "${slug}", status: PUBLISH}) {
         		  edges {
@@ -110,13 +107,23 @@ export const getAllPageACFFlexibleComponentsContent = async (
 			}
 		`;
 
-		const response: ApolloClient.QueryResult<IFlexibleContent.IQueryResponse> = await client.query<IFlexibleContent.IQueryResponse>({
-			query: content,
+		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ query: content }),
+			next: { revalidate: 86400 },
 		});
 
+		if (!nextJSFetchResponse.ok) {
+			console.error(`Pass 2 fetch failed with status: ${nextJSFetchResponse.status}`);
+			return null;
+		}
+
+		const response: IGraphQLResponse<IFlexibleContent.IQueryResponse> = await nextJSFetchResponse.json();
+
 		// 1. Check for data and errors
-        if (!response.data || response.error) {
-            console.error("GraphQL query failed or returned data errors.", response.error);
+        if (!response.data || response.errors) {
+            console.error("GraphQL query failed or returned data errors.", response.errors);
             return null;
 		}
 		

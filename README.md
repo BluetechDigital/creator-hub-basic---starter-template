@@ -76,7 +76,7 @@ server-only and stays out of the browser bundle.
 |---|---|---|
 | `CMS_URL` | server | Base WordPress site URL, used in the CSP `img-src`/`connect-src` |
 | `DEV_CMS_URL` | server | Development CMS URL |
-| `NEXT_PUBLIC_CMS_API_URL` | **client** | WPGraphQL endpoint — must be public because `config/apollo.ts` is wired into a client-side `ApolloProvider` (`context/providers/ApolloContextProvider.tsx`) |
+| `NEXT_PUBLIC_CMS_API_URL` | **client** | WPGraphQL endpoint, read by every `graphql/CMS/` query function (all server-side `fetch()` calls with `next: { revalidate }` caching — kept `NEXT_PUBLIC_` for backwards compatibility, though nothing reads it client-side anymore) |
 | `IMAGE_DIR_URL` | server | Base path for CMS-uploaded media |
 | `WORDPRESS_CMS_USERNAME` / `WORDPRESS_CMS_PASSWORD` | server | CMS credentials, if the integration needs authenticated requests |
 | `IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE` / `_TWO` + matching `_PATHNAME_*` | server | Allow-listed hostnames/paths for `next/image` and the CSP `img-src` |

@@ -2,9 +2,11 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { client } from "@/config/apollo";
-import { ApolloClient, DocumentNode, gql } from "@apollo/client";
 import * as IThemesOptions from "@/graphql/CMS/types/themesOptions";
+import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+
+const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
+if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXX Themes Option Global Content XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -14,7 +16,7 @@ XXXXXXXXXXXXXXXXXXXXXXXX Themes Option Global Content XXXXXXXXXXXXXXXXXXXXXXXXXX
 export const getThemesOptionsContent =
 	async (): Promise<IThemesOptions.IProps | unknown> => {
 		try {
-			const content: DocumentNode = gql`
+			const content = `
 				{
 					themeOptions(where: {name: "Global Content", status: PUBLISH}) {
 						edges {
@@ -121,9 +123,19 @@ export const getThemesOptionsContent =
 				}
 			`;
 
-			const response: ApolloClient.QueryResult<IThemesOptions.IResponse> = await client.query<IThemesOptions.IResponse>({
-				query: content,
+			const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ query: content }),
+				next: { revalidate: 86400 },
 			});
+
+			if (!nextJSFetchResponse.ok) {
+				console.error(`Theme options fetch failed with status: ${nextJSFetchResponse.status}`);
+				return undefined;
+			}
+
+			const response: IGraphQLResponse<IThemesOptions.IResponse> = await nextJSFetchResponse.json();
 
 			return response?.data?.themeOptions?.edges?.[0]?.node?.themeOptions;
 
