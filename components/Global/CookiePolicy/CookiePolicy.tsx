@@ -31,6 +31,12 @@ type IProps = object;
 XXXXXXXXXXXXXXXXXXXXXXXXXX Cookie Policy Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Cookie consent banner. Takes no props — its rendering is driven entirely by the
+ * `hasConsent` value read from `useCookiePolicy()` context: it returns `null` until
+ * a decision has been made, and otherwise renders an accept/decline banner that
+ * calls `acceptCookies`/`refuseCookies` from the same context.
+ */
 const CookiePolicy: FC<IProps> = () => {
 
     const { hasConsent, acceptCookies, refuseCookies } = useCookiePolicy();

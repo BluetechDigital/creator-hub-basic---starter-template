@@ -156,8 +156,15 @@ export type IYoutubeVideos = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX ISO 8601 Duration XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-// Parses YouTube's ISO 8601 duration format (e.g. "PT1H2M3S" -> 3723) so callers can, e.g.,
-// tell Shorts (<=60s) apart from regular uploads without a second API call.
+/**
+ * Parses YouTube's ISO 8601 duration format (e.g. "PT1H2M3S") into a plain
+ * number of seconds, so callers can, e.g., tell Shorts (<=60s) apart from
+ * regular uploads without a second API call.
+ * @param duration An ISO 8601 duration string as returned by the YouTube Data API
+ * (e.g. "PT4M13S").
+ * @returns The total duration in seconds. Returns 0 if the string doesn't match
+ * the expected format.
+ */
 export const iso8601DurationToSeconds = (duration: string): number => {
     const match = duration.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
 
@@ -174,6 +181,14 @@ export const iso8601DurationToSeconds = (duration: string): number => {
 XXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Channel Info XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches the channel's public profile and combines it with its statistics
+ * (view/subscriber/video counts) into a single flattened object. Requests both
+ * the `snippet` and `statistics` parts in one `channels.list` call rather than
+ * two separate requests, since the API allows combining `part` values at no
+ * extra quota cost.
+ * @returns The channel's snippet fields merged with its statistics fields.
+ */
 export const getAllYoutubeChannelInfo = async (): Promise<IYoutubeChannelInfo> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
@@ -181,7 +196,6 @@ export const getAllYoutubeChannelInfo = async (): Promise<IYoutubeChannelInfo> =
     }
 
     try {
-        // IMPROVEMENT: Combine snippet and statistics into a single API call
         const url = `${YOUTUBE_API_BASE_URL}/channels?part=snippet,statistics&id=${YOUTUBE_CHANNEL_ID}&key=${YOUTUBE_KEY}`;
         
         // Use a single fetch call with a reasonable revalidation time
@@ -221,6 +235,14 @@ export const getAllYoutubeChannelInfo = async (): Promise<IYoutubeChannelInfo> =
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Playlists XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches up to 50 of the channel's playlists and reduces each one down to just
+ * its ID — the rest of the `snippet` payload (title, thumbnails, etc.) is
+ * discarded since callers only need the ID to look up a specific playlist's
+ * contents.
+ * @returns An array of `{ id }` objects, one per playlist. Empty array if the
+ * channel has no playlists.
+ */
 export const getAllYoutubePlaylists = async (): Promise<IYoutubePlaylists> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
@@ -264,9 +286,14 @@ export const getAllYoutubePlaylists = async (): Promise<IYoutubePlaylists> => {
 XXXXXXXXXXXXXXXXXXXXXXXXX Youtube Uploads Playlist ID XXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-// Resolves the channel's "uploads" playlist ID (1 quota unit) so getAllYoutubeVideos can
-// list videos via playlistItems.list instead of search.list, which costs 100 units/call.
-// Set YOUTUBE_PLAYLIST_ID to skip this lookup entirely when a specific playlist is known.
+/**
+ * Resolves the channel's "uploads" playlist ID so getAllYoutubeVideos() can list
+ * videos via playlistItems.list instead of search.list — the latter costs 100
+ * quota units/call vs. 1, which matters since this file gets copied into every
+ * client fork of this template.
+ * @returns The uploads playlist ID. Uses YOUTUBE_PLAYLIST_ID directly if set,
+ * skipping the lookup entirely; otherwise resolves it via channels.list (1 unit).
+ */
 const resolveUploadsPlaylistId = async (): Promise<string> => {
     if (YOUTUBE_PLAYLIST_ID) {
         return YOUTUBE_PLAYLIST_ID;
@@ -297,6 +324,22 @@ const resolveUploadsPlaylistId = async (): Promise<string> => {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Youtube Videos XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches full details for every video in the channel's uploads playlist. Runs
+ * in two quota-conscious steps: (1) lists video IDs via playlistItems.list (1
+ * quota unit) instead of search.list (100 units/call), then (2) fetches full
+ * details for those IDs via videos.list, requesting every `part` a public
+ * API-key request can actually read — snippet, statistics, status,
+ * contentDetails, player, topicDetails, liveStreamingDetails, recordingDetails,
+ * and localizations — since videos.list costs a flat 1 unit regardless of how
+ * many parts are requested, so there's no quota reason to ask for less.
+ * Owner-only parts (fileDetails, processingDetails, suggestions) are
+ * deliberately excluded because they require OAuth plus video ownership and
+ * don't work with this app's read-only API-key access.
+ * @returns Full video details for every upload, each augmented with a
+ * `videoId` field (mirroring `id`) for consistency with other video shapes
+ * used elsewhere in the app. Empty array if the playlist has no videos.
+ */
 export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
     // 1. Defensive Checks
     if (!YOUTUBE_API_BASE_URL || !YOUTUBE_KEY || !YOUTUBE_CHANNEL_ID) {
@@ -304,8 +347,7 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
     }
 
     try {
-        // 1. List video IDs from the channel's uploads playlist (1 quota unit, vs. 100 for
-        // the equivalent search.list call).
+        // 1. List video IDs from the channel's uploads playlist.
         const uploadsPlaylistId = await resolveUploadsPlaylistId();
 
         const playlistItemsUrl = `${YOUTUBE_API_BASE_URL}/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${YOUTUBE_KEY}`;
@@ -327,11 +369,8 @@ export const getAllYoutubeVideos = async (): Promise<IYoutubeVideos> => {
             return [] as IYoutubeVideos; // Return empty array if no videos are found
         }
 
-        // 2. Fetch full video details using the collected IDs. Requesting every part a
-        // public API-key request can read costs no extra quota (videos.list is a flat 1 unit
-        // regardless of `part` count) — owner-only parts (fileDetails, processingDetails,
-        // suggestions) are excluded since they require OAuth + video ownership and don't work
-        // with this app's read-only API-key access.
+        // 2. Fetch full video details using the collected IDs (see doc comment above for
+        // why every readable `part` is requested here).
         const videosUrl = `${YOUTUBE_API_BASE_URL}/videos?part=snippet,statistics,status,contentDetails,player,topicDetails,liveStreamingDetails,recordingDetails,localizations&id=${videoIds}&key=${YOUTUBE_KEY}`;
 
         const videoDetailsResponse = await fetch(videosUrl, {

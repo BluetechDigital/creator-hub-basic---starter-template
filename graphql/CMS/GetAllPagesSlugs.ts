@@ -16,6 +16,13 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX PAGES SLUGS (URLS) XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches the slug and last-modified date of every published page, used by
+ * `app/sitemap.ts` to build the site's sitemap. The query caps results at
+ * `last: 100` with no pagination/cursor handling — sites with more than 100
+ * published pages will have the excess silently excluded from the sitemap.
+ * @returns A promise resolving to the array of `{ slug, modified }` nodes, or `undefined` on failure.
+ */
 export const getAllPagesSlugs = async (): Promise<IPages.IProps | unknown> => {
 	try {
 		const content = `

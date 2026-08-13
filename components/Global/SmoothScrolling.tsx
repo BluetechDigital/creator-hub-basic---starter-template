@@ -19,6 +19,10 @@ type ISmoothScrolling = {
 XXXXXXXXXXXXXXXXXXXXXX Lenis Smooth Scrolling Component XXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Wraps the app in Lenis smooth scrolling (`ReactLenis`, root mode) so scroll input
+ * across the whole page is eased rather than jumping instantly.
+ */
 const SmoothScrolling: FC<ISmoothScrolling> = ({children}) => {
 	return (
 		<ReactLenis

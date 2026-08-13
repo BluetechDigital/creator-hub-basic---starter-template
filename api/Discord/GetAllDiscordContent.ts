@@ -32,8 +32,12 @@ XXXXXXXXXXXXXX Fetches recent messages from a Discord channel XXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets the recent public messages from a Discord channel.
- * Note: Requires Bot Token and MESSAGE_CONTENT intent enabled for private messages.
+ * Fetches the most recent public messages from a Discord channel using a bot
+ * token. Note: requires a Bot Token and the privileged MESSAGE_CONTENT intent
+ * enabled for the bot in order to read message content on private messages.
+ * @param limit Maximum number of messages to fetch.
+ * @returns The channel's most recent messages, normalized to the
+ * IDiscordMessage shape.
  */
 export const getDiscordChannelMessages = async (limit: number = 10): Promise<IDiscordMessage[]> => {
     if (!DISCORD_API_BASE_URL || !DISCORD_BOT_TOKEN || !DISCORD_CHANNEL_ID) {

@@ -17,7 +17,12 @@ export type IQueryResponse = {
         };
 };
 
-// Define the full base props (with the permissive index signature)
+/**
+ * Full base shape shared by every ACF flexible-content block. The permissive
+ * `[key: string]: unknown` index signature acts as an escape hatch for CMS
+ * fields that haven't been explicitly typed yet, so new/unmapped ACF fields
+ * don't break the type until someone adds them here explicitly.
+ */
 export type IBaseFlexibleContentProps = {
     __typename: string;
     fieldGroupName: string;
@@ -25,7 +30,10 @@ export type IBaseFlexibleContentProps = {
     [key: string]: unknown; 
 };
 
-// New Utility Type: Extract only the fields we explicitly named.
+/**
+ * The subset of `IBaseFlexibleContentProps` guaranteed to exist on every
+ * flexible-content block, regardless of its specific (untyped) fields.
+ */
 export type IBaseFixedProps = Pick<
     IBaseFlexibleContentProps, 
     '__typename' | 'fieldGroupName' | 'displaySection'

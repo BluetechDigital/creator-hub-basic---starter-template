@@ -29,6 +29,16 @@ import ScrollYProgressReveal from "@/components/Animations/ScrollYProgressReveal
 XXXXXXXXXXXXXXXXXXXXXXXXXX TitleParagraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders an animated title/paragraph pair — framer-motion fades each in on scroll into
+ * view, wrapped in ScrollYProgressReveal. Title and paragraph each collapse to a `hidden`
+ * class rather than rendering empty markup when their content is falsy.
+ *
+ * `displayParagraph` is misleadingly named: it does NOT control the paragraph's visibility
+ * (emptiness already does that). It controls text ALIGNMENT — `true` centers the paragraph
+ * at every breakpoint (`text-center lg:text-center`), `false` centers it on mobile but
+ * left-aligns it on large screens (`text-center lg:text-left`).
+ */
 const TitleParagraph: FC<ITitleParagraph.IProps> = ({
 	title,
 	paragraph,

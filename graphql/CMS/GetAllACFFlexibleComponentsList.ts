@@ -19,12 +19,12 @@ ONLY THE COMPONENTS USED FOR THE CURRENT ${SLUG} PAGE XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Executes a lightweight GraphQL query to retrieve the field group names 
+ * Executes a lightweight GraphQL query to retrieve the field group names
  * (component types) used on a specific page/post slug.
- * * @param slug The slug of the page or post to query.
+ * @param slug The slug of the page or post to query.
  * @param postType The post type (e.g., 'page', 'post').
  * @param postTypeFlexibleContent The ACF type prefix (e.g., 'Page', 'Post').
- * @returns A promise that resolves to the raw GraphQL response object, or null on error.
+ * @returns A promise that resolves to the raw GraphQL response object, or an empty array on HTTP/GraphQL error.
  */
 
 export const getAllComponentFieldGroupNames = async (
@@ -99,9 +99,9 @@ XXXXXXXXXXXXXX 2. PROCESS ARRAY: Extract unique component names XXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Processes the raw GraphQL response to extract and filter the unique component 
+ * Processes the raw GraphQL response to extract and filter the unique component
  * names (e.g., 'Hero', 'ImageGallery') actually used on the page.
- * * @param fieldGroupNameListQueryResponse The raw JSON response from the Pass 1 query.
+ * @param fieldGroupNameListQueryResponse The raw JSON response from the Pass 1 query.
  * @returns An array of unique component name strings, or an empty array if none are found.
  */
 export const extractActiveComponentNames = (

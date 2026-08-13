@@ -96,7 +96,10 @@ type IAccessTokenResponse = {
 };
 
 /**
- * Gets the Spotify Client Credentials Access Token.
+ * Obtains a Spotify access token via the Client Credentials flow — the
+ * app-only auth mode that doesn't require a user login, appropriate here
+ * since this template only ever reads public show/episode data.
+ * @returns A bearer access token for authorizing subsequent Spotify Web API calls.
  */
 export const getAllSpotifyProjectAccessToken = async (): Promise<string> => {
     try {
@@ -144,7 +147,11 @@ XXXXXXXXXXXXXXXXXXXXXX Spotify Show Profile (Read Only) XXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets the main profile information for a Spotify Podcast Show.
+ * Fetches the main profile information for a Spotify Podcast Show (the
+ * `/shows/{id}` endpoint), first obtaining a fresh access token.
+ * @returns The show's profile. Does not include an `episodes` key — the
+ * `/shows/{id}` response doesn't return one; use
+ * getAllSpotifyPodcastEpisodes() for episode data.
  */
 export const getAllSpotifyShowProfile = async (): Promise<ISpotifyProfile> => {
     try {
@@ -185,7 +192,14 @@ XXXXXXXXXXXXXXXXXXXXXXXX Spotify Podcast Episodes (Feed) XXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets all episodes for a Spotify Podcast Show, handling pagination up to 100 items.
+ * Fetches episodes for a Spotify Podcast Show, following the API's own `next`
+ * pagination URL (50 episodes per page) until either the show runs out of
+ * episodes or 100 episodes have been collected. The 100-item cap is a
+ * deliberate business decision for this template (to bound feed size/response
+ * time), not a limit imposed by the Spotify API itself — shows with more
+ * episodes than that will have older ones truncated.
+ * @returns Up to 100 of the show's most recent episodes, in the order
+ * returned by the API.
  */
 export const getAllSpotifyPodcastEpisodes = async (): Promise<ISpotifyEpisodes> => {
     try {

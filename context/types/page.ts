@@ -13,6 +13,9 @@ export type ITypes = {
     home: string;
 };
 
+// Context value is nested under `memoizedValues` (matching PageContextProvider's
+// useMemo'd value) rather than exposing `content`/`postTypeFlexibleContent` directly —
+// consumers read `memoizedValues.content` / `memoizedValues.postTypeFlexibleContent`.
 export type IContext = {
     memoizedValues: {
         postTypeFlexibleContent: string;

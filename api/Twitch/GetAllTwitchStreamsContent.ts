@@ -26,15 +26,20 @@ type ITwitchStream = {
 XXXXXXXXXXXXXXXXXXXXXX Helper: Get App Access Token XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Requests a Twitch app access token via the client-credentials grant. This
+ * call should typically not be revalidated frequently, as Twitch app tokens
+ * are long-lived (e.g. ~60 days).
+ * @returns The bearer access token used to authorize subsequent Helix API calls.
+ */
 const getTwitchAppAccessToken = async (): Promise<string> => {
     if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
         throw new Error("Missing Twitch Client ID or Secret for token generation.");
     }
 
     const tokenUrl = `https://id.twitch.tv/oauth2/token?client_id=${TWITCH_CLIENT_ID}&client_secret=${TWITCH_CLIENT_SECRET}&grant_type=client_credentials`;
-    
-    // NOTE: This call should typically not be revalidated frequently as tokens last long (e.g., 60 days)
-    const response = await fetch(tokenUrl, { method: 'POST', cache: 'no-store' }); 
+
+    const response = await fetch(tokenUrl, { method: 'POST', cache: 'no-store' });
     
     if (!response.ok) {
         throw new Error("Failed to retrieve Twitch App Access Token.");
@@ -48,6 +53,14 @@ const getTwitchAppAccessToken = async (): Promise<string> => {
 XXXXXXXX Fetches the live stream data for a specific Twitch channel XXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches the live stream data for a specific Twitch channel, obtaining an app
+ * access token first and checking every 60 seconds whether the channel has
+ * gone live or offline.
+ * @returns The live stream object if the channel is currently live, or `null`
+ * if it's offline. Twitch's `/streams` endpoint always returns an array — it
+ * contains exactly one object when live, and is empty when offline.
+ */
 export const getTwitchChannelLiveStream = async (): Promise<ITwitchStream | null> => {
     if (!TWITCH_API_BASE_URL || !TWITCH_USER_LOGIN || !TWITCH_CLIENT_ID) {
         throw new Error("Missing Twitch API Base URL, User Login, or Client ID.");
@@ -73,8 +86,7 @@ export const getTwitchChannelLiveStream = async (): Promise<ITwitchStream | null
         }
 
         const data = await response.json();
-        
-        // Twitch returns an array; if live, it contains one object. If offline, it's empty.
+
         return data?.data?.[0] || null;
 
     } catch (error) {

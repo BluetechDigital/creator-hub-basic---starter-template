@@ -22,6 +22,20 @@ type IFormatNumber = {
 XXXXXXXXXXX Hook to format numbers into short form (e.g., 613k) XXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Formats a numeric string into short form (e.g., 613000 -> "613k") and renders it
+ * inside an animated `<motion.h4>` that fades/slides in when scrolled into view.
+ *
+ * Despite the `use` prefix (kept for naming consistency with the other hooks in this
+ * folder), this is not a plain value-returning hook — it returns JSX directly, so it
+ * must be used like a component (e.g. `<UseFormatNumber ... />`), not destructured
+ * like a hook's return value.
+ *
+ * @param number - The raw number, passed as a string, to format.
+ * @param decimals - Number of decimal places to keep after formatting (default 0).
+ * @param className - Class name applied to the rendered `<motion.h4>`.
+ * @returns A `<motion.h4>` element containing the formatted number.
+ */
 const useFormatNumber: FC<IFormatNumber> = ({
 	number,
 	decimals = 0,

@@ -9,8 +9,6 @@ const INSTAGRAM_GRAPH_API_BASE_URL = 'https://graph.instagram.com';
 // Key environment variables (assuming you use long-lived tokens)
 const INSTAGRAM_ACCESS_TOKEN: string | undefined = process.env.INSTAGRAM_ACCESS_TOKEN;
 
-// Note: INSTAGRAM_FEED_MEDIA_TYPE is ignored as media type is handled via the 'fields' parameter
-
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -42,8 +40,18 @@ type IRawInstagramResponse = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX Instagram API Feed XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches the authenticated user's recent Instagram media via the Instagram
+ * Graph API's `/me/media` endpoint. The Graph API version is hardcoded
+ * (`API_VERSION`) rather than configurable, and the fetch limit is a fixed 10
+ * most-recent items — both are deliberate simplifications for this template
+ * rather than environment-driven settings. Note: the `INSTAGRAM_FEED_MEDIA_TYPE`
+ * env var referenced elsewhere in the app is intentionally NOT used here —
+ * media type filtering is instead handled via the `fields` parameter.
+ * @returns The user's recent media items (images, videos, and carousel albums).
+ */
 export const getAllInstagramFeedContent = async (): Promise<IInstagramFeed> => {
-    
+
     // 1. Defensive Checks for required credentials
     if (!INSTAGRAM_ACCESS_TOKEN) {
         throw new Error("INSTAGRAM_ACCESS_TOKEN environment variable is missing. Cannot fetch Instagram feed.");

@@ -26,7 +26,7 @@ X 1. getAllFlexibleContentComponents: Orchestrator and Optimized Pass 2 Query X
  * This function orchestrates the two-pass query optimization:
  * 1. Executes a lightweight query to determine which components are active.
  * 2. Executes an optimized query fetching data only for those active components.
- * * @param slug The slug of the page or post to fetch content for.
+ * @param slug The slug of the page or post to fetch content for.
  * @param postType The WP post type (e.g., 'pages', 'posts').
  * @param postTypeFlexibleContent The ACF type name prefix (e.g., 'Page', 'Post').
  * @returns A promise that resolves to the array of flexible content components (IProps) or null on failure.

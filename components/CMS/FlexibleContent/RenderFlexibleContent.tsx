@@ -22,6 +22,15 @@ type DynamicComponentMap = Record<string, LazyExoticComponent<FC<any>>>;
 XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Component Loaders XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Registry of every CMS block component, keyed by its simple name (e.g. "Hero", "AboutUs")
+ * — the same name that appears as the suffix of a block's ACF `fieldGroupName`. Each entry
+ * is `React.lazy()`-loaded so a page only downloads the blocks it actually uses. Adding a
+ * new block type means adding it here with a key that matches the ACF field group's simple
+ * name exactly (see ARCHITECTURE.md §1) — the lookup below depends on that match, and
+ * blockRegistration.test.ts guards against this map and the `components/CMS/` folders
+ * drifting apart.
+ */
 export const DynamicComponentLoaders: DynamicComponentMap = {
     Hero: lazy(() => import("@/components/CMS/Hero/Hero")),
     HeroTwo: lazy(() => import("@/components/CMS/HeroTwo/HeroTwo")),
@@ -49,6 +58,28 @@ import SVGLoader from "@/components/CMS/FlexibleContent/fragments/SVGLoader";
 XXXXXXXXXXXXXXXXXXXXXXXXX Flexible Content Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders the flexible-content blocks for the current page in whatever order a CMS editor
+ * arranged them in WordPress — the last step of the slug → rendered-blocks pipeline
+ * described in ARCHITECTURE.md §1.
+ *
+ * Reads the page's block content array from PageContextProvider (via `usePageContext`),
+ * then for each block:
+ * 1. looks it up in `componentMapping`, keyed by the block's full ACF `fieldGroupName`
+ *    (e.g. `DefaultTemplate_Flexiblecontent_FlexibleContent_Hero`). `componentMapping` is a
+ *    `useMemo`'d reconstruction of `DynamicComponentLoaders` with each simple key
+ *    re-prefixed with `${postTypeFlexibleContent}_`, recomputed only when
+ *    `postTypeFlexibleContent` changes;
+ * 2. skips the block entirely if no matching component is registered, or if the CMS editor
+ *    toggled `displaySection` off;
+ * 3. derives a CSS class name for the wrapping `<section>` by slicing the block's simple
+ *    name off the end of `fieldGroupName` — everything after the last underscore — which is
+ *    the same "strip the ACF prefix" idea as step 1, just done via substring/lastIndexOf
+ *    instead of a known prefix length;
+ * 4. renders the resolved component (via `createElement`, since its type is only known at
+ *    runtime) inside a shared `<Suspense>` so each lazily-loaded block streams in
+ *    independently instead of blocking the rest of the page.
+ */
 const RenderFlexibleContent: FC = memo(() => {
 	const { memoizedValues } = usePageContext() as IPage.IContext;
 	

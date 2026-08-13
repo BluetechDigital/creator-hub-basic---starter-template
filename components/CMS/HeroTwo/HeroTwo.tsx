@@ -19,6 +19,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX HeroTwo Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * HeroTwo CMS block — not yet implemented. Registered in DynamicComponentLoaders
+ * and receives CMS props via IProps, but currently renders only a styled div.
+ */
 const HeroTwo: FC<IHeroTwo.IProps> = ({}) => {
 
 	return (

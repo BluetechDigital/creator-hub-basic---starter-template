@@ -10,6 +10,19 @@ import { useEffect, useState } from "react";
 XXXXXXXXXXXXXXXXX Hook to get current time in London locale XXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Returns the current time formatted for the `Europe/London` timezone, updated every
+ * second via `setInterval`. The timezone is hardcoded (not derived from the viewer's
+ * locale or any config), so this is only correct for a London-based display.
+ *
+ * Returns `""` on the initial render (before the first interval tick has fired), which
+ * means the first client render intentionally differs from what will be shown a moment
+ * later — a hydration-mismatch-shaped pattern worth being aware of if this value is ever
+ * rendered during SSR.
+ *
+ * @returns The current London time as a formatted 12-hour string (e.g. "3:45 PM"), or
+ * `""` before the first tick.
+ */
 const useLocaleTime = (): string => {
 	const [time, setTime] = useState("");
 

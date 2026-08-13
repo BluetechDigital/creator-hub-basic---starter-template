@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 XXXXXXXXXXXXXXXXXXXXXXX SpinningTextLoader Components XXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/** Suspense fallback shown while a lazy-loaded CMS block (see RenderFlexibleContent) streams in — a spinning arrow SVG, no props. */
 const SVGLoader: FC = () => {
     return (
         <div className="w-full h-full min-h-screen flex flex-col items-center justify-center">

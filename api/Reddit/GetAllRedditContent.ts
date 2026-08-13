@@ -39,7 +39,11 @@ XXXXXXXXXXXXXXX Fetches recent posts from a Reddit subreddit XXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets the top posts from a specified subreddit.
+ * Fetches the current "hot" posts from a specified subreddit (Reddit's `/hot`
+ * listing, not `/top`), authorized via an OAuth 2.0 access token.
+ * @param limit Maximum number of posts to fetch.
+ * @returns The subreddit's hot posts, unwrapped from Reddit's
+ * `{ kind, data: { children } }` envelope down to the flat post data.
  */
 export const getRedditSubredditPosts = async (limit: number = 10): Promise<IRedditPost[]> => {
     if (!REDDIT_API_BASE_URL || !REDDIT_ACCESS_TOKEN || !REDDIT_SUBREDDIT) {

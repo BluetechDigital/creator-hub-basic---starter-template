@@ -42,7 +42,12 @@ XXXXXXXXXXXXXXXXX Fetches recent posts from a Facebook Page XXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets recent posts from a Facebook Page.
+ * Fetches recent posts from a Facebook Page via the Graph API, using a
+ * long-lived Page Access Token. Requests a curated set of `fields` (including
+ * the post's link/image and reaction summary) rather than the full default
+ * payload, to keep the response focused on what the feed UI needs.
+ * @param limit Maximum number of posts to fetch.
+ * @returns The page's most recent posts.
  */
 export const getFacebookPagePosts = async (limit: number = 10): Promise<IFacebookPost[]> => {
     if (!FACEBOOK_GRAPH_API_BASE_URL || !FACEBOOK_ACCESS_TOKEN || !FACEBOOK_PAGE_ID) {

@@ -10,6 +10,9 @@ import * as IFlexibleContentType from "@/context/types/flexibleContentType";
 XXXXXXXXXXXXXXXX PUBLIC PAGES & POSTS & PREVIEW PAGES & POSTS XXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 // Post Types
+// WPGraphQL post-type slugs: `pages`/`posts` are the public WordPress post types queried
+// for live content; `previewPage`/`previewPost` (singular "page"/"post") are the post
+// types WPGraphQL uses when resolving a single preview node.
 export const postType: IPost.ITypes = {
     // Public pages
     pages: "pages",
@@ -21,12 +24,18 @@ export const postType: IPost.ITypes = {
 };
 
 // Preview pages
+// `home` maps to the WordPress page title/slug used to identify the home page when
+// querying content for `app/page.tsx`.
 export const pageType: IPage.ITypes = {
     // Public pages
     home: "Home",
 };
 
 // Preview pages
+// These values are ACF `fieldGroupName` prefixes on the WPGraphQL side — each string is
+// the flexible-content field group name for its post type/template, used to build the
+// GraphQL fragment names requested in the CMS flexible-content pipeline (see
+// `graphql/CMS/GetAllPageACFFlexibleComponentsContent.ts`).
 export const flexibleContentType: IFlexibleContentType.ITypes = {
     // Public pages
     pages: "DefaultTemplate_Flexiblecontent_FlexibleContent",

@@ -21,6 +21,20 @@ type IUseTiltEffect = {
 XXXXXXXXXX Hook to create a tilt effect based on mouse movement XXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Produces smoothed rotate/translate values that follow the mouse, for tilt-on-hover
+ * style effects.
+ *
+ * Combines a `mousemove` listener (which just records the latest target values) with a
+ * separate `setInterval`-driven tick loop (`updateTilt`, every 16ms) that eases the
+ * current state toward those targets — an unusual combination of an event listener and
+ * a polling interval instead of the more common `requestAnimationFrame` loop. Easing
+ * uses a fixed factor of `0.1` per tick (i.e. each tick closes 10% of the remaining
+ * distance to the target), which is what gives the motion its lag/smoothing feel.
+ *
+ * @returns The current `{rotateX, rotateY, translateX, translateY}` values, eased
+ * toward the latest mouse position.
+ */
 const useTiltEffect = (): IUseTiltEffect => {
 	const [rotateX, setRotateX] = useState(0);
 	const [rotateY, setRotateY] = useState(0);

@@ -13,6 +13,9 @@ Custom reusable Animation Properties/variables
 
 This is the default framer-motion scrollYProgress content reveal.
  Provides When in view should the content be revealed */
+// offsetStart/offsetFinish are scroll-trigger fractions (of scrollYProgress, 0–1) used to
+// gate when scroll-linked reveal animations start/finish — e.g. reveal begins once scroll
+// progress passes 0.9 and completes by 0.5, depending on how each consumer applies them.
 export const offsetStart: number = 0.9;
 export const offsetFinish: number = 0.5;
 
@@ -20,6 +23,9 @@ export const initial: IAnimation.IInitial = {
 	y: 0,
 	opacity: 0,
 };
+// Note: initialTwo has the same shape/values as `initial` above — a near-duplicate under
+// a different name and type (IInitialTwo). Kept as a separate export; the reason two
+// names exist isn't stated elsewhere in the codebase.
 export const initialTwo: IAnimation.IInitialTwo = {
 	y: 0,
 	opacity: 0,

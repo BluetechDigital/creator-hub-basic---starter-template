@@ -20,6 +20,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXX CallToAction Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * CallToAction CMS block — not yet implemented. Registered in DynamicComponentLoaders
+ * and receives CMS props via IProps, but currently renders only a styled div.
+ */
 const CallToAction: FC<ICallToAction.IProps> = ({}) => {
 
 	return (

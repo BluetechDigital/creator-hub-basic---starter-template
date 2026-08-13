@@ -2,8 +2,16 @@
 XXXXXXXXXXXXXXXXXXX Get All Components GrapghQL Fragments XXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/* The key is the component name (used to build the ACF field group name)
- The value is a function that returns the imported fragment (a Promise).  */
+/**
+ * Map of every registered flexible-content component to a lazy loader for its
+ * GraphQL fragment module. The key is the component's simple name, matching
+ * the suffix of the ACF field group name returned by the CMS (e.g.
+ * `DefaultTemplate_Flexiblecontent_FlexibleContent_Hero` -> `"Hero"`). The
+ * value is a dynamic `import()` rather than a static import so that only the
+ * fragments for components actually used on a given page get code-split into
+ * that page's bundle, instead of bundling every possible block's GraphQL
+ * fragment into every page.
+ */
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export const getAllComponentsGrapghQLFragments: Record<string, () => Promise<any>> = {
     Hero: () => import("@/components/CMS/Hero/graphql/index"),
@@ -22,5 +30,11 @@ export const getAllComponentsGrapghQLFragments: Record<string, () => Promise<any
     AllYoutubeShortsVideos: () => import("@/components/CMS/AllYoutubeShortsVideos/graphql/index"),
 };
 
-// Exporting the list of all keys is useful for mapping/filtering
+/**
+ * The canonical, single-source-of-truth list of valid/recognized component
+ * names, derived from the keys of `getAllComponentsGrapghQLFragments`. Used
+ * elsewhere (e.g. `extractActiveComponentNames` in
+ * `GetAllACFFlexibleComponentsList.ts`) to validate and filter which
+ * component names reported by the CMS are actually known/renderable.
+ */
 export const allComponentsGrapghQLFragmentsObjectKeys = Object.keys(getAllComponentsGrapghQLFragments);

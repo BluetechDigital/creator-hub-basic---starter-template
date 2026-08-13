@@ -20,6 +20,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX AboutUs Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * AboutUs CMS block — not yet implemented. Registered in DynamicComponentLoaders
+ * and receives CMS props via IProps, but currently renders only a styled div.
+ */
 const AboutUs: FC<IAboutUs.IProps> = ({}) => {
 
 	return (

@@ -17,6 +17,14 @@ export const CookiePolicyContext = createContext<ICookiePolicy.IContext | null>(
 XXXXXXXXXXXXXXXX Custom hook to use the Cookie Policy context XXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Reads the Cookie Policy context (consent state plus accept/decline handlers).
+ *
+ * @throws {Error} If called outside of a `CookiePolicyContextProvider` — the context
+ * defaults to `null`, and that default is treated as "no provider" rather than a valid
+ * value.
+ * @returns The cookie policy context value.
+ */
 const useCookiePolicy = () => {
 	const context = useContext(CookiePolicyContext);
 	

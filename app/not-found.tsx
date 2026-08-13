@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 XXXXXXXXXXXXXXXXXXXXXX 404 Not Found Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/** Rendered by Next.js for unmatched routes (404s). */
 const NotFound: NextPage = async () => {
 	return <Error/>;
 };

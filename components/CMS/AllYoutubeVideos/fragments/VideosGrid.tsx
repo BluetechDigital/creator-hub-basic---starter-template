@@ -25,6 +25,13 @@ const buildWatchUrl = (videoId: string): string => `https://www.youtube.com/watc
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX VideosGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders the grid of video cards for the video list handed down by AllYoutubeVideos, which
+ * has already filtered `getAllYoutubeVideos()` down to non-Shorts uploads. `memo`-wrapped
+ * client component since it does no data fetching of its own. Each card's thumbnail falls
+ * back through `high ?? medium ?? default`, since YouTube's API doesn't guarantee every
+ * thumbnail size is present for a given video.
+ */
 const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({ youtubeVideos }) => {
 
     return (

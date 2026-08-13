@@ -20,6 +20,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXX InstagramFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * InstagramFeed CMS block — not yet implemented. Registered in DynamicComponentLoaders
+ * and receives CMS props via IProps, but currently renders only a styled div.
+ */
 const InstagramFeed: FC<IInstagramFeed.IProps> = ({}) => {
 
 	return (

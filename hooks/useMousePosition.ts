@@ -19,6 +19,16 @@ type IUseMousePosition = {
 XXX Hook to track mouse position with requestAnimationFrame for performance XXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Tracks the current mouse position, throttled to at most once per animation frame.
+ *
+ * Uses `requestAnimationFrame` as a throttle gate: `handleMouseMove` only schedules a
+ * new frame if `requestRef` isn't already holding a pending one, so bursts of native
+ * `mousemove` events collapse into a single state update per frame instead of one per
+ * event.
+ *
+ * @returns The latest `{x, y}` mouse coordinates, both `null` until the first move.
+ */
 const useMousePosition = () => {
 	const [mousePosition, setMousePosition] = useState<IUseMousePosition>({
 		x: null,

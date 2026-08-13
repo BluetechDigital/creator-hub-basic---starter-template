@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Error Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/** Route-level error boundary UI, rendered by Next.js when a route segment throws. */
 const ErrorPage: NextPage = () => {
 	return <Error/>;
 };

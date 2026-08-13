@@ -28,6 +28,16 @@ declare global {
 XXXXXXXXXXXXXXXXXXXXXXX Google Tag Manager Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Client-side Google Tag Manager loader. Rendered in `<head>` (see `app/layout.tsx`),
+ * it injects the GTM bootstrap script via `next/script` and — because Next.js App
+ * Router client-side navigations don't produce a fresh page load for GTM to detect —
+ * manually re-fires a `page_view` push into `window.dataLayer` on every pathname/search
+ * param change so route changes are still tracked. Renders nothing if
+ * `NEXT_PUBLIC_GTM_ID` is unset.
+ *
+ * For the `<noscript>` fallback rendered alongside it, see {@link GoogleTagManagerNoScript}.
+ */
 const GoogleTagManager = () => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -77,6 +87,13 @@ const GoogleTagManager = () => {
 XXXXXXXXXX NoScript version for browsers with JavaScript disabled XXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * `<noscript>` fallback for Google Tag Manager: an invisible tracking iframe for
+ * visitors with JavaScript disabled, who never run the script-based tracker above.
+ * Google's own convention places this fallback immediately after the opening `<body>`
+ * tag, but in this project it's rendered in `<head>` alongside {@link GoogleTagManager}
+ * (see `app/layout.tsx`). Renders nothing if `NEXT_PUBLIC_GTM_ID` is unset.
+ */
 export const GoogleTagManagerNoScript = () => {
     if (!GTM_ID) return null;
     

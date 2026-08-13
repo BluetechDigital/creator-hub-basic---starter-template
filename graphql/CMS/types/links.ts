@@ -10,6 +10,12 @@ export type ILinksArray = {
 	};
 }[];
 
+/**
+ * Response shape for menu-link queries. Nullable at every level (`menuLinks`,
+ * `edges`, and each edge) to mirror WPGraphQL's nullable-by-default field
+ * convention — any of these can come back `null` even on an otherwise
+ * successful query, so callers must optional-chain all the way down.
+ */
 export type IResponse = {
 	menuLinks: {
         edges: Array<{

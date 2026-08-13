@@ -22,6 +22,16 @@ type IUseScrollYColorSwitch = {
 XXXXXXXXXXXXXXX Hook to switch color based on scroll position XXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Switches between two colors depending on whether scroll progress has passed a
+ * halfway point computed from a container element's position.
+ *
+ * @param containerRef - Ref to the element whose position/height define the halfway point.
+ * @param scrollYProgress - Framer-motion scroll progress value that triggers re-evaluation on change.
+ * @param colorBefore - Color returned before the halfway point is reached.
+ * @param colorAfter - Color returned once the halfway point is reached.
+ * @returns The currently active color string.
+ */
 const useScrollYColorSwitch = ({
 	scrollYProgress,
 	colorAfter,
@@ -39,6 +49,11 @@ const useScrollYColorSwitch = ({
 				 would be Halfway Point of the selected element / div */
 				const halfwayPoint = containerOffsetTop + containerHeight / 2.25;
 
+				// FLAG (not fixed here): scrollYProgress is a framer-motion MotionValue in the
+				// 0–1 range, but halfwayPoint is computed from pixel offsets
+				// (containerOffsetTop/containerHeight) — comparing a 0–1 value against a pixel
+				// value looks like a unit mismatch bug. Left as-is pending review; see
+				// [related follow-up].
 				setColor(
 					scrollYProgress.get() >= halfwayPoint ? colorAfter : colorBefore
 				);

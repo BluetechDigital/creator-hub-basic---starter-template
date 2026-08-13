@@ -78,11 +78,26 @@ export const metadata: Metadata = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Root Layout Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Root layout for every route. Fetches site-wide CMS content (theme options plus
+ * mobile/copyright/navbar/footer menu links) once here via `Promise.all` — since none of
+ * these queries depend on each other's results, running them in parallel avoids a
+ * sequential chain of network round-trips — then assembles them into `globalProps`
+ * (typed as `IGlobal.IProps`) for `GlobalContextProvider`.
+ *
+ * Provider nesting order below is significant: `CookiePolicyContextProvider` is
+ * outermost so `CookiePolicyContext` is available to everything nested inside it,
+ * including the `CookiePolicy` banner rendered further down inside `SmoothScrolling`;
+ * `GlobalContextProvider` wraps `SmoothScrolling` (and therefore `children` and
+ * `CookiePolicy`) so global content is available to the page content and the rest of the
+ * tree. Reordering these would make global content or cookie-consent state unavailable
+ * to the components that currently depend on reading it from context.
+ *
+ * @param children - The routed page content.
+ */
 const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.Element> => {
 
   /* PUBLIC PAGES  */
-	/* Fetch all global content simultaneously using Promise.all Ensure all functions 
-  being awaited are indeed Promise-returning functions. */
   const promises: Promise<unknown>[] = [
     // Custom Post Types
 		getThemesOptionsContent(),
@@ -107,8 +122,6 @@ const RootLayout = async ({ children }: { children: ReactNode }): Promise<JSX.El
 
 	] = await Promise.all(promises);
 
-	/* Construct the globalProps object, ensuring it matches IGlobal.IProps structure.
-    TypeScript will help validate this. */
 	const globalProps: IGlobal.IProps = {
 		themesOptionsContent: themesOptionsContent as IGlobal.IProps["themesOptionsContent"],
 

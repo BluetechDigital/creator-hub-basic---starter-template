@@ -29,6 +29,15 @@ type IParagraph = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX Paragraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders CMS-authored WYSIWYG rich-text HTML via `dangerouslySetInnerHTML`, running it
+ * through DOMPurify first since the markup comes from editor input and must be sanitized
+ * against XSS before injection. Optionally fades in as the container scrolls into view;
+ * `offsetStart`/`offsetFinish` are scroll-progress trigger fractions (0-1, relative to
+ * viewport height — not pixel values) marking where that scroll tracking starts and ends,
+ * and only affect opacity when `fadeIn` is true. Renders with a `hidden` class when
+ * `content` is empty.
+ */
 const Paragraph: FC<IParagraph> = memo(({
 	content,
 	className,

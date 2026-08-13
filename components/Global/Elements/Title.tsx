@@ -21,6 +21,13 @@ type ITitle = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Title Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders CMS-authored WYSIWYG title HTML via `dangerouslySetInnerHTML`, running it
+ * through DOMPurify first since the markup comes from editor input and must be
+ * sanitized against XSS before injection. Fades in once when it scrolls into view
+ * (`whileInView`, `viewport={{ once: true }}`). Renders with a `hidden` class when
+ * `content` is empty.
+ */
 const Title: FC<ITitle> = memo(({
     content,
     styleTextColor,

@@ -38,7 +38,11 @@ XXXXXXXXXXXXXXX Fetches recent Pins from a Pinterest account XXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Gets the recent Pins from the authenticated user's feed.
+ * Fetches the authenticated user's most recent Pins from the Pinterest API
+ * (v5), authorized via an OAuth 2.0 access token.
+ * @param limit Maximum number of Pins to fetch (passed through as `page_size`).
+ * @returns The most recent Pins. Does not include the response's pagination
+ * `bookmark` — only a single page is fetched.
  */
 export const getPinterestUserPins = async (limit: number = 10): Promise<IPinterest[]> => {
     if (!PINTEREST_API_BASE_URL || !PINTEREST_ACCESS_TOKEN) {

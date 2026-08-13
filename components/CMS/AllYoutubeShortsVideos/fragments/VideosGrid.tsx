@@ -25,6 +25,13 @@ const buildShortsUrl = (videoId: string): string => `https://www.youtube.com/sho
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX VideosGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders the grid of video cards for the video list handed down by AllYoutubeShortsVideos,
+ * which has already filtered `getAllYoutubeVideos()` down to Shorts (<=60s). `memo`-wrapped
+ * client component since it does no data fetching of its own. Each card's thumbnail falls
+ * back through `high ?? medium ?? default`, since YouTube's API doesn't guarantee every
+ * thumbnail size is present for a given video.
+ */
 const VideosGrid: FC<IAllYoutubeShortsVideos.IVideosGrid> = memo(({ youtubeVideos }) => {
 
     return (

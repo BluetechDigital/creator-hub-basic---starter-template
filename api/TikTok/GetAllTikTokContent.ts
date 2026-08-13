@@ -35,13 +35,23 @@ type TikTokApiVideo = {
 XXXXXXXXXXXXXXXXX Fetches recent videos from a TikTok user XXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Fetches the 10 most recent videos uploaded by the currently authorized TikTok
+ * user via the /video/list endpoint. TikTok requires this call to be made as a
+ * POST (with an empty JSON body to request the default list) even though it's
+ * a read — a GET is rejected. Failures are checked in two places since TikTok
+ * signals errors two ways: a non-2xx HTTP status, and a 2xx response whose body
+ * still carries `error_code !== 0`.
+ * @returns Up to 10 videos. Each video's `caption` prefers `title`, falling
+ * back to the first 50 characters of `video_description` (with an ellipsis)
+ * when no title is present.
+ */
 export const getTikTokUserVideos = async (): Promise<ITikTokVideo[]> => {
     if (!TIKTOK_API_BASE_URL || !TIKTOK_ACCESS_TOKEN) {
         throw new Error("Missing TikTok API Base URL or Access Token.");
     }
 
     try {
-        // NOTE: The /video/list endpoint is generally used to retrieve media uploaded by the currently authorized user.
         const url = `${TIKTOK_API_BASE_URL}/video/list/?fields=id,cover_image_url,share_url,title,video_description,like_count,comment_count,create_time&limit=10`;
 
         const response = await fetch(url, {

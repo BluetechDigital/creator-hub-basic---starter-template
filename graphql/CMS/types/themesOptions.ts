@@ -18,6 +18,12 @@ type IFields = {
 	target: string;
 };
 
+/**
+ * ACF field values for the "Global Content" theme options page (contact
+ * details, social links, error-page content). Note: this doesn't fully mirror
+ * the fields actually fetched by `getThemesOptionsContent` in
+ * `GetAllThemesOptions.ts` — cross-check before assuming it's a complete contract.
+ */
 export type IProps = {
 	email: string;
 	address: string;

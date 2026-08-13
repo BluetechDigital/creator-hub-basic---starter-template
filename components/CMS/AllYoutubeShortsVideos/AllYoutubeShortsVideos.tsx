@@ -36,6 +36,14 @@ const buildShortsUrl = (videoId: string): string => `https://www.youtube.com/sho
 XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders the channel's YouTube Shorts feed (every upload of 60 seconds or less).
+ * Async Server Component — data is fetched inside the component body rather than at module
+ * scope so it runs per-request, matching Next's per-request fetch caching/revalidation.
+ * Complementary to AllYoutubeVideos: both read from the same `getAllYoutubeVideos()` result
+ * and split it by duration — this component keeps Shorts (60s or less), while
+ * AllYoutubeVideos keeps everything longer.
+ */
 const AllYoutubeShortsVideos = async ({}: IAllYoutubeShortsVideos.IProps) => {
 
 	// Fetched inside the component so it runs per-request, matching Next's

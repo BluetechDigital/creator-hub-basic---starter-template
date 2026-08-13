@@ -15,10 +15,14 @@ type IUseWindowSize = {
 	height: number | undefined;
 };
 
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXX Hook to get current window size XXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
+/**
+ * Tracks the current window dimensions, updating on resize. Returns `undefined` for
+ * both fields until the effect runs on the client (guards against SSR, where `window`
+ * doesn't exist).
+ *
+ * @returns The current `{width, height}` of the window, both `undefined` before the
+ * first client-side measurement.
+ */
 const useWindowSize = () => {
 	const [windowSize, setWindowSize] = useState<IUseWindowSize>({
 		width: undefined,

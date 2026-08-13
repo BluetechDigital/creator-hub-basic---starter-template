@@ -36,6 +36,14 @@ const buildWatchUrl = (videoId: string): string => `https://www.youtube.com/watc
 XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Renders the channel's full YouTube uploads feed (every upload longer than 60 seconds).
+ * Async Server Component — data is fetched inside the component body rather than at module
+ * scope so it runs per-request, matching Next's per-request fetch caching/revalidation.
+ * Complementary to AllYoutubeShortsVideos: both read from the same `getAllYoutubeVideos()`
+ * result and split it by duration — this component keeps videos over 60s, while
+ * AllYoutubeShortsVideos keeps the Shorts (60s or less).
+ */
 const AllYoutubeVideos = async ({}: IAllYoutubeVideos.IProps) => {
 
 	// Fetched inside the component so it runs per-request, matching Next's

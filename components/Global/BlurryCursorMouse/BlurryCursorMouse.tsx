@@ -17,6 +17,15 @@ import styles from "@/components/Global/BlurryCursorMouse/styles/BlurryCursorMou
 XXXXXXXXXXXXXXXXXXXXXXXX BlurryCursorMouse Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Custom cursor-follower dot that trails the real pointer with a delayed, "blurry"
+ * effect. Raw pointer position is tracked in the `mouse` ref and moved onto the
+ * element instantly; a `requestAnimationFrame` loop separately eases a second
+ * `delayedMouse` ref toward it every frame via linear interpolation (LERP, alpha
+ * 0.08) and positions the visible dot with GSAP, which is what produces the lag
+ * rather than a 1:1 snap to the cursor. The `rafId` ref exists solely so the loop
+ * can be cancelled in the `useEffect` cleanup when the component unmounts.
+ */
 const BlurryCursorMouse: FC = () => {
     const size = 10;
     const circle = useRef<HTMLDivElement>(null);
@@ -42,8 +51,9 @@ const BlurryCursorMouse: FC = () => {
         [moveCircle]
     );
 
-    // --- FIX: Use an inner loop function so the RAF callback does not reference `animate` before it's declared ---
-    // We only need moveCircle in the dependency array.
+    // The RAF loop is defined as a local inner function, not a recursive call to
+    // `animate` itself, so it never references `animate` before its useCallback
+    // assignment has settled.
     const animate: () => void = useCallback(() => {
         const loop = () => {
             // Apply linear interpolation (LERP) for the smooth, "blurry" effect

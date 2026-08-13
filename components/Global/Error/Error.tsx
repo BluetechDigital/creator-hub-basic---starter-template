@@ -27,6 +27,11 @@ import ContentSliceRevealMaskAnimation from "@/components/Animations/ContentSlic
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Error Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * 404 error page content. Takes zero props — all of its text and background image
+ * come from `errorPageContent` on `useGlobalContext()`, i.e. this is entirely
+ * CMS-driven despite the empty component signature.
+ */
 const Error: FC = memo(() => {
 	const globalContext = useGlobalContext();
 

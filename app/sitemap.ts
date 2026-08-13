@@ -17,9 +17,6 @@ const SITE_URL: string | undefined = process.env.SITE_URL;
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/* Generates the sitemap for the application by fetching all necessary slugs from
- the CMS and constructing the sitemap entries.  */
-
 //  Define types for slug data and sitemap entries
 type IKeys = {
 	slug: string;
@@ -38,6 +35,12 @@ type IObject = {
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Sitemap XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/**
+ * Generates the sitemap for the application by fetching all necessary slugs from the
+ * CMS and constructing the sitemap entries.
+ *
+ * @returns The full `MetadataRoute.Sitemap` entry list for the site.
+ */
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	const siteUrl: string | undefined = SITE_URL;
 
