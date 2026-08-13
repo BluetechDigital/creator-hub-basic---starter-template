@@ -119,8 +119,9 @@ see the corresponding section in `.env.example` and the matching file under `api
 | Variable | Public? | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_GTM_ID` | **client** | Google Tag Manager container ID |
-| `EMAIL_USER` / `EMAIL_PASS` / `EMAIL_HOST` | server | Nodemailer credentials for the contact form |
-| `RECAPTCHA_SITE_KEY` | **client** | reCAPTCHA site key (safe to expose by design) |
+| `EMAIL_USER` / `EMAIL_PASS` / `EMAIL_HOST` | server | Nodemailer credentials for the contact form. `EMAIL_HOST` accepts a literal SMTP hostname or a well-known service shorthand (`gmail`, `outlook365`, `hotmail`, `yahoo`, `icloud`, `zoho`) — see `config/nodemailer.ts` |
+| `CONTACT_FORM_RECIPIENT_EMAIL` | server | Optional: who contact-form submissions are delivered to. Falls back to `EMAIL_USER` if unset |
+| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | **client** | reCAPTCHA site key (safe to expose by design — must be `NEXT_PUBLIC_` since the widget renders client-side) |
 | `RECAPTCHA_SECRET_KEY` | server | reCAPTCHA server-side verification secret |
 
 ## Security headers

@@ -7,3 +7,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 .contactForm {
     @apply w-full h-full;
 }
+
+.form {
+    @apply flex flex-col gap-4 w-full max-w-md;
+}
+
+.field {
+    @apply flex flex-col gap-1;
+}
+
+.errorText {
+    @apply text-sm text-red-600;
+}
