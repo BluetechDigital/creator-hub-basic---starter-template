@@ -1,0 +1,18 @@
+# CODEOWNERS
+#
+# Lists who must review a pull request before it can merge, based on which
+# files it touches. This file alone enforces nothing — it only takes effect
+# once branch protection is turned on for this branch with "Require review
+# from Code Owners" checked (repo Settings > Branches > add rule for `main`).
+# Until that's enabled, this file is documentation only.
+#
+# Rules are matched like .gitignore patterns; the last matching rule for a
+# given path wins, so more specific rules should come after general ones.
+
+# The reusable CMS block library (components/CMS/**) and the map in
+# RenderFlexibleContent.tsx that wires blocks up to pages. Gated because
+# nothing in the registration mechanism itself distinguishes a reusable block
+# from a one-off added to satisfy a single client's request — see
+# ARCHITECTURE.md, "CMS flexible-content blocks", and the note on
+# blockRegistration.test.ts for what is and isn't automatically caught.
+/components/CMS/ @BluetechDigital/engineering @Todd-Owen-Mpeli
