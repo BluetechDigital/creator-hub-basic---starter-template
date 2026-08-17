@@ -1,4 +1,5 @@
-@import "tailwindcss/theme"; 
+@import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -6,16 +7,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 .contactForm {
     @apply w-full h-full;
-}
 
-.form {
-    @apply flex flex-col gap-4 w-full max-w-md;
-}
+    & .form {
+        @apply flex flex-col gap-4 w-full max-w-md;
 
-.field {
-    @apply flex flex-col gap-1;
-}
+        /* .errorText renders both inside a .field (per-input validation) and
+        directly inside .form (the general/submit error) — nested here, one
+        level up from .field, so the descendant selector matches both. */
+        & .errorText {
+            @apply text-sm text-red-600;
+        }
 
-.errorText {
-    @apply text-sm text-red-600;
+        & .field {
+            @apply flex flex-col gap-1;
+        }
+    }
 }

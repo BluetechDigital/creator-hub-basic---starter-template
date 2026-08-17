@@ -3,49 +3,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 @import "tailwindcss";
-
-@theme {
-
-    /* XXX CUSTOM BREAKPOINT (SCREEN) VARIABLES XXX */
-    --breakpoint-xxs: 320px; /* Extra small mobile devices (iPhone SE) */
-    --breakpoint-xs: 425px; /* Small mobile devices (iPhone 12 Mini or iPhone X) */
-
-    /* XXX CUSTOM TEXT SIZE VARIABLES XXX */
-    --text-xxxs: .5rem;
-    --text-xxs: .65rem;
-    --text-tiny: .925rem;
-
-    /* XXX CUSTOM FONTS VARIABLE XXX */
-    --font-primary: TelkaRegular, "sans-serif";
-    --font-secondary: PlusJakartaSans, "sans-serif";
-
-    /* XXX CUSTOM COLOURS XXX */
-    /* Base Colours */
-    --color-grey: #cecece;
-    --color-light-black: #111;
-    --color-dark-grey: #8f8f8f;
-    --color-light-grey: #f7f7f7;
-    --color-lighter-black: #292929;
-    --color-light-grey-wwo: #fafafa;
-
-    /* Primary Colours */
-    --color-primary-default: #000;
-    --color-primary-two: #000;
-    --color-primary-dark: #000;
-    --color-primary-darker: #000;
-    
-    /* Secondary Colours */
-    --color-secondary-default: #000;
-    --color-secondary-two: #000;
-    --color-secondary-dark: #000;
-    --color-secondary-darker: #000;
-
-    /* Accent Colours */
-    --color-accent-default: #000;
-    --color-accent-two: #000;
-    --color-accent-dark: #000;
-    --color-accent-darker: #000;
-}
+/* Custom design tokens — extracted into their own file so CSS Modules can
+import just the tokens (see styles/theme.css's own comment for why). */
+@import "./theme.css";
 
 @layer base {
 	/* XXX CUSTOM UTILITIES XXX */

@@ -34,7 +34,7 @@ const TableOfContents: FC<ITableOfContents> = ({ headings }) => {
 
 	return (
 		<>
-			<h4 className={styles.tocHeading}>TABLE OF CONTENTS</h4>
+			<h4 className={styles.tocHeading}>Table Of Contents</h4>
 			<ul className={styles.tableOfContents}>
 				{headings.map((heading) => (
 					<li key={heading.id} className={heading.level === 3 ? styles.tocItemSub : styles.tocItem}>

@@ -1,0 +1,57 @@
+/* -----------------------------------------------------------------------------
+This project's custom design tokens, kept separate from globals.css so every
+CSS Module can `@import` just this file (alongside `tailwindcss/theme` for
+Tailwind's own defaults) and use these tokens in `@apply` — a CSS Module only
+sees what it imports itself, it doesn't automatically inherit globals.css's
+`@theme` additions just because globals.css is loaded elsewhere in the app.
+globals.css imports this too, so there's exactly one source of truth.
+----------------------------------------------------------------------------- */
+
+@theme {
+
+    /* XXX CUSTOM BREAKPOINT (SCREEN) VARIABLES XXX */
+    --breakpoint-xxs: 320px; /* Extra small mobile devices (iPhone SE) */
+    --breakpoint-xs: 425px; /* Small mobile devices (iPhone 12 Mini or iPhone X) */
+
+    /* XXX CUSTOM TEXT SIZE VARIABLES XXX */
+    --text-xxxs: .5rem;
+    --text-xxs: .65rem;
+    --text-tiny: .925rem;
+
+    /* XXX CUSTOM FONTS VARIABLE XXX */
+    --font-primary: TelkaRegular, "sans-serif";
+    --font-secondary: PlusJakartaSans, "sans-serif";
+
+    /* XXX CUSTOM COLOURS XXX */
+    /* Base Colours */
+    --color-grey: #cecece;
+    --color-light-black: #111;
+    --color-dark-grey: #8f8f8f;
+    --color-light-grey: #f7f7f7;
+    --color-lighter-black: #292929;
+    --color-light-grey-wwo: #fafafa;
+
+    /* Pure black/white — fixed, not brand-swappable (unlike primary/secondary/
+    accent below). Use these for base text/background that should stay black-on-
+    white regardless of whichever brand colours a client fork sets. */
+    --color-pure-black: #000000;
+    --color-pure-white: #ffffff;
+
+    /* Primary Colours */
+    --color-primary-default: #000;
+    --color-primary-two: #000;
+    --color-primary-dark: #000;
+    --color-primary-darker: #000;
+
+    /* Secondary Colours */
+    --color-secondary-default: #000;
+    --color-secondary-two: #000;
+    --color-secondary-dark: #000;
+    --color-secondary-darker: #000;
+
+    /* Accent Colours */
+    --color-accent-default: #4ade80;
+    --color-accent-two: #4ade80;
+    --color-accent-dark: #22c55e;
+    --color-accent-darker: #16a34a;
+}

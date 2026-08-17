@@ -1,109 +1,126 @@
 @import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 .singlePost {
-    @apply block w-full bg-gray-950;
+    @apply block w-full bg-pure-white;
 }
 
 /* ---- Hero ---- */
 
 .postHero {
-    @apply w-full px-4 sm:px-8 pt-20 pb-16 border-b border-white/10;
-}
+    @apply w-full px-4 sm:px-8 pt-20 pb-16 border-b border-pure-black/10;
 
-.postHeroInner {
-    @apply max-w-360 mx-auto flex flex-wrap items-center gap-12;
-}
+    & .postHeroInner {
+        @apply max-w-360 mx-auto flex flex-wrap items-center gap-12;
+    }
 
-.postHeroImageWrapper {
-    @apply w-full md:flex-1 overflow-hidden rounded-3xl;
-}
+    & .postHeroImageWrapper {
+        @apply w-full md:flex-1 overflow-hidden rounded-3xl;
+    }
 
-.postHeroImage {
-    @apply w-full h-auto object-cover;
-}
+    & .postHeroImage {
+        @apply w-full h-auto object-cover;
+    }
 
-.postHeroContent {
-    @apply w-full md:flex-1 flex flex-col gap-4;
-}
+    & .postHeroContent {
+        @apply w-full md:flex-1 flex flex-col gap-4;
 
-.postTitle {
-    @apply text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight;
-}
+        & .postTitle {
+            @apply text-4xl sm:text-5xl lg:text-6xl text-pure-black tracking-tight;
+        }
 
-.postExcerpt {
-    @apply text-lg text-white/60;
-}
+        & .postExcerpt {
+            @apply text-lg text-pure-black/60;
+        }
 
-.postMeta {
-    @apply flex flex-wrap items-center gap-3;
-}
+        & .postMeta {
+            @apply flex flex-wrap items-center gap-3;
 
-.postAuthorAvatar {
-    @apply rounded-full;
-}
+            & .postAuthorAvatar {
+                @apply rounded-full;
+            }
 
-.postMetaText {
-    @apply text-sm text-white font-medium;
-}
+            & .postMetaText {
+                @apply text-sm text-pure-black font-medium;
+            }
 
-.postMetaDot {
-    @apply w-1 h-1 rounded-full bg-white/60;
-}
+            & .postMetaDot {
+                @apply w-1 h-1 rounded-full bg-pure-black/60;
+            }
+        }
 
-.postAuthorBio {
-    @apply text-sm text-white/60;
+        & .postAuthorBio {
+            @apply text-sm text-pure-black/60;
+        }
+    }
 }
 
 /* ---- Body: sidebar + main column ---- */
 
 .postBody {
-    @apply max-w-360 mx-auto flex flex-wrap lg:flex-nowrap gap-12 px-4 sm:px-8 py-16 border-b border-white/10;
-}
+    @apply max-w-360 mx-auto flex flex-wrap lg:flex-nowrap gap-12 px-4 sm:px-8 py-16 border-b border-pure-black/10;
 
-.postSidebar {
-    @apply w-full lg:w-1/4 lg:shrink-0 flex flex-col gap-8;
-}
+    & .postSidebar {
+        @apply w-full lg:w-1/4 lg:shrink-0 flex flex-col gap-8;
+    }
 
-.postMain {
-    @apply w-full lg:flex-1 min-w-0;
+    & .postMain {
+        @apply w-full lg:flex-1 min-w-0;
+    }
 }
 
 /* ---- Table of contents ---- */
 
 .tocHeading {
-    @apply text-3xl text-white tracking-tight mb-5;
+    @apply text-3xl text-pure-black tracking-tight mb-5;
 }
 
 .tableOfContents {
-    @apply flex flex-col gap-4 pb-8 border-b border-white/10;
-}
+    @apply flex flex-col gap-4 pb-8 border-b border-pure-black/10;
 
-.tocItem a {
-    @apply text-xl text-white/90 hover:text-green-400 transition duration-300;
-}
+    & .tocItem a {
+        @apply text-xl text-pure-black/90 transition duration-300;
 
-.tocItemSub a {
-    @apply pl-4 text-base text-white/70 hover:text-green-400 transition duration-300;
+        &:hover {
+            @apply text-accent-default;
+        }
+    }
+
+    & .tocItemSub a {
+        @apply pl-4 text-base text-pure-black/70 transition duration-300;
+
+        &:hover {
+            @apply text-accent-default;
+        }
+    }
 }
 
 /* ---- Share links ---- */
 
 .shareLinks {
     @apply flex flex-col items-center gap-4;
-}
 
-.copyLinkButton {
-    @apply w-full px-6 py-3 text-sm text-white hover:text-black font-medium text-center border-2 border-white hover:border-green-400 hover:bg-green-400 rounded-full transition duration-300 cursor-pointer;
-}
+    & .copyLinkButton {
+        @apply w-full px-6 py-3 text-sm text-pure-black font-medium text-center border-2 border-pure-black rounded-full transition duration-300 cursor-pointer;
 
-.shareIcons {
-    @apply flex flex-wrap w-full items-center justify-center gap-3;
-}
+        &:hover {
+            @apply text-pure-white border-accent-default bg-accent-default;
+        }
+    }
 
-.shareIconLink {
-    @apply flex items-center justify-center w-12 h-12 text-white hover:text-black border-2 border-white hover:border-green-400 hover:bg-green-400 rounded-full transition duration-300;
+    & .shareIcons {
+        @apply flex flex-wrap w-full items-center justify-center gap-3;
+
+        & .shareIconLink {
+            @apply flex items-center justify-center w-12 h-12 text-pure-black border-2 border-pure-black rounded-full transition duration-300;
+
+            &:hover {
+                @apply text-pure-white border-accent-default bg-accent-default;
+            }
+        }
+    }
 }

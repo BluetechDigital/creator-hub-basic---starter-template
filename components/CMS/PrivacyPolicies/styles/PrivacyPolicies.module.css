@@ -1,4 +1,5 @@
-@import "tailwindcss/theme"; 
+@import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

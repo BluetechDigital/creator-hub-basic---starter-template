@@ -1,4 +1,5 @@
 @import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -14,20 +15,20 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 .postCard {
     @apply flex flex-col gap-2;
-}
 
-.postThumbnail {
-    @apply w-full h-auto rounded;
-}
+    & .postThumbnail {
+        @apply w-full h-auto rounded;
+    }
 
-.postTitle {
-    @apply text-base font-medium;
-}
+    & .postTitle {
+        @apply text-base font-medium;
+    }
 
-.postDate {
-    @apply text-sm opacity-70;
-}
+    & .postDate {
+        @apply text-sm opacity-70;
+    }
 
-.postExcerpt {
-    @apply text-sm;
+    & .postExcerpt {
+        @apply text-sm;
+    }
 }
