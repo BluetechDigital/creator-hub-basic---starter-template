@@ -13,10 +13,14 @@ under .articleContent so it only applies inside a rendered post body.
 */
 
 .articleContent {
-    @apply w-full max-w-none flex flex-col gap-6 text-lg text-pure-black/80;
+    @apply w-full max-w-none flex flex-col gap-6 text-base text-pure-black/80;
 
     & h2 {
-        @apply text-3xl text-pure-black tracking-tight scroll-mt-24;
+        @apply text-pure-black tracking-tight scroll-mt-24;
+        /* Fluid text-2xl (1.5rem/24px ceiling at 1440px) down to a
+        1.125rem/18px floor at a 375px reference — same shape as
+        SinglePost.module.css's .tocHeading, kept in sync with it. */
+        font-size: clamp(1.125rem, 0.99rem + 0.56vw, 1.5rem);
     }
 
     & h3 {
@@ -24,7 +28,7 @@ under .articleContent so it only applies inside a rendered post body.
     }
 
     & p {
-        @apply text-lg text-pure-black/80;
+        @apply text-base text-pure-black/80;
     }
 
     & a {

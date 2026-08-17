@@ -30,7 +30,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         @apply w-full md:flex-1 flex flex-col gap-4;
 
         & .postTitle {
-            @apply text-4xl sm:text-5xl lg:text-6xl text-pure-black tracking-tight;
+            @apply text-pure-black tracking-tight;
+            /* Fluid text-4xl (2.25rem/36px ceiling at this page's own 1440px
+            max-width) down to a 1.5rem/24px floor at a 375px mobile
+            reference — scales continuously instead of needing sm:/md:/lg:
+            overrides. Formula: clamp(floor, floor + (ceiling-floor)/(1440-375)
+            * 100vw offset by the 375px intercept, ceiling). */
+            font-size: clamp(1.5rem, 1.236rem + 1.13vw, 2.25rem);
         }
 
         & .postExcerpt {
@@ -76,14 +82,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /* ---- Table of contents ---- */
 
 .tocHeading {
-    @apply text-3xl text-pure-black tracking-tight mb-5;
+    @apply text-pure-black tracking-tight mb-5;
+    /* Fluid text-2xl (1.5rem/24px ceiling at 1440px) down to a 1.125rem/18px
+    floor at a 375px reference — same formula shape as .postTitle above. */
+    font-size: clamp(1.125rem, 0.99rem + 0.56vw, 1.5rem);
 }
 
 .tableOfContents {
     @apply flex flex-col gap-4 pb-8 border-b border-pure-black/10;
 
     & .tocItem a {
-        @apply text-xl text-pure-black/90 transition duration-300;
+        @apply text-base text-pure-black/90 transition duration-300;
 
         &:hover {
             @apply text-accent-default;
@@ -105,7 +114,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     @apply flex flex-col items-center gap-4;
 
     & .copyLinkButton {
-        @apply w-full px-6 py-3 text-sm text-pure-black font-medium text-center border-2 border-pure-black rounded-full transition duration-300 cursor-pointer;
+        @apply w-full px-6 py-3 text-sm text-pure-black font-semibold text-center border-2 border-pure-black rounded-full transition duration-300 cursor-pointer;
 
         &:hover {
             @apply text-pure-white border-accent-default bg-accent-default;
