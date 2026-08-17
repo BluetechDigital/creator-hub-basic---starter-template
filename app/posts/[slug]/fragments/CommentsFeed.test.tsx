@@ -19,7 +19,7 @@ describe("CommentsFeed", () => {
 
 		expect(screen.getByText("Jane Doe")).toBeInTheDocument();
 		expect(screen.getByText("Great post!")).toBeInTheDocument();
-		expect(screen.getByText("Comments (1)")).toBeInTheDocument();
+		expect(screen.getByText("1 Comment")).toBeInTheDocument();
 	});
 
 	it("sanitizes comment content", () => {

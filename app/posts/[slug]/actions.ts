@@ -7,7 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import validator from "validator";
 import { verifyRecaptcha } from "@/config/recaptcha";
 import { createComment } from "@/graphql/CMS/CreateComment";
-import { incrementPostLikes } from "@/graphql/CMS/IncrementPostLikes";
+import { setPostReaction, IReaction } from "@/graphql/CMS/SetPostReaction";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -97,26 +97,37 @@ export const submitComment = async (values: ICommentFormValues): Promise<ICommen
 };
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Increment Like XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Set Reaction XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Server Action for the like button: increments a post's like count via
- * `incrementPostLikes`. No reCAPTCHA — a like click isn't a form submission and a
+ * Server Action for the like/dislike buttons: swaps a post's reaction via
+ * `setPostReaction`. Reactions are mutually exclusive, so the caller passes both
+ * the visitor's previous reaction (to decrement) and their new one (to increment)
+ * in one call. No reCAPTCHA — a reaction click isn't a form submission and a
  * captcha there would be poor UX; abuse is instead guarded by the client-side
- * "already liked" cookie (`EngagementBar.tsx`) plus the mu-plugin's own server-side
- * per-post/per-IP rate limit (see `wordpress-mu-plugins/simple-blogs-post-likes.php`).
- * @param postId The post's `databaseId` to like.
- * @returns `{success: true, likes}` with the new count, or `{success: false}` if
- * the mu-plugin isn't installed yet, the rate limit rejected the request, or the
- * request otherwise failed.
+ * "current reaction" cookie (`EngagementBar.tsx`) plus the mu-plugin's own
+ * server-side per-post/per-IP rate limit (see
+ * `wordpress-mu-plugins/simple-blogs-post-likes.php`).
+ * @param postId The post's `databaseId` to react to.
+ * @param previousReaction The visitor's reaction before this change, or
+ * `undefined` if they had none.
+ * @param newReaction The visitor's new reaction, or `"none"` to just clear their
+ * previous reaction.
+ * @returns `{success: true, likes, dislikes}` with the new counts, or
+ * `{success: false}` if the mu-plugin isn't installed yet, the rate limit
+ * rejected the request, or the request otherwise failed.
  */
-export const incrementLike = async (postId: number): Promise<{ success: true; likes: number } | { success: false }> => {
-	const likes = await incrementPostLikes(postId);
+export const setReaction = async (
+	postId: number,
+	previousReaction: IReaction | undefined,
+	newReaction: IReaction | "none"
+): Promise<{ success: true; likes: number; dislikes: number } | { success: false }> => {
+	const reactions = await setPostReaction(postId, previousReaction, newReaction);
 
-	if (typeof likes !== "number") {
+	if (!reactions) {
 		return { success: false };
 	}
 
-	return { success: true, likes };
+	return { success: true, likes: reactions.likes, dislikes: reactions.dislikes };
 };

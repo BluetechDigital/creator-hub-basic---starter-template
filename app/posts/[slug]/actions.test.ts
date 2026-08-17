@@ -5,17 +5,17 @@ Same "mock the side-effect dependency, dynamic-import for fresh env reads" shape
 as components/CMS/ContactForm/actions.test.ts.
 ----------------------------------------------------------------------------- */
 
-const { mockCreateComment, mockIncrementPostLikes } = vi.hoisted(() => ({
+const { mockCreateComment, mockSetPostReaction } = vi.hoisted(() => ({
 	mockCreateComment: vi.fn(),
-	mockIncrementPostLikes: vi.fn(),
+	mockSetPostReaction: vi.fn(),
 }));
 
 vi.mock("@/graphql/CMS/CreateComment", () => ({
 	createComment: mockCreateComment,
 }));
 
-vi.mock("@/graphql/CMS/IncrementPostLikes", () => ({
-	incrementPostLikes: mockIncrementPostLikes,
+vi.mock("@/graphql/CMS/SetPostReaction", () => ({
+	setPostReaction: mockSetPostReaction,
 }));
 
 const originalEnv = { ...process.env };
@@ -118,29 +118,39 @@ describe("submitComment", () => {
 	});
 });
 
-describe("incrementLike", () => {
+describe("setReaction", () => {
 	beforeEach(() => {
-		mockIncrementPostLikes.mockReset();
+		mockSetPostReaction.mockReset();
 	});
 
 	afterEach(() => {
 		process.env = { ...originalEnv };
 	});
 
-	it("returns the new like count on success", async () => {
-		mockIncrementPostLikes.mockResolvedValue(6);
+	it("returns the new likes/dislikes counts on success", async () => {
+		mockSetPostReaction.mockResolvedValue({ likes: 6, dislikes: 1 });
 
-		const { incrementLike } = await importFreshModule();
-		const result = await incrementLike(307);
+		const { setReaction } = await importFreshModule();
+		const result = await setReaction(307, undefined, "like");
 
-		expect(result).toEqual({ success: true, likes: 6 });
+		expect(result).toEqual({ success: true, likes: 6, dislikes: 1 });
+		expect(mockSetPostReaction).toHaveBeenCalledWith(307, undefined, "like");
 	});
 
-	it("returns success: false when incrementPostLikes resolves undefined (mu-plugin not installed, or rate-limited)", async () => {
-		mockIncrementPostLikes.mockResolvedValue(undefined);
+	it("passes the previous reaction through when swapping", async () => {
+		mockSetPostReaction.mockResolvedValue({ likes: 5, dislikes: 2 });
 
-		const { incrementLike } = await importFreshModule();
-		const result = await incrementLike(307);
+		const { setReaction } = await importFreshModule();
+		await setReaction(307, "like", "dislike");
+
+		expect(mockSetPostReaction).toHaveBeenCalledWith(307, "like", "dislike");
+	});
+
+	it("returns success: false when setPostReaction resolves undefined (mu-plugin not installed, or rate-limited)", async () => {
+		mockSetPostReaction.mockResolvedValue(undefined);
+
+		const { setReaction } = await importFreshModule();
+		const result = await setReaction(307, undefined, "like");
 
 		expect(result).toEqual({ success: false });
 	});

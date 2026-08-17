@@ -5,10 +5,10 @@ These files are **not part of the Next.js app** — they're PHP that needs to be
 ## `simple-blogs-post-likes.php`
 
 **Plugin Name:** Simple Blogs Post Likes - Add Reactions to Your Posts
-**Author:** BluetechDigital Ltd ([bluetech-digital.co.uk](https://bluetech-digital.co.uk))
-**Version:** 1.0.0
+**Author:** Bluetech Digital Ltd ([bluetech-digital.co.uk](https://bluetech-digital.co.uk))
+**Version:** 1.1.0
 
-Adds the post-likes feature used by the single-post page's like button. WordPress has no native "likes" concept, so this registers a small custom `likes` field and `incrementPostLikes` mutation in WPGraphQL, backed by post meta — see `ARCHITECTURE.md` for how the Next.js side depends on it and degrades when it's absent.
+Adds the post-reactions feature used by the single-post page's like/dislike buttons. WordPress has no native "likes"/"dislikes" concept, so this registers `likes`/`dislikes` fields and a `setPostReaction` mutation in WPGraphQL, backed by post meta. Reactions are mutually exclusive (like XOR dislike XOR neither) — the mutation takes the visitor's previous and new reaction so it can swap atomically in one call — see `ARCHITECTURE.md` for how the Next.js side depends on it and degrades when it's absent.
 
 **To install:**
 1. Connect to the WordPress site's files (hosting file manager, SFTP, etc.).
@@ -17,4 +17,4 @@ Adds the post-likes feature used by the single-post page's like button. WordPres
 
 That's it — files in `mu-plugins/` ("must-use") load automatically on every request, with no activation step. It'll show up under **wp-admin → Plugins → Must-Use** (a separate tab from the regular plugin list, no Activate/Deactivate/Delete buttons — remove it by deleting the file from the server). Requires the WPGraphQL plugin to already be active (it is, on this site).
 
-**Until this is installed**, the frontend's like button still renders but the like action will fail gracefully (the mutation simply doesn't exist yet) — it won't crash the page or the build.
+**Until this is installed**, the frontend's like/dislike buttons still render but reacting will fail gracefully (the mutation simply doesn't exist yet) — it won't crash the page or the build.

@@ -13,12 +13,12 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
  * image, author, categories, approved comments) by slug. SEO metadata is fetched
  * separately via the already-generic `getAllSeoContent(slug, postType.posts)` — this
  * function only covers the fields the post's own body/breadcrumb rendering needs.
- * Deliberately does NOT fetch `likes` here — that's a custom field from the
- * simple-blogs-post-likes mu-plugin (see `wordpress-mu-plugins/`), which may not be
- * installed on every fork/environment. A GraphQL schema-validation error (querying
- * a field that doesn't exist) fails the *entire* request, not just that field — so
- * `likes` is fetched separately via `getPostLikes`, isolated so a missing plugin
- * doesn't take down the rest of the post.
+ * Deliberately does NOT fetch `likes`/`dislikes` here — those are custom fields
+ * from the simple-blogs-post-likes mu-plugin (see `wordpress-mu-plugins/`), which
+ * may not be installed on every fork/environment. A GraphQL schema-validation
+ * error (querying a field that doesn't exist) fails the *entire* request, not
+ * just that field — so reactions are fetched separately via `getPostReactions`,
+ * isolated so a missing plugin doesn't take down the rest of the post.
  * @param slug The slug of the post to fetch content for.
  * @returns A promise resolving to the post's content fields, or `undefined` if the fetch/query failed or no post matched.
  */

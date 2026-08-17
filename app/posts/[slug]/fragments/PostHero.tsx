@@ -6,6 +6,7 @@ import { FC } from "react";
 import Image from "next/image";
 import dateFormat from "dateformat";
 import * as IPost from "@/graphql/CMS/types/post";
+import EngagementBar from "@/app/posts/[slug]/fragments/EngagementBar";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -19,6 +20,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 type IPostHero = {
 	post: IPost.IProps;
+	initialLikes: number;
+	initialDislikes: number;
+	commentCount: number;
 };
 
 /* -----------------------------------------------------------------------------
@@ -27,12 +31,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Renders the single post page's hero header: featured image, title, excerpt,
- * author (name — linked to `author.url` when present — avatar, and bio), date, and
- * read time. Plain presentational component, no data fetching of its own — `post`
- * is passed down already-resolved from `SinglePostPage`.
+ * author (name — linked to `author.url` when present — avatar, and bio), date,
+ * read time, and the like/dislike/comment-count engagement pill. Plain
+ * presentational component, no data fetching of its own — `post` and the
+ * reaction/comment counts are passed down already-resolved from
+ * `SinglePostPage`.
+ *
+ * `EngagementBar` sits directly below the author bio (not after the article
+ * body, where it originally lived) so a reader can react without scrolling
+ * past the whole post first.
  * @param post The post's content fields, as returned by `getPostContentBySlug`.
+ * @param initialLikes The post's current like count (`getPostReactions`, 0 if the likes mu-plugin isn't installed).
+ * @param initialDislikes The post's current dislike count (`getPostReactions`, 0 if the likes mu-plugin isn't installed).
+ * @param commentCount The post's approved comment count.
  */
-const PostHero: FC<IPostHero> = ({ post }) => {
+const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentCount }) => {
 
 	return (
 		<header className={styles.postHero}>
@@ -92,6 +105,12 @@ const PostHero: FC<IPostHero> = ({ post }) => {
 					{post.author?.node?.description && (
 						<p className={styles.postAuthorBio}>{post.author.node.description}</p>
 					)}
+					<EngagementBar
+						postId={post.databaseId}
+						initialLikes={initialLikes}
+						initialDislikes={initialDislikes}
+						commentCount={commentCount}
+					/>
 				</div>
 			</div>
 		</header>

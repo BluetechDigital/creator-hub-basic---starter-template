@@ -94,13 +94,16 @@ new pattern.
 
 Everything else in this repo talks to WordPress purely through WPGraphQL's existing schema —
 no custom WordPress code required. **One feature is the exception**: the single-post page's
-like button (`app/posts/[slug]/fragments/EngagementBar.tsx`).
+like/dislike buttons (`app/posts/[slug]/fragments/EngagementBar.tsx`).
 
-WordPress has no native "likes" concept, so
+WordPress has no native "likes"/"dislikes" concept, so
 [`wordpress-mu-plugins/simple-blogs-post-likes.php`](./wordpress-mu-plugins/simple-blogs-post-likes.php)
-is a small companion PHP file — **not part of the Next.js app or its build** — that registers a
-custom `likes` field and `incrementPostLikes` mutation in WPGraphQL, backed by post meta. It has
-to be installed directly on the WordPress site (`wp-content/mu-plugins/`, see
+is a small companion PHP file — **not part of the Next.js app or its build** — that registers
+`likes`/`dislikes` fields and a `setPostReaction` mutation in WPGraphQL, backed by post meta.
+Reactions are mutually exclusive (like XOR dislike XOR neither); the mutation takes both the
+visitor's previous and new reaction so it can swap atomically in one call instead of the frontend
+issuing two separate increment/decrement requests. It has to be installed directly on the
+WordPress site (`wp-content/mu-plugins/`, see
 [`wordpress-mu-plugins/README.md`](./wordpress-mu-plugins/README.md) for the install steps) —
 nothing in this repo's toolchain can deploy PHP to a separate WordPress host, so this is a manual
 step for whoever manages that WordPress install, the same way the underlying WP/ACF/WPGraphQL
@@ -108,13 +111,13 @@ setup itself is.
 
 **If it's missing, deleted, or not yet installed** (e.g. a fresh fork, before anyone's set this
 up): nothing breaks. Querying a GraphQL field/mutation that doesn't exist fails validation for
-that request only — `graphql/CMS/GetPostLikes.ts` and `graphql/CMS/IncrementPostLikes.ts` are
+that request only — `graphql/CMS/GetPostReactions.ts` and `graphql/CMS/SetPostReaction.ts` are
 both deliberately isolated from the main post-content query for exactly this reason (folding
-`likes` into `GetPostContentBySlug.ts`'s query would take the *entire* post page down, not just
-likes, the moment the field doesn't exist — confirmed live against a real WPGraphQL endpoint
-before this was built this way). Both catch that failure and resolve to `undefined` rather than
-throwing; the frontend shows a like count of `0` and the button click silently no-ops instead of
-persisting. This folder existing (or not) can never affect a Vercel build.
+`likes`/`dislikes` into `GetPostContentBySlug.ts`'s query would take the *entire* post page down,
+not just reactions, the moment the fields don't exist — confirmed live against a real WPGraphQL
+endpoint before this was built this way). Both catch that failure and resolve to `undefined`
+rather than throwing; the frontend shows like/dislike counts of `0` and a button click silently
+no-ops instead of persisting. This folder existing (or not) can never affect a Vercel build.
 
 ## Testing
 

@@ -14,7 +14,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
 import { getPostContentBySlug } from "@/graphql/CMS/GetPostContentBySlug";
-import { getPostLikes } from "@/graphql/CMS/GetPostLikes";
+import { getPostReactions } from "@/graphql/CMS/GetPostReactions";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -26,7 +26,6 @@ import LatestPosts from "@/components/Global/Elements/LatestPosts/LatestPosts";
 import PostHero from "@/app/posts/[slug]/fragments/PostHero";
 import TableOfContents from "@/app/posts/[slug]/fragments/TableOfContents";
 import ShareLinks from "@/app/posts/[slug]/fragments/ShareLinks";
-import EngagementBar from "@/app/posts/[slug]/fragments/EngagementBar";
 import CommentsFeed from "@/app/posts/[slug]/fragments/CommentsFeed";
 import CommentForm from "@/app/posts/[slug]/fragments/CommentForm";
 
@@ -132,10 +131,10 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		notFound();
 	}
 
-	// getPostLikes resolves to undefined (shown as 0) when the simple-blogs-post-likes
+	// getPostReactions resolves to undefined (shown as 0/0) when the simple-blogs-post-likes
 	// mu-plugin isn't installed yet — an expected state, not an error, so it's
 	// awaited plainly rather than wrapped in try/catch like getPostContentBySlug.
-	const likes = (await getPostLikes(post.databaseId)) ?? 0;
+	const reactions = await getPostReactions(post.databaseId);
 
 	const { headings, contentWithAnchors } = extractToc(post.content);
 
@@ -155,7 +154,12 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		<article className={styles.singlePost}>
 			<StructuredData data={[breadcrumbSchema, articleSchema]} />
 
-			<PostHero post={post} />
+			<PostHero
+				post={post}
+				initialLikes={reactions?.likes ?? 0}
+				initialDislikes={reactions?.dislikes ?? 0}
+				commentCount={post.commentCount ?? 0}
+			/>
 
 			<div className={styles.postBody}>
 				<aside className={styles.postSidebar}>
@@ -167,7 +171,6 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 				</div>
 			</div>
 
-			<EngagementBar postId={post.databaseId} initialLikes={likes} commentCount={post.commentCount ?? 0} />
 			<CommentsFeed comments={post.comments?.nodes ?? []} />
 			<CommentForm postId={post.databaseId} />
 

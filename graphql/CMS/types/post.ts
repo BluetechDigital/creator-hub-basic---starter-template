@@ -32,8 +32,9 @@ export type IProps = {
 	} | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
 	seo?: { readingTime: number } | null;
-	/** Custom counter from the simple-blogs-post-likes mu-plugin — 0 if that plugin isn't installed yet. */
+	/** Custom counters from the simple-blogs-post-likes mu-plugin — 0 if that plugin isn't installed yet. */
 	likes?: number | null;
+	dislikes?: number | null;
 	commentCount?: number | null;
 	comments?: {
 		nodes: IComment.IProps[];

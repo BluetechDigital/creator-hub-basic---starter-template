@@ -32,7 +32,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentsFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * returns approved ones). Unlike the archive/latest-posts empty states, this shows
  * an explicit "be the first to comment" invite rather than rendering nothing, since
  * an empty comments section benefits from a call to action. Anchored `id="comments"`
- * so `EngagementBar`'s comment-count link can jump straight to it.
+ * so `EngagementBar`'s comment-count link can jump straight to it. Heading matches
+ * YouTube's comments-section convention — the count comes before the word
+ * ("1,479 Comments"), not after it in parentheses.
  * @param comments The post's approved comments, in the order WPGraphQL returns them.
  */
 const CommentsFeed: FC<ICommentsFeed> = ({ comments }) => {
@@ -40,7 +42,7 @@ const CommentsFeed: FC<ICommentsFeed> = ({ comments }) => {
 	return (
 		<section id="comments" className={styles.commentsFeed}>
 			<h2 className={styles.commentsHeading}>
-				{comments.length > 0 ? `Comments (${comments.length})` : 'Comments'}
+				{comments.length.toLocaleString()} {comments.length === 1 ? 'Comment' : 'Comments'}
 			</h2>
 			{comments.length === 0 ? (
 				<p className={styles.commentsEmpty}>No comments yet — be the first to share your thoughts.</p>

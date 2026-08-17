@@ -4,14 +4,14 @@ const originalEnv = { ...process.env };
 
 const importFreshModule = async () => {
 	vi.resetModules();
-	return import("./IncrementPostLikes");
+	return import("./GetPostReactions");
 };
 
 const setCmsEnv = () => {
 	process.env.NEXT_PUBLIC_CMS_API_URL = "https://example.test/graphql";
 };
 
-describe("incrementPostLikes", () => {
+describe("getPostReactions", () => {
 	afterEach(() => {
 		process.env = { ...originalEnv };
 		vi.unstubAllGlobals();
@@ -23,39 +23,34 @@ describe("incrementPostLikes", () => {
 		await expect(importFreshModule()).rejects.toThrow("NEXT_PUBLIC_CMS_API_URL not defined.");
 	});
 
-	it("returns the new like count on success", async () => {
+	it("returns the like and dislike counts on success", async () => {
 		setCmsEnv();
 
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => ({ data: { incrementPostLikes: { likes: 5 } } }),
+			json: async () => ({ data: { post: { likes: 12, dislikes: 3 } } }),
 		});
 		vi.stubGlobal("fetch", mockFetch);
 
-		const { incrementPostLikes } = await importFreshModule();
-		const result = await incrementPostLikes(307);
+		const { getPostReactions } = await importFreshModule();
 
-		expect(result).toBe(5);
-
-		const [, requestInit] = mockFetch.mock.calls[0];
-		const body = JSON.parse((requestInit as RequestInit).body as string);
-		expect(body.variables).toEqual({ postId: 307 });
+		expect(await getPostReactions(307)).toEqual({ likes: 12, dislikes: 3 });
 	});
 
-	it("returns undefined (not a throw) when the mutation doesn't exist yet (mu-plugin not installed)", async () => {
+	it("returns undefined (not a throw) when the fields don't exist yet (mu-plugin not installed)", async () => {
 		setCmsEnv();
 
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: true,
 			json: async () => ({
-				errors: [{ message: 'Unknown field "incrementPostLikes" on type "RootMutation".' }],
+				errors: [{ message: 'Cannot query field "likes" on type "Post".' }],
 			}),
 		});
 		vi.stubGlobal("fetch", mockFetch);
 
-		const { incrementPostLikes } = await importFreshModule();
+		const { getPostReactions } = await importFreshModule();
 
-		await expect(incrementPostLikes(307)).resolves.toBeUndefined();
+		await expect(getPostReactions(307)).resolves.toBeUndefined();
 	});
 
 	it("returns undefined when the HTTP response is not ok", async () => {
@@ -63,9 +58,9 @@ describe("incrementPostLikes", () => {
 
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
 
-		const { incrementPostLikes } = await importFreshModule();
+		const { getPostReactions } = await importFreshModule();
 
-		expect(await incrementPostLikes(307)).toBeUndefined();
+		expect(await getPostReactions(307)).toBeUndefined();
 	});
 
 	it("returns undefined (not a throw) on a network-level failure", async () => {
@@ -73,8 +68,8 @@ describe("incrementPostLikes", () => {
 
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
 
-		const { incrementPostLikes } = await importFreshModule();
+		const { getPostReactions } = await importFreshModule();
 
-		await expect(incrementPostLikes(307)).resolves.toBeUndefined();
+		await expect(getPostReactions(307)).resolves.toBeUndefined();
 	});
 });

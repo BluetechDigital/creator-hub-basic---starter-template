@@ -134,28 +134,62 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     }
 }
 
-/* ---- Engagement bar (likes + comment count) ---- */
+/* ---- Engagement bar (likes/dislikes pill + comment count pill) ---- */
+/* YouTube-style: like/dislike share one rounded pill split by a divider, the
+comment count is its own separate pill alongside it. */
 
-.engagementBar {
-    @apply max-w-360 mx-auto flex items-center justify-center gap-8 px-4 sm:px-8 py-12;
+.postEngagement {
+    @apply flex flex-wrap items-center gap-3 mt-2;
 
-    & .engagementButton {
-        @apply flex items-center gap-3 text-pure-black transition duration-300;
+    & .reactionPill {
+        @apply flex items-center bg-pure-black/5 rounded-full overflow-hidden;
+
+        & .reactionButton {
+            @apply flex items-center gap-2 px-4 py-2 text-pure-black transition duration-300;
+
+            &:hover {
+                @apply bg-pure-black/10;
+            }
+
+            &:disabled {
+                @apply cursor-not-allowed;
+            }
+
+            & svg {
+                @apply w-5 h-5;
+
+                &.reactionIconFlipped {
+                    @apply rotate-180;
+                }
+            }
+
+            & .reactionCount {
+                @apply text-sm font-medium;
+            }
+
+            &.reactionButtonActive {
+                @apply text-accent-dark bg-accent-default/20;
+            }
+        }
+
+        & .reactionDivider {
+            @apply w-px h-6 bg-pure-black/15;
+        }
+    }
+
+    & .commentPillButton {
+        @apply flex items-center gap-2 px-4 py-2 text-pure-black bg-pure-black/5 rounded-full transition duration-300;
 
         &:hover {
-            @apply text-accent-dark;
+            @apply bg-pure-black/10;
         }
 
-        &:disabled {
-            @apply cursor-not-allowed text-accent-dark;
+        & svg {
+            @apply w-5 h-5;
         }
 
-        & .engagementIcon {
-            @apply flex items-center justify-center w-16 h-16 bg-pure-black/5 rounded-full;
-        }
-
-        & .engagementCount {
-            @apply text-lg font-medium;
+        & .reactionCount {
+            @apply text-sm font-medium;
         }
     }
 }
