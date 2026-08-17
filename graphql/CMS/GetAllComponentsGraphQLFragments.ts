@@ -28,6 +28,7 @@ export const getAllComponentsGrapghQLFragments: Record<string, () => Promise<any
     YoutubeVideoGrid: () => import("@/components/CMS/YouTubeVideoGrid/graphql/index"),
     AllYoutubeVideos: () => import("@/components/CMS/AllYoutubeVideos/graphql/index"),
     AllYoutubeShortsVideos: () => import("@/components/CMS/AllYoutubeShortsVideos/graphql/index"),
+    AllBlogPosts: () => import("@/components/CMS/AllBlogPosts/graphql/index"),
 };
 
 /**

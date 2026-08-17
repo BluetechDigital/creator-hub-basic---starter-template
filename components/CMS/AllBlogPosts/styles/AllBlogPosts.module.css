@@ -1,0 +1,33 @@
+@import "tailwindcss/theme";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.allBlogPosts {
+    @apply w-full h-full min-h-screen flex flex-col items-center justify-center self-center;
+}
+
+.postsGrid {
+    @apply w-full grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.postCard {
+    @apply flex flex-col gap-2;
+}
+
+.postThumbnail {
+    @apply w-full h-auto rounded;
+}
+
+.postTitle {
+    @apply text-base font-medium;
+}
+
+.postDate {
+    @apply text-sm opacity-70;
+}
+
+.postExcerpt {
+    @apply text-sm;
+}
