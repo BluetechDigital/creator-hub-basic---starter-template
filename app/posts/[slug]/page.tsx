@@ -3,8 +3,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { Metadata } from "next";
-import Image from "next/image";
-import dateFormat from "dateformat";
 import { notFound } from "next/navigation";
 import * as ISeo from "@/graphql/CMS/types/seo";
 import * as IPost from "@/graphql/CMS/types/post";
@@ -24,6 +22,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import ArticleContent from "@/components/Global/Elements/ArticleContent/ArticleContent";
 import { extractToc } from "@/components/Global/Elements/ArticleContent/extractToc";
 import LatestPosts from "@/components/Global/Elements/LatestPosts/LatestPosts";
+import PostHero from "@/app/posts/[slug]/fragments/PostHero";
 import TableOfContents from "@/app/posts/[slug]/fragments/TableOfContents";
 import ShareLinks from "@/app/posts/[slug]/fragments/ShareLinks";
 
@@ -147,66 +146,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		<article className={styles.singlePost}>
 			<StructuredData data={[breadcrumbSchema, articleSchema]} />
 
-			<header className={styles.postHero}>
-				<div className={styles.postHeroInner}>
-					{post.featuredImage?.node?.sourceUrl && (
-						<div className={styles.postHeroImageWrapper}>
-							<Image
-								src={post.featuredImage.node.sourceUrl}
-								alt={post.featuredImage.node.altText || post.title}
-								width={720}
-								height={640}
-								className={styles.postHeroImage}
-								priority
-							/>
-						</div>
-					)}
-					<div className={styles.postHeroContent}>
-						<h1 className={styles.postTitle}>{post.title}</h1>
-						{post.excerpt && (
-							<p className={styles.postExcerpt}>
-								{post.excerpt.replace(/<[^>]+>/g, '').trim()}
-							</p>
-						)}
-						<div className={styles.postMeta}>
-							{post.author?.node?.avatar?.url && (
-								<Image
-									width={32}
-									height={32}
-									alt={post.author.node.name}
-									src={post.author.node.avatar.url}
-									className={styles.postAuthorAvatar}
-								/>
-							)}
-							{post.author?.node?.name && (
-								post.author.node.url ? (
-									<a
-										href={post.author.node.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className={styles.postMetaText}
-									>
-										{post.author.node.name}
-									</a>
-								) : (
-									<span className={styles.postMetaText}>{post.author.node.name}</span>
-								)
-							)}
-							<span className={styles.postMetaDot} aria-hidden="true" />
-							<span className={styles.postMetaText}>{dateFormat(post.date, "mmmm dS, yyyy")}</span>
-							{post.seo?.readingTime ? (
-								<>
-									<span className={styles.postMetaDot} aria-hidden="true" />
-									<span className={styles.postMetaText}>{post.seo.readingTime} min read</span>
-								</>
-							) : null}
-						</div>
-						{post.author?.node?.description && (
-							<p className={styles.postAuthorBio}>{post.author.node.description}</p>
-						)}
-					</div>
-				</div>
-			</header>
+			<PostHero post={post} />
 
 			<div className={styles.postBody}>
 				<aside className={styles.postSidebar}>
