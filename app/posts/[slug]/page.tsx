@@ -3,6 +3,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { Metadata } from "next";
+import Image from "next/image";
+import dateFormat from "dateformat";
 import { notFound } from "next/navigation";
 import * as ISeo from "@/graphql/CMS/types/seo";
 import { postType } from "@/context/constants";
@@ -23,6 +25,12 @@ import ArticleContent from "@/components/Global/Elements/ArticleContent/ArticleC
 // Structured Data (JSON-LD)
 import StructuredData from "@/components/Global/StructuredData/StructuredData";
 import { buildArticleSchema, buildBreadcrumbListSchema } from "@/components/Global/StructuredData/builders";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+import styles from "@/app/posts/[slug]/styles/SinglePost.module.css";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -77,7 +85,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Post Page Component XXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Renders a single blog post for the given slug. Unlike `app/[slug]/page.tsx`, this
+ * Renders a single blog post for the given slug: a header (title, date, author,
+ * featured image) followed by the sanitized body. Unlike `app/[slug]/page.tsx`, this
  * route does not go through the ACF flexible-content pipeline — a blog post is
  * standard WP post content (title/body/featured image), not an ACF block
  * composition — so it fetches `getPostContentBySlug` directly and renders it.
@@ -119,7 +128,23 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	return (
 		<article>
 			<StructuredData data={[breadcrumbSchema, articleSchema]} />
-			<h1>{post.title}</h1>
+			<header className={styles.postHeader}>
+				<h1 className={styles.postTitle}>{post.title}</h1>
+				<span className={styles.postMeta}>
+					{dateFormat(post.date, "mmmm dS, yyyy")}
+					{post.author?.node?.name ? ` · ${post.author.node.name}` : ''}
+				</span>
+				{post.featuredImage?.node?.sourceUrl && (
+					<Image
+						src={post.featuredImage.node.sourceUrl}
+						alt={post.featuredImage.node.altText || post.title}
+						width={1200}
+						height={630}
+						className={styles.postFeaturedImage}
+						priority
+					/>
+				)}
+			</header>
 			<ArticleContent content={post.content} />
 		</article>
 	);
