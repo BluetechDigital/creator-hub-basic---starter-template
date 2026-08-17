@@ -10,6 +10,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX COMMENTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
 export type IProps = {
 	id: string;
+	/** The comment's numeric WP id — used to batch-fetch reactions (`getCommentReactions`) and as the `setCommentReaction` mutation target, since likes/dislikes are deliberately not part of this type (see `getPostComments`'s doc comment for why). */
+	databaseId: number;
 	content: string;
 	date: string;
 	author?: {

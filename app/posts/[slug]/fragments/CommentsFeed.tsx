@@ -10,6 +10,8 @@ import DOMPurify from "isomorphic-dompurify";
 import * as IComment from "@/graphql/CMS/types/comment";
 import { formatRelativeDate } from "@/app/posts/[slug]/fragments/formatRelativeDate";
 import CommentForm from "@/app/posts/[slug]/fragments/CommentForm";
+import CommentReactions from "@/app/posts/[slug]/fragments/CommentReactions";
+import { ICommentReactions } from "@/graphql/CMS/GetCommentReactions";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -24,6 +26,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 type ICommentsFeed = {
 	postId: number;
 	comments: IComment.IProps[];
+	/** Maps a comment/reply's `databaseId` to its `{likes, dislikes}` — from `getCommentReactions`, `{}` if the reactions mu-plugin isn't installed yet (each comment then falls back to 0/0). */
+	commentReactions: Record<number, ICommentReactions>;
 };
 
 /* -----------------------------------------------------------------------------
@@ -31,14 +35,22 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentEntry Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Avatar + author/date meta + sanitized body, shared by both top-level
- * comments and their replies. `children` (the Reply toggle/inline reply box/
- * nested replies list, for top-level comments only) renders inside the same
- * `.commentBody` column, below the content — not as a sibling of it — so it
- * stacks vertically under the comment text instead of appearing as a third
- * flex item next to the avatar.
+ * Avatar + author/date meta + sanitized body + like/dislike pill, shared by
+ * both top-level comments and their replies. `children` (the Reply toggle/
+ * inline reply box/nested replies list, for top-level comments only) renders
+ * inside the same `.commentBody` column, below the reaction pill — not as a
+ * sibling of the whole entry — so it stacks vertically under the comment
+ * instead of appearing as a third flex item next to the avatar.
  */
-const CommentEntry = ({ comment, children }: { comment: IComment.IProps; children?: ReactNode }) => (
+const CommentEntry = ({
+	comment,
+	reactions,
+	children,
+}: {
+	comment: IComment.IProps;
+	reactions: ICommentReactions;
+	children?: ReactNode;
+}) => (
 	<>
 		{comment.author?.node?.avatar?.url && (
 			<Image
@@ -58,10 +70,17 @@ const CommentEntry = ({ comment, children }: { comment: IComment.IProps; childre
 				className={styles.commentContent}
 				dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}
 			/>
+			<CommentReactions
+				commentId={comment.databaseId}
+				initialLikes={reactions.likes}
+				initialDislikes={reactions.dislikes}
+			/>
 			{children}
 		</div>
 	</>
 );
+
+const NO_REACTIONS: ICommentReactions = { likes: 0, dislikes: 0 };
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentsFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -90,8 +109,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentsFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * offered as a separate action from a reply's own row in this first pass.
  * @param postId The post's `databaseId` — needed so an opened reply box knows which post to comment on.
  * @param comments The post's approved top-level comments, in the order WPGraphQL returns them.
+ * @param commentReactions Each comment/reply's like/dislike counts, keyed by `databaseId`.
  */
-const CommentsFeed = ({ postId, comments }: ICommentsFeed) => {
+const CommentsFeed = ({ postId, comments, commentReactions }: ICommentsFeed) => {
 	const [openReplyId, setOpenReplyId] = useState<string | null>(null);
 
 	return (
@@ -105,7 +125,7 @@ const CommentsFeed = ({ postId, comments }: ICommentsFeed) => {
 				<ul className={styles.commentsList}>
 					{comments.map((comment) => (
 						<li key={comment.id} className={styles.commentItem}>
-							<CommentEntry comment={comment}>
+							<CommentEntry comment={comment} reactions={commentReactions[comment.databaseId] ?? NO_REACTIONS}>
 								<button
 									type="button"
 									onClick={() => setOpenReplyId(openReplyId === comment.id ? null : comment.id)}
@@ -128,7 +148,7 @@ const CommentsFeed = ({ postId, comments }: ICommentsFeed) => {
 									<ul className={styles.commentReplies}>
 										{comment.replies.nodes.map((reply) => (
 											<li key={reply.id} className={styles.commentItem}>
-												<CommentEntry comment={reply} />
+												<CommentEntry comment={reply} reactions={commentReactions[reply.databaseId] ?? NO_REACTIONS} />
 											</li>
 										))}
 									</ul>

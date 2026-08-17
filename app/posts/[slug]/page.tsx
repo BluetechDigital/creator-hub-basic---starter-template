@@ -16,6 +16,7 @@ import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
 import { getPostContentBySlug } from "@/graphql/CMS/GetPostContentBySlug";
 import { getPostReactions } from "@/graphql/CMS/GetPostReactions";
 import { getPostComments } from "@/graphql/CMS/GetPostComments";
+import { getCommentReactions } from "@/graphql/CMS/GetCommentReactions";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -105,9 +106,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Post Page Component XXXXXXXXXXXXXXXXXXXXXXXX
  * get a page title for its breadcrumb), a second fetch here would be redundant —
  * `getAllSeoContent` stays solely in `generateMetadata`, where it's actually needed
  * for OG/canonical/etc. `readingTime` comes from `post.seo` directly instead (fetched
- * as part of `getPostContentBySlug`'s own query). Reactions (`getPostReactions`) and
- * comments (`getPostComments`) are each fetched separately with their own short
- * cache lifetimes — see those functions' own doc comments for why.
+ * as part of `getPostContentBySlug`'s own query). Post reactions (`getPostReactions`),
+ * comments (`getPostComments`), and comment-level reactions (`getCommentReactions`)
+ * are each fetched separately with their own short cache lifetimes — see those
+ * functions' own doc comments for why.
  *
  * `params` is awaited before use because Next.js's App Router passes route params as
  * a Promise for async server components.
@@ -144,6 +146,16 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	// query's much longer cache lifetime — see GetPostComments.ts's doc comment.
 	const comments = await getPostComments(post.databaseId);
 
+	// Comment-level like/dislike counts are fetched in one batched call for
+	// every comment/reply on the page (rather than one request per comment),
+	// isolated the same way post reactions are — see GetCommentReactions.ts's
+	// doc comment.
+	const commentDatabaseIds = (comments?.comments ?? []).flatMap((comment) => [
+		comment.databaseId,
+		...(comment.replies?.nodes.map((reply) => reply.databaseId) ?? []),
+	]);
+	const commentReactions = (await getCommentReactions(commentDatabaseIds)) ?? {};
+
 	const { headings, contentWithAnchors } = extractToc(post.content);
 
 	const breadcrumbSchema = buildBreadcrumbListSchema({
@@ -179,7 +191,11 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 				</div>
 			</div>
 
-			<CommentsFeed postId={post.databaseId} comments={comments?.comments ?? []} />
+			<CommentsFeed
+				postId={post.databaseId}
+				comments={comments?.comments ?? []}
+				commentReactions={commentReactions}
+			/>
 			<CommentForm postId={post.databaseId} />
 
 			<LatestPosts excludePostId={post.databaseId} />

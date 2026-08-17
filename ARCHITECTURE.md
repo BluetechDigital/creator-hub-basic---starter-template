@@ -94,30 +94,34 @@ new pattern.
 
 Everything else in this repo talks to WordPress purely through WPGraphQL's existing schema —
 no custom WordPress code required. **One feature is the exception**: the single-post page's
-like/dislike buttons (`app/posts/[slug]/fragments/EngagementBar.tsx`).
+like/dislike buttons, on both posts (`app/posts/[slug]/fragments/EngagementBar.tsx`) and
+individual comments (`app/posts/[slug]/fragments/CommentReactions.tsx`).
 
 WordPress has no native "likes"/"dislikes" concept, so
 [`wordpress-mu-plugins/simple-blogs-post-likes.php`](./wordpress-mu-plugins/simple-blogs-post-likes.php)
 is a small companion PHP file — **not part of the Next.js app or its build** — that registers
-`likes`/`dislikes` fields and a `setPostReaction` mutation in WPGraphQL, backed by post meta.
-Reactions are mutually exclusive (like XOR dislike XOR neither); the mutation takes both the
-visitor's previous and new reaction so it can swap atomically in one call instead of the frontend
-issuing two separate increment/decrement requests. It has to be installed directly on the
-WordPress site (`wp-content/mu-plugins/`, see
-[`wordpress-mu-plugins/README.md`](./wordpress-mu-plugins/README.md) for the install steps) —
-nothing in this repo's toolchain can deploy PHP to a separate WordPress host, so this is a manual
-step for whoever manages that WordPress install, the same way the underlying WP/ACF/WPGraphQL
-setup itself is.
+`likes`/`dislikes` fields and a `setPostReaction`/`setCommentReaction` mutation pair in WPGraphQL,
+one targeting posts (backed by post meta) and one targeting comments (backed by comment meta),
+sharing their swap/validation/rate-limit logic rather than duplicating it. Reactions are mutually
+exclusive (like XOR dislike XOR neither) on both; each mutation takes the visitor's previous and
+new reaction so it can swap atomically in one call instead of the frontend issuing two separate
+increment/decrement requests. It has to be installed directly on the WordPress site
+(`wp-content/mu-plugins/`, see [`wordpress-mu-plugins/README.md`](./wordpress-mu-plugins/README.md)
+for the install steps) — nothing in this repo's toolchain can deploy PHP to a separate WordPress
+host, so this is a manual step for whoever manages that WordPress install, the same way the
+underlying WP/ACF/WPGraphQL setup itself is.
 
 **If it's missing, deleted, or not yet installed** (e.g. a fresh fork, before anyone's set this
 up): nothing breaks. Querying a GraphQL field/mutation that doesn't exist fails validation for
-that request only — `graphql/CMS/GetPostReactions.ts` and `graphql/CMS/SetPostReaction.ts` are
-both deliberately isolated from the main post-content query for exactly this reason (folding
-`likes`/`dislikes` into `GetPostContentBySlug.ts`'s query would take the *entire* post page down,
-not just reactions, the moment the fields don't exist — confirmed live against a real WPGraphQL
-endpoint before this was built this way). Both catch that failure and resolve to `undefined`
-rather than throwing; the frontend shows like/dislike counts of `0` and a button click silently
-no-ops instead of persisting. This folder existing (or not) can never affect a Vercel build.
+that request only — `graphql/CMS/GetPostReactions.ts`/`SetPostReaction.ts` and
+`graphql/CMS/GetCommentReactions.ts`/`SetCommentReaction.ts` are all deliberately isolated from
+their respective main content queries for exactly this reason (folding `likes`/`dislikes` into
+`GetPostContentBySlug.ts`'s or `GetPostComments.ts`'s query would take the *entire* post page or
+comments section down, not just reactions, the moment the fields don't exist — confirmed live
+against a real WPGraphQL endpoint before this was built this way). All four catch that failure
+and resolve to `undefined` rather than throwing; the frontend shows like/dislike counts of `0`
+and a button click silently no-ops instead of persisting. This folder existing (or not) can never
+affect a Vercel build.
 
 ## Testing
 

@@ -35,6 +35,11 @@ export type IPostComments = {
  * `commentCount` is unaffected by that filter — it's WordPress's own total
  * comment count for the post, replies included, matching what a visitor
  * actually sees added up across top-level comments and their replies.
+ * Each comment/reply's `databaseId` (a native WPGraphQL field, safe to fetch
+ * here regardless of whether the reactions mu-plugin is installed) is used by
+ * the caller to batch-fetch like/dislike counts separately via
+ * `getCommentReactions` — deliberately not fetched in this same query, for
+ * the same isolation reason as `likes`/`dislikes` on posts.
  * @param databaseId The post's `databaseId` (its numeric WP post ID).
  * @returns A promise resolving to `{commentCount, comments}`, or `undefined` if the fetch/query failed.
  */
@@ -47,6 +52,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 					comments(first: 20, where: { parent: 0 }) {
 						nodes {
 							id
+							databaseId
 							content
 							date
 							author {
@@ -60,6 +66,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 							replies(first: 20) {
 								nodes {
 									id
+									databaseId
 									content
 									date
 									author {

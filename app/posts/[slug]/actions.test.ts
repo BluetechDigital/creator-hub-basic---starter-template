@@ -5,9 +5,10 @@ Same "mock the side-effect dependency, dynamic-import for fresh env reads" shape
 as components/CMS/ContactForm/actions.test.ts.
 ----------------------------------------------------------------------------- */
 
-const { mockCreateComment, mockSetPostReaction } = vi.hoisted(() => ({
+const { mockCreateComment, mockSetPostReaction, mockSetCommentReaction } = vi.hoisted(() => ({
 	mockCreateComment: vi.fn(),
 	mockSetPostReaction: vi.fn(),
+	mockSetCommentReaction: vi.fn(),
 }));
 
 vi.mock("@/graphql/CMS/CreateComment", () => ({
@@ -16,6 +17,10 @@ vi.mock("@/graphql/CMS/CreateComment", () => ({
 
 vi.mock("@/graphql/CMS/SetPostReaction", () => ({
 	setPostReaction: mockSetPostReaction,
+}));
+
+vi.mock("@/graphql/CMS/SetCommentReaction", () => ({
+	setCommentReaction: mockSetCommentReaction,
 }));
 
 const originalEnv = { ...process.env };
@@ -151,6 +156,44 @@ describe("setReaction", () => {
 
 		const { setReaction } = await importFreshModule();
 		const result = await setReaction(307, undefined, "like");
+
+		expect(result).toEqual({ success: false });
+	});
+});
+
+describe("setCommentReaction", () => {
+	beforeEach(() => {
+		mockSetCommentReaction.mockReset();
+	});
+
+	afterEach(() => {
+		process.env = { ...originalEnv };
+	});
+
+	it("returns the new likes/dislikes counts on success", async () => {
+		mockSetCommentReaction.mockResolvedValue({ likes: 3, dislikes: 0 });
+
+		const { setCommentReaction } = await importFreshModule();
+		const result = await setCommentReaction(2, undefined, "like");
+
+		expect(result).toEqual({ success: true, likes: 3, dislikes: 0 });
+		expect(mockSetCommentReaction).toHaveBeenCalledWith(2, undefined, "like");
+	});
+
+	it("passes the previous reaction through when swapping", async () => {
+		mockSetCommentReaction.mockResolvedValue({ likes: 2, dislikes: 1 });
+
+		const { setCommentReaction } = await importFreshModule();
+		await setCommentReaction(2, "like", "dislike");
+
+		expect(mockSetCommentReaction).toHaveBeenCalledWith(2, "like", "dislike");
+	});
+
+	it("returns success: false when setCommentReaction resolves undefined (mu-plugin not installed, or rate-limited)", async () => {
+		mockSetCommentReaction.mockResolvedValue(undefined);
+
+		const { setCommentReaction } = await importFreshModule();
+		const result = await setCommentReaction(2, undefined, "like");
 
 		expect(result).toEqual({ success: false });
 	});

@@ -8,6 +8,7 @@ import validator from "validator";
 import { verifyRecaptcha } from "@/config/recaptcha";
 import { createComment } from "@/graphql/CMS/CreateComment";
 import { setPostReaction, IReaction } from "@/graphql/CMS/SetPostReaction";
+import { setCommentReaction as setCommentReactionMutation } from "@/graphql/CMS/SetCommentReaction";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -128,6 +129,40 @@ export const setReaction = async (
 	newReaction: IReaction | "none"
 ): Promise<{ success: true; likes: number; dislikes: number } | { success: false }> => {
 	const reactions = await setPostReaction(postId, previousReaction, newReaction);
+
+	if (!reactions) {
+		return { success: false };
+	}
+
+	return { success: true, likes: reactions.likes, dislikes: reactions.dislikes };
+};
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Set Comment Reaction XXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+/**
+ * Server Action for a comment's like/dislike buttons (`CommentReactions.tsx`)
+ * — same shape as `setReaction` above, just targeting `setCommentReaction`
+ * instead of `setPostReaction`. Kept as a separate action (not a shared
+ * `postId | commentId` parameter) since posts and comments are reacted to
+ * from different components with different cookie keys, and a single
+ * combined action would need a discriminator anyway.
+ * @param commentId The comment's `databaseId` to react to.
+ * @param previousReaction The visitor's reaction before this change, or
+ * `undefined` if they had none.
+ * @param newReaction The visitor's new reaction, or `"none"` to just clear their
+ * previous reaction.
+ * @returns `{success: true, likes, dislikes}` with the new counts, or
+ * `{success: false}` if the mu-plugin isn't installed yet, the rate limit
+ * rejected the request, or the request otherwise failed.
+ */
+export const setCommentReaction = async (
+	commentId: number,
+	previousReaction: IReaction | undefined,
+	newReaction: IReaction | "none"
+): Promise<{ success: true; likes: number; dislikes: number } | { success: false }> => {
+	const reactions = await setCommentReactionMutation(commentId, previousReaction, newReaction);
 
 	if (!reactions) {
 		return { success: false };

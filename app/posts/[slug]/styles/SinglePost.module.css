@@ -236,6 +236,48 @@ comment count is its own separate pill alongside it. */
                     @apply text-base text-pure-black/80;
                 }
 
+                /* Comment-level like/dislike pill — same mutually-exclusive
+                pattern and pill shape as .postEngagement's .reactionPill,
+                just scaled down for inline use under a comment instead of
+                being the page's main engagement row. Not sharing those
+                classes directly since CSS Modules nesting scopes them under
+                .postEngagement specifically. */
+                & .commentReactionPill {
+                    @apply flex items-center self-start bg-pure-black/5 rounded-full overflow-hidden mt-1;
+
+                    & .commentReactionButton {
+                        @apply flex items-center gap-1.5 px-3 py-1 text-pure-black transition duration-300;
+
+                        &:hover {
+                            @apply bg-pure-black/10;
+                        }
+
+                        &:disabled {
+                            @apply cursor-not-allowed;
+                        }
+
+                        & svg {
+                            @apply w-3.5 h-3.5;
+
+                            &.commentReactionIconFlipped {
+                                @apply rotate-180;
+                            }
+                        }
+
+                        & .commentReactionCount {
+                            @apply text-xs font-medium;
+                        }
+
+                        &.commentReactionButtonActive {
+                            @apply text-accent-dark bg-accent-default/20;
+                        }
+                    }
+
+                    & .commentReactionDivider {
+                        @apply w-px h-4 bg-pure-black/15;
+                    }
+                }
+
                 & .commentReplyToggle {
                     @apply self-start text-sm font-medium text-pure-black/60 transition duration-300 cursor-pointer;
 
