@@ -39,6 +39,8 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 							author {
 								node {
 									name
+									url
+									description
 									avatar {
 										url
 									}

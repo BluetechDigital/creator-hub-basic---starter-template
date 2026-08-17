@@ -21,12 +21,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Person Schema XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Optional/nullable: that options page can legitimately have no data yet —
  * `getThemesOptionsContent()`'s real return type is loose even though `IGlobal.IProps`
  * asserts it non-null, and this is the one place that assertion gets dereferenced
- * directly, so it has to hold up at runtime too. Note: `IThemesOptions.IProps` also
- * declares `youtubeLink`/`instagramLink`, but those aren't real ACF fields on this
- * WordPress instance's "Global Content" options page (confirmed via direct GraphQL
- * introspection — querying them errors the whole request) — the type is aspirational
- * there, not synced to the live schema, so they're deliberately left out of `sameAs`
- * below rather than silently fetched as undefined.
+ * directly, so it has to hold up at runtime too.
  * @returns A schema.org `Person` object, with `email` and `sameAs` included only when
  * present.
  */
@@ -51,6 +46,9 @@ export const buildPersonSchema = ({
 		themeOptions?.pinterestLink?.url,
 		themeOptions?.snapchatLink?.url,
 		themeOptions?.redditLink?.url,
+		themeOptions?.lineLink?.url,
+		themeOptions?.whatsappLink?.url,
+		themeOptions?.wechatLink?.url,
 	].filter((url): url is string => Boolean(url));
 
 	return {

@@ -20,15 +20,13 @@ type IFields = {
 
 /**
  * ACF field values for the "Global Content" theme options page (contact
- * details, social links, error-page content). Note: this doesn't fully mirror
- * the fields actually fetched by `getThemesOptionsContent` in
- * `GetAllThemesOptions.ts` — cross-check before assuming it's a complete contract.
+ * details, social links, error-page content) — kept in sync with exactly what
+ * `getThemesOptionsContent` in `GetAllThemesOptions.ts` fetches.
  */
 export type IProps = {
 	email: string;
 	address: string;
 	emailTwo: string;
-	textarea: string;
 	phoneNumber: string;
 	copyrightText: string;
     phoneNumberTwo: string;
@@ -47,20 +45,20 @@ export type IProps = {
 			};
 		};
     };
-    
+
     // Social Media Links
 	tiktokLink: IFields;
 	twitchLink: IFields;
     redditLink: IFields;
 	twitterLink: IFields;
 	spotifyLink: IFields;
-	youtubeLink: IFields;
 	threadsLink: IFields;
 	discordLink: IFields;
 	facebookLink: IFields;
 	linkedinLink: IFields;
 	snapchatLink: IFields;
-	instagramLink: IFields;
 	pinterestLink: IFields;
-    
+	lineLink: IFields;
+	whatsappLink: IFields;
+	wechatLink: IFields;
 };

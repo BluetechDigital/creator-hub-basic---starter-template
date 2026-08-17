@@ -131,8 +131,6 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 
 	const { headings, contentWithAnchors } = extractToc(post.content);
 
-	const postUrl = `${SITE_URL ?? ''}/posts/${slug}`;
-
 	const breadcrumbSchema = buildBreadcrumbListSchema({
 		siteUrl: SITE_URL!,
 		slug: `posts/${slug}`,
@@ -173,15 +171,26 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 						<div className={styles.postMeta}>
 							{post.author?.node?.avatar?.url && (
 								<Image
-									src={post.author.node.avatar.url}
-									alt={post.author.node.name}
 									width={32}
 									height={32}
+									alt={post.author.node.name}
+									src={post.author.node.avatar.url}
 									className={styles.postAuthorAvatar}
 								/>
 							)}
 							{post.author?.node?.name && (
-								<span className={styles.postMetaText}>{post.author.node.name}</span>
+								post.author.node.url ? (
+									<a
+										href={post.author.node.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										className={styles.postMetaText}
+									>
+										{post.author.node.name}
+									</a>
+								) : (
+									<span className={styles.postMetaText}>{post.author.node.name}</span>
+								)
 							)}
 							<span className={styles.postMetaDot} aria-hidden="true" />
 							<span className={styles.postMetaText}>{dateFormat(post.date, "mmmm dS, yyyy")}</span>
@@ -192,6 +201,9 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 								</>
 							) : null}
 						</div>
+						{post.author?.node?.description && (
+							<p className={styles.postAuthorBio}>{post.author.node.description}</p>
+						)}
 					</div>
 				</div>
 			</header>
@@ -199,7 +211,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 			<div className={styles.postBody}>
 				<aside className={styles.postSidebar}>
 					<TableOfContents headings={headings} />
-					<ShareLinks url={postUrl} title={post.title} />
+					<ShareLinks />
 				</aside>
 				<div className={styles.postMain}>
 					<ArticleContent content={contentWithAnchors} />

@@ -18,11 +18,6 @@ XXXXXXXXXXXXXXXXXXXXXXXX Themes Option Global Content XXXXXXXXXXXXXXXXXXXXXXXXXX
  * The options page is matched by a hardcoded `where: {name: "Global Content"}`
  * string, not by ID — if that page is ever renamed in the CMS, this query will
  * silently return no matching edges instead of erroring.
- * Note: the fields fetched here don't fully line up with `IThemesOptions.IProps`
- * in `graphql/CMS/types/themesOptions.ts` — this query fetches `lineLink`,
- * `whatsappLink`, and `wechatLink` (not declared on `IProps`), while `IProps`
- * declares `youtubeLink`, `instagramLink`, and `textarea` (not fetched here).
- * Don't assume `IProps` is a complete/accurate contract for this response shape.
  * @returns A promise resolving to the theme options fields object, or `undefined` on failure.
  */
 export const getThemesOptionsContent =

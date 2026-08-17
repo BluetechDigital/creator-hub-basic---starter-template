@@ -54,6 +54,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     @apply w-1 h-1 rounded-full bg-white/60;
 }
 
+.postAuthorBio {
+    @apply text-sm text-white/60;
+}
+
 /* ---- Body: sidebar + main column ---- */
 
 .postBody {

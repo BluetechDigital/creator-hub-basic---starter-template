@@ -20,7 +20,14 @@ export type IProps = {
 	content: string;
 	excerpt: string;
 	featuredImage?: { node: { sourceUrl: string; altText: string } } | null;
-	author?: { node: { name: string; avatar?: { url: string } | null } } | null;
+	author?: {
+		node: {
+			name: string;
+			url?: string | null;
+			description?: string | null;
+			avatar?: { url: string } | null;
+		};
+	} | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
 	seo?: { readingTime: number } | null;
 };
