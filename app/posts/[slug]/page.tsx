@@ -179,7 +179,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 				</div>
 			</div>
 
-			<CommentsFeed comments={comments?.comments ?? []} />
+			<CommentsFeed postId={post.databaseId} comments={comments?.comments ?? []} />
 			<CommentForm postId={post.databaseId} />
 
 			<LatestPosts excludePostId={post.databaseId} />

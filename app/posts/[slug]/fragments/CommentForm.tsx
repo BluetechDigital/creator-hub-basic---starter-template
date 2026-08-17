@@ -4,7 +4,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useFormik } from "formik";
 import ReCAPTCHA from "react-google-recaptcha";
 import { submitComment, ICommentFormValues } from "@/app/posts/[slug]/actions";
@@ -27,9 +27,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 type ICommentForm = {
 	postId: number;
+	/** The parent comment's global `id`, when this form is replying to a comment (`CommentsFeed.tsx`'s inline reply box) — omit for the standalone top-level comment form. */
+	parentId?: string;
+	/** Shown as a "Cancel" button when set — used by the inline reply box to let a visitor close it without submitting. */
+	onCancel?: () => void;
 };
 
-type IFormValues = Omit<ICommentFormValues, 'postId' | 'recaptchaToken'>;
+type IFormValues = Omit<ICommentFormValues, 'postId' | 'recaptchaToken' | 'parentId'>;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -47,9 +51,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * not something this codebase controls. Even on a site with moderation off, a fresh
  * comment still won't appear instantly — `getPostComments` (see its own doc comment)
  * caches for 60s.
+ *
+ * Doubles as the inline reply box (`CommentsFeed.tsx` renders one per comment
+ * when its "Reply" toggle is open) when `parentId`/`onCancel` are passed — same
+ * fields and validation, just a compact layout with no heading and a Cancel
+ * button instead of the page-level spacing. Field ids are suffixed with
+ * `useId()` so multiple instances (the main form + an open reply box) never
+ * collide.
  * @param postId The post's `databaseId` being commented on.
+ * @param parentId The parent comment's global `id`, when replying; omit for a top-level comment.
+ * @param onCancel Renders a "Cancel" button that calls this when set (reply-box mode only).
  */
-const CommentForm = ({ postId }: ICommentForm) => {
+const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
+	const uid = useId();
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const [submitted, setSubmitted] = useState(false);
 	const [generalError, setGeneralError] = useState<string | null>(null);
@@ -68,7 +82,7 @@ const CommentForm = ({ postId }: ICommentForm) => {
 				return;
 			}
 
-			const result = await submitComment({ ...values, postId, recaptchaToken: recaptchaToken ?? "" });
+			const result = await submitComment({ ...values, postId, parentId, recaptchaToken: recaptchaToken ?? "" });
 
 			recaptchaRef.current?.reset();
 
@@ -86,13 +100,13 @@ const CommentForm = ({ postId }: ICommentForm) => {
 	});
 
 	return (
-		<div className={styles.commentForm}>
-			<h2 className={styles.commentFormHeading}>Leave a comment</h2>
+		<div className={`${styles.commentForm} ${parentId ? styles.commentFormCompact : ''}`}>
+			{!parentId && <h2 className={styles.commentFormHeading}>Leave a comment</h2>}
 			<form onSubmit={formik.handleSubmit} noValidate>
 				<div className={styles.commentFormField}>
-					<label htmlFor="comment-name">Name</label>
+					<label htmlFor={`comment-name-${uid}`}>Name</label>
 					<input
-						id="comment-name"
+						id={`comment-name-${uid}`}
 						name="name"
 						type="text"
 						value={formik.values.name}
@@ -102,9 +116,9 @@ const CommentForm = ({ postId }: ICommentForm) => {
 				</div>
 
 				<div className={styles.commentFormField}>
-					<label htmlFor="comment-email">Email</label>
+					<label htmlFor={`comment-email-${uid}`}>Email</label>
 					<input
-						id="comment-email"
+						id={`comment-email-${uid}`}
 						name="email"
 						type="email"
 						value={formik.values.email}
@@ -114,9 +128,9 @@ const CommentForm = ({ postId }: ICommentForm) => {
 				</div>
 
 				<div className={styles.commentFormField}>
-					<label htmlFor="comment-content">Comment</label>
+					<label htmlFor={`comment-content-${uid}`}>{parentId ? 'Reply' : 'Comment'}</label>
 					<textarea
-						id="comment-content"
+						id={`comment-content-${uid}`}
 						name="content"
 						value={formik.values.content}
 						onChange={formik.handleChange}
@@ -129,11 +143,20 @@ const CommentForm = ({ postId }: ICommentForm) => {
 				) : null}
 
 				{generalError ? <p className={styles.commentFormError} role="alert">{generalError}</p> : null}
-				{submitted ? <p role="status">Thanks for your comment! It may take a minute to appear.</p> : null}
+				{submitted ? (
+					<p role="status">Thanks for your {parentId ? 'reply' : 'comment'}! It may take a minute to appear.</p>
+				) : null}
 
-				<button type="submit" disabled={formik.isSubmitting} className={styles.commentFormSubmit}>
-					{formik.isSubmitting ? 'Sending...' : 'Post comment'}
-				</button>
+				<div className={styles.commentFormActions}>
+					<button type="submit" disabled={formik.isSubmitting} className={styles.commentFormSubmit}>
+						{formik.isSubmitting ? 'Sending...' : parentId ? 'Reply' : 'Post comment'}
+					</button>
+					{onCancel ? (
+						<button type="button" onClick={onCancel} className={styles.commentFormCancel}>
+							Cancel
+						</button>
+					) : null}
+				</div>
 			</form>
 		</div>
 	);

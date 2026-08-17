@@ -51,6 +51,24 @@ describe("createComment", () => {
 		expect(body.query).not.toContain("Jane Doe");
 	});
 
+	it("includes parentId as a GraphQL variable when replying", async () => {
+		setCmsEnv();
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { createComment: { success: true } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { createComment } = await importFreshModule();
+		await createComment({ ...validArgs, parentId: "Y29tbWVudDoy" });
+
+		const [, requestInit] = mockFetch.mock.calls[0];
+		const body = JSON.parse((requestInit as RequestInit).body as string);
+
+		expect(body.variables).toEqual({ ...validArgs, parentId: "Y29tbWVudDoy" });
+	});
+
 	it("returns undefined when the HTTP response is not ok", async () => {
 		setCmsEnv();
 

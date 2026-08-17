@@ -19,6 +19,8 @@ export type ICommentFormValues = {
 	email: string;
 	content: string;
 	recaptchaToken: string;
+	/** The parent comment's global GraphQL `id`, when replying; omit for a top-level comment. */
+	parentId?: string;
 };
 
 type ICommentFormErrors = {
@@ -84,6 +86,7 @@ export const submitComment = async (values: ICommentFormValues): Promise<ICommen
 			authorName: name,
 			authorEmail: email,
 			content,
+			parentId: values.parentId,
 		});
 
 		if (!result?.success) {

@@ -2,7 +2,12 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX COMMENTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/** A single approved comment on a post, as returned as part of `getPostContentBySlug`. */
+/**
+ * A single approved comment on a post, as returned by `getPostComments`.
+ * `replies` is fetched one level deep only — a reply's own replies aren't
+ * requested, since the comment UI flattens reply-to-reply into the same
+ * top-level thread (YouTube-style) rather than nesting indefinitely.
+ */
 export type IProps = {
 	id: string;
 	content: string;
@@ -12,6 +17,9 @@ export type IProps = {
 			name: string;
 			avatar?: { url: string } | null;
 		};
+	} | null;
+	replies?: {
+		nodes: IProps[];
 	} | null;
 };
 

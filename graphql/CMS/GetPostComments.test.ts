@@ -46,6 +46,32 @@ describe("getPostComments", () => {
 		expect(await getPostComments(307)).toEqual({ commentCount: 1, comments: [comment] });
 	});
 
+	it("passes nested replies through unchanged", async () => {
+		setCmsEnv();
+
+		const comment = {
+			id: "1",
+			content: "<p>Great post!</p>",
+			date: "2026-01-05T00:00:00",
+			author: { node: { name: "Jane Doe" } },
+			replies: {
+				nodes: [
+					{ id: "2", content: "<p>Agreed!</p>", date: "2026-01-06T00:00:00", author: { node: { name: "John Smith" } } },
+				],
+			},
+		};
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { post: { commentCount: 2, comments: { nodes: [comment] } } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getPostComments } = await importFreshModule();
+
+		expect(await getPostComments(307)).toEqual({ commentCount: 2, comments: [comment] });
+	});
+
 	it("defaults to a count of 0 and an empty list when the post has no comments", async () => {
 		setCmsEnv();
 

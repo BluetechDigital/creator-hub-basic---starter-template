@@ -18,14 +18,23 @@ export type IPostComments = {
 };
 
 /**
- * Fetches a single post's approved comment count + comments list — kept as its
- * own isolated query with a short 60s cache, rather than folded into
+ * Fetches a single post's approved comment count + top-level comments (each
+ * with up to 20 direct replies nested one level deep — see `IComment.IProps`'s
+ * doc comment for why replies aren't fetched recursively) — kept as its own
+ * isolated query with a short 60s cache, rather than folded into
  * `getPostContentBySlug`'s query (which caches for 24h — fine for content that
  * rarely changes, but far too long for a comment a visitor just posted and had
  * approved to actually show up on the page). Confirmed live: a comment
  * approved in wp-admin was correctly returned by WPGraphQL immediately, but
  * didn't appear on the frontend until the 24h post-content cache expired —
  * this isolation, matching `getPostReactions`'s 60s cache, fixes that.
+ *
+ * `where: { parent: 0 }` (confirmed live) filters `comments` to top-level only
+ * — without it, replies would also come back as their own flat entries,
+ * duplicating them alongside their nested appearance under `replies`.
+ * `commentCount` is unaffected by that filter — it's WordPress's own total
+ * comment count for the post, replies included, matching what a visitor
+ * actually sees added up across top-level comments and their replies.
  * @param databaseId The post's `databaseId` (its numeric WP post ID).
  * @returns A promise resolving to `{commentCount, comments}`, or `undefined` if the fetch/query failed.
  */
@@ -35,7 +44,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 			{
 				post(id: ${databaseId}, idType: DATABASE_ID) {
 					commentCount
-					comments(first: 20) {
+					comments(first: 20, where: { parent: 0 }) {
 						nodes {
 							id
 							content
@@ -45,6 +54,21 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 									name
 									avatar {
 										url
+									}
+								}
+							}
+							replies(first: 20) {
+								nodes {
+									id
+									content
+									date
+									author {
+										node {
+											name
+											avatar {
+												url
+											}
+										}
 									}
 								}
 							}
