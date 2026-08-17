@@ -2,8 +2,6 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX POSTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import * as IComment from "@/graphql/CMS/types/comment";
-
 /* ---- Single post (getPostContentBySlug) ---- */
 
 export type IResponse = {
@@ -32,14 +30,6 @@ export type IProps = {
 	} | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
 	seo?: { readingTime: number } | null;
-	/** Custom counters from the simple-blogs-post-likes mu-plugin — 0 if that plugin isn't installed yet. */
-	likes?: number | null;
-	dislikes?: number | null;
-	commentCount?: number | null;
-	comments?: {
-		nodes: IComment.IProps[];
-		pageInfo: { hasNextPage: boolean; endCursor: string | null };
-	} | null;
 };
 
 /* ---- List summaries (getAllPostsSummaries, getLatestPosts) ---- */

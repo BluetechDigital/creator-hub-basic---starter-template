@@ -15,6 +15,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Queries Functions XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { getAllSeoContent } from "@/graphql/CMS/GetAllSeoContent";
 import { getPostContentBySlug } from "@/graphql/CMS/GetPostContentBySlug";
 import { getPostReactions } from "@/graphql/CMS/GetPostReactions";
+import { getPostComments } from "@/graphql/CMS/GetPostComments";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -104,7 +105,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Post Page Component XXXXXXXXXXXXXXXXXXXXXXXX
  * get a page title for its breadcrumb), a second fetch here would be redundant —
  * `getAllSeoContent` stays solely in `generateMetadata`, where it's actually needed
  * for OG/canonical/etc. `readingTime` comes from `post.seo` directly instead (fetched
- * as part of `getPostContentBySlug`'s own query).
+ * as part of `getPostContentBySlug`'s own query). Reactions (`getPostReactions`) and
+ * comments (`getPostComments`) are each fetched separately with their own short
+ * cache lifetimes — see those functions' own doc comments for why.
  *
  * `params` is awaited before use because Next.js's App Router passes route params as
  * a Promise for async server components.
@@ -136,6 +139,11 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	// awaited plainly rather than wrapped in try/catch like getPostContentBySlug.
 	const reactions = await getPostReactions(post.databaseId);
 
+	// Isolated from getPostContentBySlug with its own short cache so a freshly
+	// approved comment shows up quickly instead of waiting on the post-content
+	// query's much longer cache lifetime — see GetPostComments.ts's doc comment.
+	const comments = await getPostComments(post.databaseId);
+
 	const { headings, contentWithAnchors } = extractToc(post.content);
 
 	const breadcrumbSchema = buildBreadcrumbListSchema({
@@ -158,7 +166,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 				post={post}
 				initialLikes={reactions?.likes ?? 0}
 				initialDislikes={reactions?.dislikes ?? 0}
-				commentCount={post.commentCount ?? 0}
+				commentCount={comments?.commentCount ?? 0}
 			/>
 
 			<div className={styles.postBody}>
@@ -171,7 +179,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 				</div>
 			</div>
 
-			<CommentsFeed comments={post.comments?.nodes ?? []} />
+			<CommentsFeed comments={comments?.comments ?? []} />
 			<CommentForm postId={post.databaseId} />
 
 			<LatestPosts excludePostId={post.databaseId} />
