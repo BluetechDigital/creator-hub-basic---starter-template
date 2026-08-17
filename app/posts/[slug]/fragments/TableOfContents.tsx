@@ -33,13 +33,16 @@ const TableOfContents: FC<ITableOfContents> = ({ headings }) => {
 	if (headings.length === 0) return null;
 
 	return (
-		<ul className={styles.tableOfContents}>
-			{headings.map((heading) => (
-				<li key={heading.id} className={heading.level === 3 ? styles.tocItemSub : styles.tocItem}>
-					<a href={`#${heading.id}`}>{heading.text}</a>
-				</li>
-			))}
-		</ul>
+		<>
+			<h4 className={styles.tocHeading}>TABLE OF CONTENTS</h4>
+			<ul className={styles.tableOfContents}>
+				{headings.map((heading) => (
+					<li key={heading.id} className={heading.level === 3 ? styles.tocItemSub : styles.tocItem}>
+						<a href={`#${heading.id}`}>{heading.text}</a>
+					</li>
+				))}
+			</ul>
+		</>
 	);
 };
 
