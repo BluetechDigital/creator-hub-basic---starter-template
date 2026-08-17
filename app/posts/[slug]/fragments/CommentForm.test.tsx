@@ -22,7 +22,7 @@ describe("CommentForm", () => {
 		expect(screen.getByLabelText("Comment")).toBeInTheDocument();
 	});
 
-	it("submits the comment and shows an awaiting-approval message", async () => {
+	it("submits the comment and shows a confirmation message", async () => {
 		mockSubmitComment.mockResolvedValue({ success: true });
 
 		render(<CommentForm postId={307} />);
@@ -34,7 +34,7 @@ describe("CommentForm", () => {
 		fireEvent.click(screen.getByRole("button", { name: /post comment/i }));
 
 		await waitFor(() => {
-			expect(screen.getByRole("status")).toHaveTextContent(/awaiting approval/i);
+			expect(screen.getByRole("status")).toHaveTextContent(/thanks for your comment/i);
 		});
 
 		expect(mockSubmitComment).toHaveBeenCalledWith(

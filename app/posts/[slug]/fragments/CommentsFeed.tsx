@@ -4,9 +4,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { FC } from "react";
 import Image from "next/image";
-import dateFormat from "dateformat";
 import DOMPurify from "isomorphic-dompurify";
 import * as IComment from "@/graphql/CMS/types/comment";
+import { formatRelativeDate } from "@/app/posts/[slug]/fragments/formatRelativeDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -62,7 +62,7 @@ const CommentsFeed: FC<ICommentsFeed> = ({ comments }) => {
 							<div className={styles.commentBody}>
 								<div className={styles.commentMeta}>
 									<span className={styles.commentAuthor}>{comment.author?.node?.name ?? 'Anonymous'}</span>
-									<span className={styles.commentDate}>{dateFormat(comment.date, "mmmm dS, yyyy")}</span>
+									<span className={styles.commentDate}>{formatRelativeDate(comment.date)}</span>
 								</div>
 								<div
 									className={styles.commentContent}

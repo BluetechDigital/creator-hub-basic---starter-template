@@ -47,7 +47,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             @apply flex flex-wrap items-center gap-3;
 
             & .postAuthorAvatar {
-                @apply rounded-full;
+                @apply rounded-full object-cover;
             }
 
             & .postMetaText {
@@ -214,7 +214,7 @@ comment count is its own separate pill alongside it. */
             @apply flex gap-4;
 
             & .commentAvatar {
-                @apply rounded-full shrink-0;
+                @apply rounded-full shrink-0 object-cover;
             }
 
             & .commentBody {

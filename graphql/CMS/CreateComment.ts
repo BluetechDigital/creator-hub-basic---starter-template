@@ -20,12 +20,13 @@ type ICreateCommentArgs = {
 };
 
 /**
- * Submits a new comment on a post via WPGraphQL's `createComment` mutation.
- * Confirmed live against this app's actual WordPress install that new comments are
- * held in a pending-moderation queue by default, not auto-published — a successful
- * `{success: true}` here means the submission was accepted, not that the comment is
- * publicly visible yet, so callers should show an "awaiting approval" message
- * rather than trying to render the comment immediately.
+ * Submits a new comment on a post via WPGraphQL's `createComment` mutation. A
+ * successful `{success: true}` here means the submission was accepted — whether
+ * it's immediately publicly visible depends on the WordPress site's own
+ * Discussion settings (`Settings → Discussion → "Comment must be manually
+ * approved"`), which this codebase doesn't control or assume either way.
+ * Callers should show a generic confirmation rather than promising instant
+ * visibility or claiming the comment is pending review.
  * @param postId The post's `databaseId` to comment on.
  * @param authorName The commenter's name.
  * @param authorEmail The commenter's email (not displayed publicly — standard WP behaviour).

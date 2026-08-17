@@ -39,10 +39,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Comment submission form — same shape as `components/CMS/ContactForm/ContactForm.tsx`
  * (`useFormik`, no client-side validation library since `actions.ts`'s `submitComment`
  * is the single source of truth for validation rules, same reCAPTCHA widget wired to
- * the shared `submitComment` Server Action). On success, shows an "awaiting approval"
- * message instead of appending to the visible feed — confirmed live against this
- * app's actual WordPress install that new comments are held for moderation by
- * default, not auto-published.
+ * the shared `submitComment` Server Action). On success, shows a generic "may take a
+ * minute to appear" message instead of appending to the visible feed — deliberately
+ * doesn't promise instant visibility or claim moderation either way, since whether a
+ * new comment publishes immediately or waits for approval is a per-site WordPress
+ * Discussion setting (`Settings → Discussion → "Comment must be manually approved"`),
+ * not something this codebase controls. Even on a site with moderation off, a fresh
+ * comment still won't appear instantly — `getPostComments` (see its own doc comment)
+ * caches for 60s.
  * @param postId The post's `databaseId` being commented on.
  */
 const CommentForm = ({ postId }: ICommentForm) => {
@@ -125,7 +129,7 @@ const CommentForm = ({ postId }: ICommentForm) => {
 				) : null}
 
 				{generalError ? <p className={styles.commentFormError} role="alert">{generalError}</p> : null}
-				{submitted ? <p role="status">Thanks — your comment is awaiting approval.</p> : null}
+				{submitted ? <p role="status">Thanks for your comment! It may take a minute to appear.</p> : null}
 
 				<button type="submit" disabled={formik.isSubmitting} className={styles.commentFormSubmit}>
 					{formik.isSubmitting ? 'Sending...' : 'Post comment'}

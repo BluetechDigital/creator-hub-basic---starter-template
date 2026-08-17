@@ -40,10 +40,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Submit Comment XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Server Action for the single-post comment form: validates input, verifies
  * reCAPTCHA (same shared check as `submitContactForm`), then calls `createComment`.
- * A `{success: true}` result means the comment was accepted, not that it's publicly
- * visible yet — confirmed live against this app's actual WordPress install that new
- * comments are held for moderation by default (see `CreateComment.ts`'s doc
- * comment) — the caller should show an "awaiting approval" message.
+ * A `{success: true}` result means the comment was accepted, not that it's
+ * necessarily publicly visible yet — whether a new comment publishes immediately
+ * or waits for manual approval is a per-site WordPress Discussion setting (see
+ * `CreateComment.ts`'s doc comment), so the caller shows a generic "may take a
+ * moment" message rather than asserting either behaviour.
  * @param values The submitted form values, including the reCAPTCHA response token.
  * @returns `{success: true}`, or `{success: false, errors}` with field-level messages
  * (validation failures) or a `general`/`recaptcha` message (verification or submit failures).
