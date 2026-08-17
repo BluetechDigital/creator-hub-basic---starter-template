@@ -50,7 +50,7 @@ globals.css imports this too, so there's exactly one source of truth.
     --color-secondary-darker: #000;
 
     /* Accent Colours */
-    --color-accent-default: #4ade80;
+    --color-accent-default: #bff007;
     --color-accent-two: #4ade80;
     --color-accent-dark: #22c55e;
     --color-accent-darker: #16a34a;
