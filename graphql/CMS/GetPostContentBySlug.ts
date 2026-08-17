@@ -23,6 +23,7 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 				posts(where: {name: "${slug}", status: PUBLISH}) {
 					edges {
 						node {
+							databaseId
 							title
 							slug
 							date
@@ -38,6 +39,9 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 							author {
 								node {
 									name
+									avatar {
+										url
+									}
 								}
 							}
 							categories {
@@ -45,6 +49,9 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 									name
 									slug
 								}
+							}
+							seo {
+								readingTime
 							}
 						}
 					}

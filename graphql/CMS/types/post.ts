@@ -12,6 +12,7 @@ export type IResponse = {
 
 /** A single published blog post's rendering fields, as returned by `getPostContentBySlug`. */
 export type IProps = {
+	databaseId: number;
 	title: string;
 	slug: string;
 	date: string;
@@ -19,13 +20,17 @@ export type IProps = {
 	content: string;
 	excerpt: string;
 	featuredImage?: { node: { sourceUrl: string; altText: string } } | null;
-	author?: { node: { name: string } } | null;
+	author?: { node: { name: string; avatar?: { url: string } | null } } | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
+	seo?: { readingTime: number } | null;
 };
 
-/* ---- List summaries (getAllPostsSummaries) ---- */
+/* ---- List summaries (getAllPostsSummaries, getLatestPosts) ---- */
 
-export type ISummaryProps = Pick<IProps, "title" | "slug" | "date" | "excerpt" | "featuredImage">;
+export type ISummaryProps = Pick<
+	IProps,
+	"title" | "slug" | "date" | "excerpt" | "featuredImage" | "categories" | "seo"
+>;
 
 export type ISummaryResponse = {
 	posts: ({

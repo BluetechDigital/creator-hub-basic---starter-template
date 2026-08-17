@@ -4,6 +4,46 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/*
+Generic styling for whatever standard WP block markup an editor produces
+(paragraphs, headings, images, quotes, links, lists) — not a fixed set of
+components, since the CMS editor can write any of these at any time. Scoped
+under .articleContent so it only applies inside a rendered post body.
+*/
+
 .articleContent {
-    @apply w-full max-w-none;
+    @apply w-full max-w-none flex flex-col gap-6 text-lg text-white/80;
+}
+
+.articleContent h2 {
+    @apply text-3xl text-white tracking-tight scroll-mt-24;
+}
+
+.articleContent h3 {
+    @apply text-2xl text-white tracking-tight scroll-mt-24;
+}
+
+.articleContent p {
+    @apply text-lg text-white/80;
+}
+
+.articleContent a {
+    @apply text-green-400 underline underline-offset-2;
+}
+
+.articleContent img {
+    @apply w-full h-auto rounded-2xl;
+}
+
+.articleContent blockquote {
+    @apply flex flex-col gap-2 pl-6 border-l-2 border-green-400 text-xl text-white;
+}
+
+.articleContent ul,
+.articleContent ol {
+    @apply flex flex-col gap-2 pl-6 text-lg text-white/80 list-disc;
+}
+
+.articleContent ol {
+    @apply list-decimal;
 }

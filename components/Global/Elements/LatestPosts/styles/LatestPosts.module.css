@@ -1,0 +1,61 @@
+@import "tailwindcss/theme";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.latestPosts {
+    @apply w-full bg-gray-950 px-4 sm:px-8 py-20;
+}
+
+.latestPostsEyebrow {
+    @apply inline-block mb-4 text-sm text-green-400 font-medium;
+}
+
+.latestPostsHeading {
+    @apply mb-16 text-4xl sm:text-5xl lg:text-6xl text-white;
+}
+
+.latestPostsGrid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+}
+
+.latestPostCard {
+    @apply flex flex-col;
+}
+
+.latestPostImageWrapper {
+    @apply mb-6 overflow-hidden rounded-3xl;
+}
+
+.latestPostImage {
+    @apply w-full h-auto object-cover transform hover:scale-110 transition duration-700;
+}
+
+.latestPostMeta {
+    @apply flex flex-wrap items-center gap-2 mb-3 text-sm text-white/60;
+}
+
+.latestPostMetaDot {
+    @apply w-1 h-1 rounded-full bg-white/60;
+}
+
+.latestPostTitleLink {
+    @apply block mb-3;
+}
+
+.latestPostTitle {
+    @apply text-2xl text-white hover:underline;
+}
+
+.latestPostExcerpt {
+    @apply mb-4 text-white/60;
+}
+
+.latestPostTags {
+    @apply flex flex-wrap gap-2;
+}
+
+.latestPostTag {
+    @apply inline-block px-4 py-2 text-xs text-white font-medium bg-white/10 rounded-full;
+}

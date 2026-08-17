@@ -14,11 +14,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX POSTS SUMMARIES XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Fetches a page of published post summaries (title, slug, date, excerpt, featured
- * image) for the blog archive grid, using WPGraphQL's Relay-style cursor pagination
- * on the `posts` connection. `pageInfo` is always returned even though the current
- * `AllBlogPosts` block doesn't render a "Load more" control — keeping the
- * cursor/pageInfo shape wired through now means a future paginated UI only needs to
- * call this again with `after`, not change the query.
+ * image, categories, read time) for the blog archive grid and the "Latest news"
+ * section, using WPGraphQL's Relay-style cursor pagination on the `posts` connection.
+ * `pageInfo` is always returned even though the current `AllBlogPosts` block doesn't
+ * render a "Load more" control — keeping the cursor/pageInfo shape wired through now
+ * means a future paginated UI only needs to call this again with `after`, not change
+ * the query.
  * @param first Page size.
  * @param after Optional end cursor from a previous page, for future pagination.
  * @returns A promise resolving to `{ posts, pageInfo }`, or `undefined` on failure.
@@ -43,6 +44,15 @@ export const getAllPostsSummaries = async (
 								sourceUrl
 								altText
 							}
+						}
+						categories {
+							nodes {
+								name
+								slug
+							}
+						}
+						seo {
+							readingTime
 						}
 					}
 					pageInfo {

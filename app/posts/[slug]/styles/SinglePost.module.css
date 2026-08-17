@@ -4,18 +4,98 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-.postHeader {
-    @apply w-full max-w-3xl mx-auto flex flex-col gap-2 mb-6;
+.singlePost {
+    @apply block w-full bg-gray-950;
+}
+
+/* ---- Hero ---- */
+
+.postHero {
+    @apply w-full px-4 sm:px-8 pt-20 pb-16 border-b border-white/10;
+}
+
+.postHeroInner {
+    @apply max-w-6xl mx-auto flex flex-wrap items-center gap-12;
+}
+
+.postHeroImageWrapper {
+    @apply w-full md:flex-1 overflow-hidden rounded-3xl;
+}
+
+.postHeroImage {
+    @apply w-full h-auto object-cover;
+}
+
+.postHeroContent {
+    @apply w-full md:flex-1 flex flex-col gap-4;
 }
 
 .postTitle {
-    @apply text-3xl font-semibold;
+    @apply text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight;
+}
+
+.postExcerpt {
+    @apply text-lg text-white/60;
 }
 
 .postMeta {
-    @apply text-sm opacity-70;
+    @apply flex flex-wrap items-center gap-3;
 }
 
-.postFeaturedImage {
-    @apply w-full h-auto rounded my-4;
+.postAuthorAvatar {
+    @apply rounded-full;
+}
+
+.postMetaText {
+    @apply text-sm text-white font-medium;
+}
+
+.postMetaDot {
+    @apply w-1 h-1 rounded-full bg-white/60;
+}
+
+/* ---- Body: sidebar + main column ---- */
+
+.postBody {
+    @apply max-w-6xl mx-auto flex flex-wrap lg:flex-nowrap gap-12 px-4 sm:px-8 py-16 border-b border-white/10;
+}
+
+.postSidebar {
+    @apply w-full lg:w-1/4 lg:shrink-0 flex flex-col gap-8;
+}
+
+.postMain {
+    @apply w-full lg:flex-1 min-w-0;
+}
+
+/* ---- Table of contents ---- */
+
+.tableOfContents {
+    @apply flex flex-col gap-4 pb-8 border-b border-white/10;
+}
+
+.tocItem a {
+    @apply text-xl text-white/90 hover:text-green-400 transition duration-300;
+}
+
+.tocItemSub a {
+    @apply pl-4 text-base text-white/70 hover:text-green-400 transition duration-300;
+}
+
+/* ---- Share links ---- */
+
+.shareLinks {
+    @apply flex flex-col items-center gap-4;
+}
+
+.copyLinkButton {
+    @apply w-full px-6 py-3 text-sm text-white hover:text-black font-medium text-center border-2 border-white hover:border-green-400 hover:bg-green-400 rounded-full transition duration-300 cursor-pointer;
+}
+
+.shareIcons {
+    @apply flex items-center justify-center gap-3;
+}
+
+.shareIconLink {
+    @apply flex items-center justify-center w-12 h-12 text-white hover:text-black border-2 border-white hover:border-green-400 hover:bg-green-400 rounded-full transition duration-300;
 }

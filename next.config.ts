@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
 						key: "Content-Security-Policy",
 						value: `
 							default-src 'self';
-							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} https://www.googletagmanager.com https://www.google-analytics.com data:;
+							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} https://secure.gravatar.com https://www.googletagmanager.com https://www.google-analytics.com data:;
 							script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
 							style-src 'self' 'unsafe-inline';
 							connect-src 'self' ${process.env.CMS_URL} https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com;
@@ -159,6 +159,15 @@ const nextConfig: NextConfig = {
 				hostname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME}`,
 				port: "",
 				pathname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATHNAME}/**`,
+			},
+			{
+				// WordPress author avatars — a fixed, universal host (not client-specific
+				// like the CMS/YouTube/Instagram hosts above), so hardcoded rather than
+				// read from an env var.
+				protocol: "https",
+				hostname: "secure.gravatar.com",
+				port: "",
+				pathname: "/avatar/**",
 			},
 		],
 	}

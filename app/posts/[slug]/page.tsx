@@ -22,6 +22,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import ArticleContent from "@/components/Global/Elements/ArticleContent/ArticleContent";
+import { extractToc } from "@/components/Global/Elements/ArticleContent/extractToc";
+import LatestPosts from "@/components/Global/Elements/LatestPosts/LatestPosts";
+import TableOfContents from "@/app/posts/[slug]/fragments/TableOfContents";
+import ShareLinks from "@/app/posts/[slug]/fragments/ShareLinks";
 
 // Structured Data (JSON-LD)
 import StructuredData from "@/components/Global/StructuredData/StructuredData";
@@ -86,17 +90,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Post Page Component XXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Renders a single blog post for the given slug: a header (title, date, author,
- * featured image) followed by the sanitized body. Unlike `app/[slug]/page.tsx`, this
- * route does not go through the ACF flexible-content pipeline — a blog post is
- * standard WP post content (title/body/featured image), not an ACF block
- * composition — so it fetches `getPostContentBySlug` directly and renders it.
+ * Renders a single blog post for the given slug: a hero header (title, excerpt,
+ * author, read time, featured image), a two-column body (table of contents + share
+ * links sidebar, article content), and a "Latest news" section of other posts.
+ * Unlike `app/[slug]/page.tsx`, this route does not go through the ACF
+ * flexible-content pipeline — a blog post is standard WP post content, not an ACF
+ * block composition — so it fetches `getPostContentBySlug` directly and renders it.
  *
  * `getPostContentBySlug` already returns the post's own `title`, so unlike
  * `app/[slug]/page.tsx`'s `DynamicPages` (which needs a parallel SEO fetch just to
  * get a page title for its breadcrumb), a second fetch here would be redundant —
  * `getAllSeoContent` stays solely in `generateMetadata`, where it's actually needed
- * for OG/canonical/etc.
+ * for OG/canonical/etc. `readingTime` comes from `post.seo` directly instead (fetched
+ * as part of `getPostContentBySlug`'s own query).
  *
  * `params` is awaited before use because Next.js's App Router passes route params as
  * a Promise for async server components.
@@ -123,6 +129,10 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		notFound();
 	}
 
+	const { headings, contentWithAnchors } = extractToc(post.content);
+
+	const postUrl = `${SITE_URL ?? ''}/posts/${slug}`;
+
 	const breadcrumbSchema = buildBreadcrumbListSchema({
 		siteUrl: SITE_URL!,
 		slug: `posts/${slug}`,
@@ -136,26 +146,67 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	});
 
 	return (
-		<article>
+		<article className={styles.singlePost}>
 			<StructuredData data={[breadcrumbSchema, articleSchema]} />
-			<header className={styles.postHeader}>
-				<h1 className={styles.postTitle}>{post.title}</h1>
-				<span className={styles.postMeta}>
-					{dateFormat(post.date, "mmmm dS, yyyy")}
-					{post.author?.node?.name ? ` · ${post.author.node.name}` : ''}
-				</span>
-				{post.featuredImage?.node?.sourceUrl && (
-					<Image
-						src={post.featuredImage.node.sourceUrl}
-						alt={post.featuredImage.node.altText || post.title}
-						width={1200}
-						height={630}
-						className={styles.postFeaturedImage}
-						priority
-					/>
-				)}
+
+			<header className={styles.postHero}>
+				<div className={styles.postHeroInner}>
+					{post.featuredImage?.node?.sourceUrl && (
+						<div className={styles.postHeroImageWrapper}>
+							<Image
+								src={post.featuredImage.node.sourceUrl}
+								alt={post.featuredImage.node.altText || post.title}
+								width={720}
+								height={640}
+								className={styles.postHeroImage}
+								priority
+							/>
+						</div>
+					)}
+					<div className={styles.postHeroContent}>
+						<h1 className={styles.postTitle}>{post.title}</h1>
+						{post.excerpt && (
+							<p className={styles.postExcerpt}>
+								{post.excerpt.replace(/<[^>]+>/g, '').trim()}
+							</p>
+						)}
+						<div className={styles.postMeta}>
+							{post.author?.node?.avatar?.url && (
+								<Image
+									src={post.author.node.avatar.url}
+									alt={post.author.node.name}
+									width={32}
+									height={32}
+									className={styles.postAuthorAvatar}
+								/>
+							)}
+							{post.author?.node?.name && (
+								<span className={styles.postMetaText}>{post.author.node.name}</span>
+							)}
+							<span className={styles.postMetaDot} aria-hidden="true" />
+							<span className={styles.postMetaText}>{dateFormat(post.date, "mmmm dS, yyyy")}</span>
+							{post.seo?.readingTime ? (
+								<>
+									<span className={styles.postMetaDot} aria-hidden="true" />
+									<span className={styles.postMetaText}>{post.seo.readingTime} min read</span>
+								</>
+							) : null}
+						</div>
+					</div>
+				</div>
 			</header>
-			<ArticleContent content={post.content} />
+
+			<div className={styles.postBody}>
+				<aside className={styles.postSidebar}>
+					<TableOfContents headings={headings} />
+					<ShareLinks url={postUrl} title={post.title} />
+				</aside>
+				<div className={styles.postMain}>
+					<ArticleContent content={contentWithAnchors} />
+				</div>
+			</div>
+
+			<LatestPosts excludePostId={post.databaseId} />
 		</article>
 	);
 }
