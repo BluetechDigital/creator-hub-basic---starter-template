@@ -14,7 +14,7 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
  * separately via the already-generic `getAllSeoContent(slug, postType.posts)` — this
  * function only covers the fields the post's own body/breadcrumb rendering needs.
  * Deliberately does NOT fetch `likes` here — that's a custom field from the
- * creator-hub-likes mu-plugin (see `wordpress-mu-plugins/`), which may not be
+ * simple-blogs-post-likes mu-plugin (see `wordpress-mu-plugins/`), which may not be
  * installed on every fork/environment. A GraphQL schema-validation error (querying
  * a field that doesn't exist) fails the *entire* request, not just that field — so
  * `likes` is fetched separately via `getPostLikes`, isolated so a missing plugin

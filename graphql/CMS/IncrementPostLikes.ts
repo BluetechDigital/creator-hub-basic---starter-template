@@ -13,7 +13,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX INCREMENT POST LIKES XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Increments a post's like count by 1, via the custom `incrementPostLikes`
- * mutation registered by the `creator-hub-likes` mu-plugin (see
+ * mutation registered by the `simple-blogs-post-likes` mu-plugin (see
  * `wordpress-mu-plugins/`). Returns `undefined` — not a thrown error — when that
  * plugin isn't installed yet (the mutation doesn't exist), same graceful-
  * degradation reasoning as `getPostLikes`: this is an expected state for a fresh

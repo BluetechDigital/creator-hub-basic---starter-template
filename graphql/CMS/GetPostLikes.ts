@@ -14,7 +14,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX POST LIKES XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Fetches a single post's like count — kept as its own isolated query rather than
  * folded into `getPostContentBySlug`'s query, because `likes` is a custom field
- * added by the `creator-hub-likes` mu-plugin (see `wordpress-mu-plugins/`), which
+ * added by the `simple-blogs-post-likes` mu-plugin (see `wordpress-mu-plugins/`), which
  * may not be installed on every fork/environment. Querying a field that doesn't
  * exist in the schema fails the *entire* GraphQL request (not just that field), so
  * this stays separate: if the plugin isn't installed, this function alone fails
@@ -48,7 +48,7 @@ export const getPostLikes = async (databaseId: number): Promise<number | undefin
 		const response: IGraphQLResponse<{ post: { likes: number } | null }> = await nextJSFetchResponse.json();
 
 		if (response.errors) {
-			// Expected/routine when the creator-hub-likes mu-plugin isn't installed
+			// Expected/routine when the simple-blogs-post-likes mu-plugin isn't installed
 			// yet (the `likes` field doesn't exist) — not logged as an error, since
 			// that's a normal, anticipated state for a fresh fork, not a bug.
 			console.log("Post likes query returned errors (mu-plugin may not be installed yet):", response.errors);

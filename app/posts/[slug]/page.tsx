@@ -132,7 +132,7 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		notFound();
 	}
 
-	// getPostLikes resolves to undefined (shown as 0) when the creator-hub-likes
+	// getPostLikes resolves to undefined (shown as 0) when the simple-blogs-post-likes
 	// mu-plugin isn't installed yet — an expected state, not an error, so it's
 	// awaited plainly rather than wrapped in try/catch like getPostContentBySlug.
 	const likes = (await getPostLikes(post.databaseId)) ?? 0;

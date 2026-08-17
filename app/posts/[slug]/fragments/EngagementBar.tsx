@@ -39,11 +39,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX EngagementBar Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `CookiePolicyContextProvider.tsx` (no cookie library). If that cookie already
  * exists on mount, the button renders disabled — this is a UX guard, not real
  * abuse prevention; the actual backstop is the mu-plugin's own server-side
- * per-post/per-IP rate limit (see `wordpress-mu-plugins/creator-hub-likes.php`),
+ * per-post/per-IP rate limit (see `wordpress-mu-plugins/simple-blogs-post-likes.php`),
  * since a client-side-only guard is trivially bypassed by clearing cookies.
  *
  * `initialLikes` comes from `getPostLikes`, which resolves to `undefined` (shown
- * here as 0) if the creator-hub-likes mu-plugin isn't installed yet — the button
+ * here as 0) if the simple-blogs-post-likes mu-plugin isn't installed yet — the button
  * still renders in that case, it just won't successfully increment until the
  * plugin is installed, handled the same as any other failed like attempt.
  */

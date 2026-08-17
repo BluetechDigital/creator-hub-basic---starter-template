@@ -32,7 +32,7 @@ export type IProps = {
 	} | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
 	seo?: { readingTime: number } | null;
-	/** Custom counter from the creator-hub-likes mu-plugin — 0 if that plugin isn't installed yet. */
+	/** Custom counter from the simple-blogs-post-likes mu-plugin — 0 if that plugin isn't installed yet. */
 	likes?: number | null;
 	commentCount?: number | null;
 	comments?: {

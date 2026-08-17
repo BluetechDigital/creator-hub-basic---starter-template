@@ -1,10 +1,13 @@
 <?php
 /**
- * Plugin Name: Creator Hub - Post Likes
+ * Plugin Name: Simple Blogs Post Likes - Add Reactions to Your Posts
  * Description: Adds a `likes` field and an `incrementPostLikes` mutation to
  * WPGraphQL for the Next.js frontend's like button. WordPress has no native
  * "likes" concept, so this stores a simple integer counter in post meta.
  * Version: 1.0.0
+ * Author: BluetechDigital Ltd
+ * Author URI: https://bluetech-digital.co.uk
+ * Plugin URI: https://bluetech-digital.co.uk
  *
  * INSTALL: copy this file into wp-content/mu-plugins/ (create that folder if
  * it doesn't exist — files placed there load automatically, no activation

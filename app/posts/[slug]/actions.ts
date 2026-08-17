@@ -105,7 +105,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Increment Like XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `incrementPostLikes`. No reCAPTCHA — a like click isn't a form submission and a
  * captcha there would be poor UX; abuse is instead guarded by the client-side
  * "already liked" cookie (`EngagementBar.tsx`) plus the mu-plugin's own server-side
- * per-post/per-IP rate limit (see `wordpress-mu-plugins/creator-hub-likes.php`).
+ * per-post/per-IP rate limit (see `wordpress-mu-plugins/simple-blogs-post-likes.php`).
  * @param postId The post's `databaseId` to like.
  * @returns `{success: true, likes}` with the new count, or `{success: false}` if
  * the mu-plugin isn't installed yet, the rate limit rejected the request, or the
