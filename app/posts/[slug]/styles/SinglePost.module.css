@@ -97,7 +97,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 }
 
 .shareIcons {
-    @apply flex items-center justify-center gap-3;
+    @apply flex flex-wrap w-full items-center justify-center gap-3;
 }
 
 .shareIconLink {
