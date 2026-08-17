@@ -15,7 +15,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 }
 
 .postHeroInner {
-    @apply max-w-6xl mx-auto flex flex-wrap items-center gap-12;
+    @apply max-w-360 mx-auto flex flex-wrap items-center gap-12;
 }
 
 .postHeroImageWrapper {
@@ -61,7 +61,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /* ---- Body: sidebar + main column ---- */
 
 .postBody {
-    @apply max-w-6xl mx-auto flex flex-wrap lg:flex-nowrap gap-12 px-4 sm:px-8 py-16 border-b border-white/10;
+    @apply max-w-360 mx-auto flex flex-wrap lg:flex-nowrap gap-12 px-4 sm:px-8 py-16 border-b border-white/10;
 }
 
 .postSidebar {
