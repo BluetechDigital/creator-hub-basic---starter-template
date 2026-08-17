@@ -7,6 +7,9 @@ import { MetadataRoute } from "next";
 // Pages
 import { getAllPagesSlugs } from "@/graphql/CMS/GetAllPagesSlugs";
 
+// Posts
+import { getAllPostsSlugs } from "@/graphql/CMS/GetAllPostsSlugs";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -44,11 +47,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Sitemap XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	const siteUrl: string | undefined = SITE_URL;
 
-	const [pagesSlugs] = await Promise.all([getAllPagesSlugs()]) as [IKeys[]];
+	const [pagesSlugs, postsSlugs] = await Promise.all([
+		getAllPagesSlugs(),
+		getAllPostsSlugs(),
+	]) as [IKeys[], IKeys[]];
 
 	/* PUSHING THE DYNAMIC SLUGS INTO THE EMPTY ARRAYS */
 	/* Pages, News Insights Posts Arrays */
 	const pagesLinks: IObject[] = [];
+	const postsLinks: IObject[] = [];
 
 	/* PAGES */
 	pagesSlugs.map((keys: IKeys) => {
@@ -63,8 +70,21 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 		pagesLinks.push(object);
 	});
 
+	/* POSTS */
+	postsSlugs.map((keys: IKeys) => {
+
+		const object: IObject = {
+			url: `${siteUrl}/posts/${keys.slug}`,
+			changefreq: "weekly",
+			lastmod: `${keys.modified}`,
+			priority: 0.6,
+		};
+
+		postsLinks.push(object);
+	});
+
 	// Arrays with your all dynamic links
-	const allLinks: MetadataRoute.Sitemap = [...pagesLinks,];
+	const allLinks: MetadataRoute.Sitemap = [...pagesLinks, ...postsLinks];
 
 	return allLinks as MetadataRoute.Sitemap;
 };
