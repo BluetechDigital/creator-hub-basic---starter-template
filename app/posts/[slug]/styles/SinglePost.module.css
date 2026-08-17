@@ -75,7 +75,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /* ---- Table of contents ---- */
 
 .tocHeading {
-    @apply font-bold text-white mb-5;
+    @apply text-3xl text-white tracking-tight mb-5;
 }
 
 .tableOfContents {
