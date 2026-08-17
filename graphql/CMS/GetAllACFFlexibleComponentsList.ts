@@ -111,7 +111,7 @@ export const extractActiveComponentNames = (
     /* Extract unique component names (e.g. DefaultTemplate_Flexiblecontent_FlexibleContent_{ComponentName}) */
         const fieldGroupNameStructureArray: { fieldGroupName: string }[] | undefined = Array.isArray(fieldGroupNameListQueryResponse)
             ? undefined
-            : fieldGroupNameListQueryResponse.data?.flexibleComponents?.edges?.[0].node.template.flexibleContent.flexibleContent;
+            : fieldGroupNameListQueryResponse.data?.flexibleComponents?.edges?.[0]?.node.template.flexibleContent.flexibleContent;
         
         if (!fieldGroupNameStructureArray || fieldGroupNameStructureArray.length === 0) {
             return []; // Exit early

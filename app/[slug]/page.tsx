@@ -3,6 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import * as ISeo from "@/graphql/CMS/types/seo";
 import { postType, flexibleContentType } from "@/context/constants";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
@@ -44,13 +45,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `slug` property can be read.
  *
  * @param params - Route params promise; resolves to `{slug}` for the current page.
- * @returns Next.js `Metadata` for this page.
+ * @returns Next.js `Metadata` for this page, or minimal no-index metadata if the slug
+ * doesn't match a published page — `DynamicPages` below is what actually 404s; this just
+ * has to avoid crashing on `seo` being `undefined` in the meantime.
  */
 export const generateMetadata = async ({ params }: { params: { slug: string } }): Promise<Metadata> => {
-	
+
 	const { slug } = await params;
 
-	const seo = await getAllSeoContent(slug, postType.pages) as ISeo.IProps;
+	const seo = await getAllSeoContent(slug, postType.pages) as ISeo.IProps | undefined;
+
+	if (!seo) {
+		return { robots: { follow: false, index: false } };
+	}
 
 	return {
 		title: seo.title,
@@ -88,6 +95,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Pages Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Content and SEO are fetched in parallel via `Promise.all` since neither depends on the
  * other's result, avoiding a sequential network round-trip.
  *
+ * `getAllPageACFFlexibleComponentsContent`/`getAllSeoContent` resolve to `null`/`undefined`
+ * for a slug that doesn't match a published page, and can also throw on a network-level
+ * failure — both cases are treated as "not found" here, so a bad or stale slug (an old
+ * bookmarked/indexed URL after a page gets renamed in WordPress, for instance) 404s cleanly
+ * instead of surfacing as an unhandled 500.
+ *
  * `params` is awaited before use because Next.js's App Router passes route params as a
  * Promise for async server components — `params` must be resolved before its `slug`
  * property can be read.
@@ -95,24 +108,35 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Pages Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * @param params - Route params promise; resolves to `{slug}` for the current page.
  */
 const DynamicPages = async ({ params }: { params: { slug: string } }) => {
-	
+
 	/* Extract slug directly from params to ensure it's resolved before use. */
 	const { slug } = await params;
 
-  	// Current Page ACF Flexible Components Content
-	const [pageACFFlexibleComponentsContent, seo] = await Promise.all([
-		getAllPageACFFlexibleComponentsContent(
-			slug,
-			postType.pages,
-			flexibleContentType.pages
-		) as Promise<IFlexibleContent.IProps>,
-		getAllSeoContent(slug, postType.pages) as Promise<ISeo.IProps>,
-	]);
+	let pageACFFlexibleComponentsContent: IFlexibleContent.IProps | null = null;
+	let seo: ISeo.IProps | undefined;
+
+	try {
+		// Current Page ACF Flexible Components Content
+		[pageACFFlexibleComponentsContent, seo] = await Promise.all([
+			getAllPageACFFlexibleComponentsContent(
+				slug,
+				postType.pages,
+				flexibleContentType.pages
+			) as Promise<IFlexibleContent.IProps | null>,
+			getAllSeoContent(slug, postType.pages) as Promise<ISeo.IProps | undefined>,
+		]);
+	} catch (error) {
+		console.log(error);
+	}
+
+	if (!pageACFFlexibleComponentsContent) {
+		notFound();
+	}
 
 	const breadcrumbSchema = buildBreadcrumbListSchema({
 		siteUrl: SITE_URL!,
 		slug,
-		pageTitle: seo.title,
+		pageTitle: seo?.title ?? slug,
 	});
 
 	return (

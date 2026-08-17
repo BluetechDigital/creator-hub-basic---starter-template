@@ -33,8 +33,8 @@ export const pageType: IPage.ITypes = {
     // must match the ACF-composed archive page in WordPress exactly, the same way
     // `home` does for the home page. Not to be confused with `postType.posts` below,
     // which is the WP post type queried for the actual blog posts themselves.
-    // Confirmed against the live CMS: the archive page is titled "Blogs" (slug "blogs").
-    posts: "Blogs",
+    // Confirmed against the live CMS: the archive page is titled "Posts" (slug "posts").
+    posts: "Posts",
 };
 
 // Preview pages
