@@ -11,6 +11,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PAGES XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /* PAGE: Project Types, Content & Content Provider Interface */
 export type ITypes = {
     home: string;
+    posts: string;
 };
 
 // Context value is nested under `memoizedValues` (matching PageContextProvider's

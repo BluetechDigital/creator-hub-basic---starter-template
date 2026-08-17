@@ -1,0 +1,9 @@
+@import "tailwindcss/theme";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.articleContent {
+    @apply w-full max-w-none;
+}

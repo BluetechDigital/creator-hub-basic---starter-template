@@ -1,0 +1,21 @@
+@import "tailwindcss/theme";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.postHeader {
+    @apply w-full max-w-3xl mx-auto flex flex-col gap-2 mb-6;
+}
+
+.postTitle {
+    @apply text-3xl font-semibold;
+}
+
+.postMeta {
+    @apply text-sm opacity-70;
+}
+
+.postFeaturedImage {
+    @apply w-full h-auto rounded my-4;
+}

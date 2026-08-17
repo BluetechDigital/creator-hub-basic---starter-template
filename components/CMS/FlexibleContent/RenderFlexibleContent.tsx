@@ -46,6 +46,7 @@ export const DynamicComponentLoaders: DynamicComponentMap = {
     YoutubeVideoGrid: lazy(() => import("@/components/CMS/YouTubeVideoGrid/YouTubeVideoGrid")),
     AllYoutubeVideos: lazy(() => import("@/components/CMS/AllYoutubeVideos/AllYoutubeVideos")),
     AllYoutubeShortsVideos: lazy(() => import("@/components/CMS/AllYoutubeShortsVideos/AllYoutubeShortsVideos")),
+    AllBlogPosts: lazy(() => import("@/components/CMS/AllBlogPosts/AllBlogPosts")),
 };
 
 /* -----------------------------------------------------------------------------
