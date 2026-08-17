@@ -50,7 +50,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	const [pagesSlugs, postsSlugs] = await Promise.all([
 		getAllPagesSlugs(),
 		getAllPostsSlugs(),
-	]) as [IKeys[], IKeys[]];
+	]) as [IKeys[] | undefined, IKeys[] | undefined];
 
 	/* PUSHING THE DYNAMIC SLUGS INTO THE EMPTY ARRAYS */
 	/* Pages, News Insights Posts Arrays */
@@ -58,7 +58,10 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	const postsLinks: IObject[] = [];
 
 	/* PAGES */
-	pagesSlugs.map((keys: IKeys) => {
+	// getAllPagesSlugs/getAllPostsSlugs both resolve to undefined on a CMS failure —
+	// falling back to [] here keeps a failure on one source from taking down the
+	// other's links (and the whole sitemap) along with it.
+	(pagesSlugs ?? []).map((keys: IKeys) => {
 
 		const object: IObject = {
 			url: `${siteUrl}/${keys.slug}`,
@@ -71,7 +74,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	});
 
 	/* POSTS */
-	postsSlugs.map((keys: IKeys) => {
+	(postsSlugs ?? []).map((keys: IKeys) => {
 
 		const object: IObject = {
 			url: `${siteUrl}/posts/${keys.slug}`,

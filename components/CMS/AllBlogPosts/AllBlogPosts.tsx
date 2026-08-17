@@ -35,11 +35,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX AllBlogPosts Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Component — data is fetched inside the component body rather than at module
  * scope so it runs per-request, matching Next's per-request fetch caching/
  * revalidation (see ARCHITECTURE.md §2's fetch convention, applied here too).
+ *
+ * `getAllPostsSummaries` throws on a network/fetch-level failure (not just a
+ * resolved-`undefined` GraphQL error) — caught here so a CMS blip degrades to an
+ * empty grid instead of crashing the whole archive page.
  */
 const AllBlogPosts = async ({}: IAllBlogPosts.IProps) => {
 
-	const summaries = await getAllPostsSummaries(POSTS_PAGE_SIZE);
-	const posts = summaries?.posts ?? [];
+	let posts: IAllBlogPosts.IPostsGrid["posts"] = [];
+
+	try {
+		const summaries = await getAllPostsSummaries(POSTS_PAGE_SIZE);
+		posts = summaries?.posts ?? [];
+	} catch (error) {
+		console.log(error);
+	}
 
 	return (
 		<div className={styles.allBlogPosts}>

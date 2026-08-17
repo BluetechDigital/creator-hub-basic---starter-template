@@ -7,6 +7,7 @@ import Image from "next/image";
 import dateFormat from "dateformat";
 import { notFound } from "next/navigation";
 import * as ISeo from "@/graphql/CMS/types/seo";
+import * as IPost from "@/graphql/CMS/types/post";
 import { postType } from "@/context/constants";
 
 /* -----------------------------------------------------------------------------
@@ -107,7 +108,16 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	/* Extract slug directly from params to ensure it's resolved before use. */
 	const { slug } = await params;
 
-	const post = await getPostContentBySlug(slug);
+	// getPostContentBySlug throws on a network/fetch-level failure, not just a
+	// resolved-undefined GraphQL error — caught here so a CMS blip 404s cleanly
+	// instead of surfacing as an unhandled 500.
+	let post: IPost.IProps | undefined;
+
+	try {
+		post = await getPostContentBySlug(slug);
+	} catch (error) {
+		console.log(error);
+	}
 
 	if (!post) {
 		notFound();
