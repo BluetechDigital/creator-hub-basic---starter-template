@@ -18,7 +18,6 @@ import { getAllPageACFFlexibleComponentsContent } from "@/graphql/CMS/GetAllPage
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import PageContextProvider from "@/context/providers/PageContextProvider";
 import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
 /* -----------------------------------------------------------------------------
@@ -65,10 +64,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX Blog Archive Page Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * WP *Page* that hosts the archive, not to be confused with `postType.posts` (the WP
  * post type queried by the `AllBlogPosts` block below for the actual posts). It
  * fetches this page's ACF flexible-content blocks via
- * `getAllPageACFFlexibleComponentsContent`, hands them down through
- * `PageContextProvider`, and lets `RenderFlexibleContent` resolve each block to a
- * component via `DynamicComponentLoaders` further down the tree — including
- * `AllBlogPosts`, which a CMS editor places on this page to render the actual grid.
+ * `getAllPageACFFlexibleComponentsContent` and hands them straight to
+ * `RenderFlexibleContent`, which resolves each block to a component via
+ * `DynamicComponentLoaders` further down the tree — including `AllBlogPosts`, which
+ * a CMS editor places on this page to render the actual grid.
  */
 const PostsArchivePage: NextPage = async () => {
 
@@ -79,14 +78,7 @@ const PostsArchivePage: NextPage = async () => {
   	flexibleContentType.pages
   ) as IFlexibleContent.IProps;
 
-  return (
-    <PageContextProvider
-      content={pageACFFlexibleComponentsContent}
-      postTypeFlexibleContent={flexibleContentType.pages}
-    >
-      <RenderFlexibleContent />
-	</PageContextProvider>
-  );
+  return <RenderFlexibleContent content={pageACFFlexibleComponentsContent} />;
 }
 
 PostsArchivePage.displayName = 'PostsArchivePage';

@@ -22,14 +22,19 @@ in that order, with no per-page React code.
      the block types Pass 1 found. This avoids requesting every possible block's fragment on
      every page load.
 2. The result — an array of blocks, each carrying a WordPress `fieldGroupName` like
-   `DefaultTemplate_Flexiblecontent_FlexibleContent_Hero` — is handed to
-   `PageContextProvider` (`context/providers/`), which puts it in React context.
-3. `RenderFlexibleContent` (`components/CMS/FlexibleContent/RenderFlexibleContent.tsx`) reads
-   that context, strips each block's `fieldGroupName` down to its simple name (`Hero`,
-   `AboutUs`, …), and looks it up in `DynamicComponentLoaders` — a map from simple name to a
-   `React.lazy()`-loaded component.
-4. Each matched component is rendered with the block's CMS data as props, wrapped in
-   `<Suspense>` so blocks stream in independently.
+   `DefaultTemplate_Flexiblecontent_FlexibleContent_Hero` — is passed directly as a prop to
+   `RenderFlexibleContent` (`components/CMS/FlexibleContent/RenderFlexibleContent.tsx`).
+3. `RenderFlexibleContent` strips each block's `fieldGroupName` down to its simple name
+   (`Hero`, `AboutUs`, …) and looks it up in `DynamicComponentLoaders` — a map from simple
+   name to a plain `import()` loader, awaited server-side (not `React.lazy()`) by a small
+   per-block `ResolvedBlock` Server Component. This matters because several blocks
+   (`AllYoutubeVideos`, `AllYoutubeShortsVideos`, `AllBlogPosts`) are themselves `async`
+   Server Components that fetch their own data — React does not support rendering an async
+   component via `React.lazy()`/`createElement` from a Client Component, so resolution has to
+   happen server-side. `RenderFlexibleContent` itself carries no `'use client'` directive for
+   this reason.
+4. Each matched component is rendered with the block's CMS data as props, wrapped in its own
+   `<Suspense>` boundary so blocks stream in independently.
 
 **Adding a new block type** means: create the component under `components/CMS/<Name>/`,
 add its GraphQL fragment to `GetAllComponentsGraphQLFragments.ts`, and register it in

@@ -25,7 +25,7 @@ const getBlockFolderNames = (): string[] => {
 
 const getRegisteredComponents = (): { key: string; importPath: string }[] => {
 	const source = fs.readFileSync(RENDERER_PATH, "utf-8");
-	const registrationRegex = /(\w+):\s*lazy\(\(\)\s*=>\s*import\("([^"]+)"\)\)/g;
+	const registrationRegex = /(\w+):\s*\(\)\s*=>\s*import\("([^"]+)"\)/g;
 
 	const registered: { key: string; importPath: string }[] = [];
 	let match: RegExpExecArray | null;

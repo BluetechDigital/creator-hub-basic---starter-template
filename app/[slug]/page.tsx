@@ -18,7 +18,6 @@ import { getAllPageACFFlexibleComponentsContent } from "@/graphql/CMS/GetAllPage
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import PageContextProvider from "@/context/providers/PageContextProvider";
 import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
 // Structured Data (JSON-LD)
@@ -81,10 +80,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Pages Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Renders a CMS-driven page for the given slug. This is the entry point for the CMS
  * flexible-content pipeline documented in `ARCHITECTURE.md` §1: it fetches the page's
  * ACF flexible-content blocks (via a two-pass GraphQL query in
- * `getAllPageACFFlexibleComponentsContent`) and its SEO/breadcrumb data, hands the block
- * data down through `PageContextProvider`, and lets `RenderFlexibleContent` resolve each
- * block to a component via `DynamicComponentLoaders` further down the tree — no
- * per-page React code is written here or per-page-type.
+ * `getAllPageACFFlexibleComponentsContent`) and its SEO/breadcrumb data, and hands the
+ * block data straight to `RenderFlexibleContent`, which resolves each block to a
+ * component via `DynamicComponentLoaders` further down the tree — no per-page React
+ * code is written here or per-page-type.
  *
  * Content and SEO are fetched in parallel via `Promise.all` since neither depends on the
  * other's result, avoiding a sequential network round-trip.
@@ -117,13 +116,10 @@ const DynamicPages = async ({ params }: { params: { slug: string } }) => {
 	});
 
 	return (
-		<PageContextProvider
-			content={pageACFFlexibleComponentsContent}
-			postTypeFlexibleContent={flexibleContentType.pages}
-		>
+		<>
 			<StructuredData data={breadcrumbSchema} />
-			<RenderFlexibleContent />
-		</PageContextProvider>
+			<RenderFlexibleContent content={pageACFFlexibleComponentsContent} />
+		</>
 	);
 }
 

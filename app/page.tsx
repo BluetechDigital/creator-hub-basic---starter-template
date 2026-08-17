@@ -18,7 +18,6 @@ import { getAllPageACFFlexibleComponentsContent } from "@/graphql/CMS/GetAllPage
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import PageContextProvider from "@/context/providers/PageContextProvider";
 import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
 /* -----------------------------------------------------------------------------
@@ -63,12 +62,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Home Page Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Renders the home page. Same CMS flexible-content pipeline as `app/[slug]/page.tsx`
  * (see `ARCHITECTURE.md` §1), fixed to `pageType.home` instead of a route param: it
  * fetches this page's ACF flexible-content blocks via
- * `getAllPageACFFlexibleComponentsContent`, hands them down through
- * `PageContextProvider`, and lets `RenderFlexibleContent` resolve each block to a
- * component via `DynamicComponentLoaders` further down the tree.
+ * `getAllPageACFFlexibleComponentsContent` and hands them straight to
+ * `RenderFlexibleContent`, which resolves each block to a component via
+ * `DynamicComponentLoaders` further down the tree.
  */
 const HomePage: NextPage = async () => {
-	
+
   // Current Page ACF Flexible Components Content
   const pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
   	pageType.home,
@@ -76,14 +75,7 @@ const HomePage: NextPage = async () => {
   	flexibleContentType.pages
   ) as IFlexibleContent.IProps;
 
-  return (
-    <PageContextProvider
-      content={pageACFFlexibleComponentsContent}
-      postTypeFlexibleContent={flexibleContentType.pages}
-    >
-      <RenderFlexibleContent />
-	</PageContextProvider>
-  );
+  return <RenderFlexibleContent content={pageACFFlexibleComponentsContent} />;
 }
 
 HomePage.displayName = 'HomePage';
