@@ -7,6 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import validator from "validator";
 import { render } from "@react-email/components";
 import { getEmailTransporter } from "@/config/nodemailer";
+import { verifyRecaptcha } from "@/config/recaptcha";
 import ContactNotificationEmail from "@/components/CMS/ContactForm/emails/ContactNotificationEmail";
 import ContactConfirmationEmail from "@/components/CMS/ContactForm/emails/ContactConfirmationEmail";
 
@@ -14,7 +15,6 @@ import ContactConfirmationEmail from "@/components/CMS/ContactForm/emails/Contac
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const RECAPTCHA_SECRET_KEY: string | undefined = process.env.RECAPTCHA_SECRET_KEY;
 const EMAIL_USER: string | undefined = process.env.EMAIL_USER;
 // Falls back to EMAIL_USER (the SMTP-authenticating address) if unset, but lets a
 // creator receive submissions at a different inbox (e.g. their personal Gmail) than
@@ -44,35 +44,6 @@ type IContactFormErrors = {
 export type IContactFormResult =
 	| { success: true }
 	| { success: false; errors: IContactFormErrors };
-
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX reCAPTCHA Verification XXXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
-/**
- * Verifies a reCAPTCHA v2 token server-side against Google's `siteverify` endpoint.
- * If `RECAPTCHA_SECRET_KEY` isn't configured yet for this client fork, verification
- * is skipped (returns true) rather than hard-failing every submission — a fork
- * mid-setup shouldn't have a fully broken contact form.
- * @param token The client-side reCAPTCHA response token to verify.
- * @returns Whether the token is valid (or verification was skipped).
- */
-const verifyRecaptcha = async (token: string): Promise<boolean> => {
-	if (!RECAPTCHA_SECRET_KEY) {
-		console.warn("RECAPTCHA_SECRET_KEY is not set; skipping reCAPTCHA verification.");
-		return true;
-	}
-
-	const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-		method: "POST",
-		headers: { "Content-Type": "application/x-www-form-urlencoded" },
-		body: new URLSearchParams({ secret: RECAPTCHA_SECRET_KEY, response: token }),
-	});
-
-	const data: { success: boolean } = await response.json();
-
-	return data.success === true;
-};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Submit Contact Form XXXXXXXXXXXXXXXXXXXXXXXXXXXXX

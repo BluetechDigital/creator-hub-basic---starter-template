@@ -81,7 +81,7 @@ const PostHero: FC<IPostHero> = ({ post }) => {
 							)
 						)}
 						<span className={styles.postMetaDot} aria-hidden="true" />
-						<span className={styles.postMetaText}>{dateFormat(post.date, "mmmm dS, yyyy")}</span>
+						<span className={styles.postMetaText}>{dateFormat(post.date, "dddd, mmmm dS, yyyy")}</span>
 						{post.seo?.readingTime ? (
 							<>
 								<span className={styles.postMetaDot} aria-hidden="true" />

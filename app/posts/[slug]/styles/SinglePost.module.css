@@ -133,3 +133,118 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         }
     }
 }
+
+/* ---- Engagement bar (likes + comment count) ---- */
+
+.engagementBar {
+    @apply max-w-360 mx-auto flex items-center justify-center gap-8 px-4 sm:px-8 py-12;
+
+    & .engagementButton {
+        @apply flex items-center gap-3 text-pure-black transition duration-300;
+
+        &:hover {
+            @apply text-accent-dark;
+        }
+
+        &:disabled {
+            @apply cursor-not-allowed text-accent-dark;
+        }
+
+        & .engagementIcon {
+            @apply flex items-center justify-center w-16 h-16 bg-pure-black/5 rounded-full;
+        }
+
+        & .engagementCount {
+            @apply text-lg font-medium;
+        }
+    }
+}
+
+/* ---- Comments feed ---- */
+
+.commentsFeed {
+    @apply max-w-360 mx-auto px-4 sm:px-8 py-16 border-t border-pure-black/10 scroll-mt-24;
+
+    & .commentsHeading {
+        @apply text-2xl text-pure-black tracking-tight mb-8;
+    }
+
+    & .commentsEmpty {
+        @apply text-pure-black/60;
+    }
+
+    & .commentsList {
+        @apply flex flex-col gap-8;
+
+        & .commentItem {
+            @apply flex gap-4;
+
+            & .commentAvatar {
+                @apply rounded-full shrink-0;
+            }
+
+            & .commentBody {
+                @apply flex flex-col gap-1;
+
+                & .commentMeta {
+                    @apply flex flex-wrap items-baseline gap-3;
+
+                    & .commentAuthor {
+                        @apply text-sm font-semibold text-pure-black;
+                    }
+
+                    & .commentDate {
+                        @apply text-sm text-pure-black/60;
+                    }
+                }
+
+                & .commentContent {
+                    @apply text-base text-pure-black/80;
+                }
+            }
+        }
+    }
+}
+
+/* ---- Comment form ---- */
+
+.commentForm {
+    @apply max-w-360 mx-auto px-4 sm:px-8 pb-16;
+
+    & .commentFormHeading {
+        @apply text-2xl text-pure-black tracking-tight mb-8;
+    }
+
+    & form {
+        @apply flex flex-col gap-4 max-w-md;
+    }
+
+    & .commentFormField {
+        @apply flex flex-col gap-1;
+
+        & label {
+            @apply text-sm font-medium text-pure-black;
+        }
+
+        & input,
+        & textarea {
+            @apply border border-pure-black/20 rounded px-3 py-2 text-pure-black;
+        }
+    }
+
+    & .commentFormError {
+        @apply text-sm text-red-600;
+    }
+
+    & .commentFormSubmit {
+        @apply px-6 py-3 text-sm text-pure-white font-semibold text-center bg-pure-black rounded-full transition duration-300 cursor-pointer;
+
+        &:hover {
+            @apply bg-accent-dark;
+        }
+
+        &:disabled {
+            @apply opacity-50 cursor-not-allowed;
+        }
+    }
+}
