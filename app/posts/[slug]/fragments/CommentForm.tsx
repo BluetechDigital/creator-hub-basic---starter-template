@@ -103,28 +103,30 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 		<div className={`${styles.commentForm} ${parentId ? styles.commentFormCompact : ''}`}>
 			{!parentId && <h2 className={styles.commentFormHeading}>Leave a comment</h2>}
 			<form onSubmit={formik.handleSubmit} noValidate>
-				<div className={styles.commentFormField}>
-					<label htmlFor={`comment-name-${uid}`}>Name</label>
-					<input
-						id={`comment-name-${uid}`}
-						name="name"
-						type="text"
-						value={formik.values.name}
-						onChange={formik.handleChange}
-					/>
-					{formik.errors.name ? <p className={styles.commentFormError}>{formik.errors.name}</p> : null}
-				</div>
+				<div className={styles.commentFormRow}>
+					<div className={styles.commentFormField}>
+						<label htmlFor={`comment-name-${uid}`}>Name</label>
+						<input
+							id={`comment-name-${uid}`}
+							name="name"
+							type="text"
+							value={formik.values.name}
+							onChange={formik.handleChange}
+						/>
+						{formik.errors.name ? <p className={styles.commentFormError}>{formik.errors.name}</p> : null}
+					</div>
 
-				<div className={styles.commentFormField}>
-					<label htmlFor={`comment-email-${uid}`}>Email</label>
-					<input
-						id={`comment-email-${uid}`}
-						name="email"
-						type="email"
-						value={formik.values.email}
-						onChange={formik.handleChange}
-					/>
-					{formik.errors.email ? <p className={styles.commentFormError}>{formik.errors.email}</p> : null}
+					<div className={styles.commentFormField}>
+						<label htmlFor={`comment-email-${uid}`}>Email</label>
+						<input
+							id={`comment-email-${uid}`}
+							name="email"
+							type="email"
+							value={formik.values.email}
+							onChange={formik.handleChange}
+						/>
+						{formik.errors.email ? <p className={styles.commentFormError}>{formik.errors.email}</p> : null}
+					</div>
 				</div>
 
 				<div className={styles.commentFormField}>
