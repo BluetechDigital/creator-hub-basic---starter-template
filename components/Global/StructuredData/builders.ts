@@ -3,6 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import * as IThemesOptions from "@/graphql/CMS/types/themesOptions";
+import * as IPost from "@/graphql/CMS/types/post";
 import { IYoutubeVideos } from "@/api/YouTube/GetAllYoutubeContent";
 
 /* -----------------------------------------------------------------------------
@@ -118,6 +119,37 @@ export const buildBreadcrumbListSchema = ({
 			item: `${siteUrl}/${slug}`,
 		},
 	],
+});
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Article Schema XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+/**
+ * Builds an Article schema.org object for a single blog post.
+ * @param siteUrl The site's canonical URL, used to build `mainEntityOfPage`.
+ * @param slug The post's slug, appended to `siteUrl`/`posts` for `mainEntityOfPage`.
+ * @param post The post's content fields, as returned by `getPostContentBySlug`.
+ * @returns A schema.org `Article` object, with `image`/`author` included only when
+ * present.
+ */
+export const buildArticleSchema = ({
+	siteUrl,
+	slug,
+	post,
+}: {
+	siteUrl: string;
+	slug: string;
+	post: IPost.IProps;
+}) => ({
+	"@context": "https://schema.org",
+	"@type": "Article",
+	headline: post.title,
+	datePublished: post.date,
+	dateModified: post.modified,
+	...(post.featuredImage?.node?.sourceUrl ? { image: [post.featuredImage.node.sourceUrl] } : {}),
+	...(post.author?.node?.name ? { author: { "@type": "Person", name: post.author.node.name } } : {}),
+	mainEntityOfPage: `${siteUrl}/posts/${slug}`,
 });
 
 /* -----------------------------------------------------------------------------
