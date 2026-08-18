@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Blogs Post Likes - Add Reactions to Your Posts
  * Description: Adds like/dislike reactions to WPGraphQL for both posts and comments — WordPress has no native "reactions" concept, so this stores mutually-exclusive counters in post/comment meta.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Bluetech Digital Ltd
  * Author URI: https://bluetech-digital.co.uk
  * Plugin URI: https://bluetech-digital.co.uk
@@ -109,6 +109,31 @@ function chl_swap_reaction_counts($likes, $dislikes, $previous, $new) {
     return [$likes, $dislikes];
 }
 
+/**
+ * Extracts the numeric comment ID from whatever object WPGraphQL hands a
+ * `Comment` field resolver — its `Model\Comment` wrapper, not the raw
+ * `WP_Comment` core object, so the native `comment_ID` (snake_case, WP core's
+ * DB-column name) isn't reliably present; WPGraphQL models generally only
+ * expose their own whitelisted camelCase properties (`commentId`). Confirmed
+ * live: `likes`/`dislikes` always resolved to 0 even after a successful like
+ * (the mutation itself was fine — it uses the raw `databaseId` sent by the
+ * frontend, not this model object) — tries the likely property names in
+ * order rather than assuming one, and falls back to 0 (a safe no-op —
+ * `get_comment_meta(0, ...)` just returns an empty count) rather than
+ * guessing wrong and fatally erroring the whole request.
+ * @param mixed $comment The resolver's `$source` argument for a `Comment` field.
+ * @return int The comment's numeric ID, or 0 if it couldn't be determined.
+ */
+function chl_get_comment_id($comment) {
+    if (isset($comment->commentId)) {
+        return absint($comment->commentId);
+    }
+    if (isset($comment->comment_ID)) {
+        return absint($comment->comment_ID);
+    }
+    return 0;
+}
+
 add_action('graphql_register_types', function () {
 
     /* -------------------------------------------------------------------
@@ -205,7 +230,7 @@ add_action('graphql_register_types', function () {
         'type' => 'Int',
         'description' => 'Number of times this comment has been liked (custom counter — not a native WordPress field).',
         'resolve' => function ($comment) {
-            $count = get_comment_meta($comment->comment_ID, '_creator_hub_comment_likes', true);
+            $count = get_comment_meta(chl_get_comment_id($comment), '_creator_hub_comment_likes', true);
             return $count === '' ? 0 : (int) $count;
         },
     ]);
@@ -214,7 +239,7 @@ add_action('graphql_register_types', function () {
         'type' => 'Int',
         'description' => 'Number of times this comment has been disliked (custom counter — not a native WordPress field).',
         'resolve' => function ($comment) {
-            $count = get_comment_meta($comment->comment_ID, '_creator_hub_comment_dislikes', true);
+            $count = get_comment_meta(chl_get_comment_id($comment), '_creator_hub_comment_dislikes', true);
             return $count === '' ? 0 : (int) $count;
         },
     ]);
