@@ -20,6 +20,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX LATEST POSTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * (verified directly against the live endpoint, not introspection, which is disabled
  * here) — newest-first is WPGraphQL's own default order for this connection, but it's
  * specified explicitly rather than relied upon.
+ *
+ * `date: dateGmt` aliases WPGraphQL's GMT field back onto `date` — see
+ * `GetPostContentBySlug.ts`'s doc comment for why, and why callers must use
+ * `parseWpDate` rather than `new Date()` on it.
  * @param excludeId The `databaseId` of the post to exclude (the one currently being viewed).
  * @param first How many posts to return.
  * @returns A promise resolving to the post summaries, or `undefined` on failure.
@@ -35,7 +39,7 @@ export const getLatestPosts = async (
 					nodes {
 						title
 						slug
-						date
+						date: dateGmt
 						excerpt
 						featuredImage {
 							node {

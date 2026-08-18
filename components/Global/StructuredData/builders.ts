@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import * as IThemesOptions from "@/graphql/CMS/types/themesOptions";
 import * as IPost from "@/graphql/CMS/types/post";
 import { IYoutubeVideos } from "@/api/YouTube/GetAllYoutubeContent";
+import { parseWpDate } from "@/graphql/CMS/parseWpDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Person Schema XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -143,8 +144,8 @@ export const buildArticleSchema = ({
 	"@context": "https://schema.org",
 	"@type": "Article",
 	headline: post.title,
-	datePublished: post.date,
-	dateModified: post.modified,
+	datePublished: parseWpDate(post.date).toISOString(),
+	dateModified: parseWpDate(post.modified).toISOString(),
 	...(post.featuredImage?.node?.sourceUrl ? { image: [post.featuredImage.node.sourceUrl] } : {}),
 	...(post.author?.node?.name ? { author: { "@type": "Person", name: post.author.node.name } } : {}),
 	mainEntityOfPage: `${siteUrl}/posts/${slug}`,

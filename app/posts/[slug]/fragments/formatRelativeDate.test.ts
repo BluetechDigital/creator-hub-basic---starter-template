@@ -41,23 +41,10 @@ describe("formatRelativeDate", () => {
 		expect(formatRelativeDate(new Date(NOW.getTime() - 400 * 86400 * 1000).toISOString())).toBe('1 year ago');
 	});
 
-	it("treats a WordPress *Gmt string (space-separated, no timezone marker) as UTC, regardless of the host's local timezone", () => {
-		const originalTz = process.env.TZ;
-		// An extreme offset (UTC+14) — if this ever regresses to naively
-		// parsing the string as local time, the result would be wildly wrong
-		// rather than off by a subtle amount that might pass by coincidence.
-		process.env.TZ = 'Pacific/Kiritimati';
-
-		try {
-			// 5 minutes before the fixed "NOW" (2026-08-17T12:00:00Z), in
-			// WordPress's actual dateGmt shape: a space instead of "T", no "Z".
-			expect(formatRelativeDate('2026-08-17 11:55:00')).toBe('5 minutes ago');
-		} finally {
-			process.env.TZ = originalTz;
-		}
-	});
-
-	it("doesn't double-append a UTC marker onto a string that already has one", () => {
-		expect(formatRelativeDate('2026-08-17T11:55:00Z')).toBe('5 minutes ago');
+	it("handles WordPress's actual dateGmt shape (space-separated, no timezone marker) via parseWpDate", () => {
+		// 5 minutes before the fixed "NOW" (2026-08-17T12:00:00Z). Full
+		// UTC-vs-local-timezone coverage lives in parseWpDate.test.ts — this
+		// just confirms formatRelativeDate delegates to it correctly.
+		expect(formatRelativeDate('2026-08-17 11:55:00')).toBe('5 minutes ago');
 	});
 });

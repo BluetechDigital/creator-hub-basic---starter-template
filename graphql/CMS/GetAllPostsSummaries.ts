@@ -20,6 +20,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX POSTS SUMMARIES XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * render a "Load more" control — keeping the cursor/pageInfo shape wired through now
  * means a future paginated UI only needs to call this again with `after`, not change
  * the query.
+ * `date: dateGmt` aliases WPGraphQL's GMT field back onto `date` so
+ * `IPost.ISummaryProps` doesn't need a rename — see `GetPostContentBySlug.ts`'s
+ * doc comment for why the plain `date` field can't be parsed with `new
+ * Date()` safely, and why callers must use `parseWpDate` instead.
  * @param first Page size.
  * @param after Optional end cursor from a previous page, for future pagination.
  * @returns A promise resolving to `{ posts, pageInfo }`, or `undefined` on failure.
@@ -37,7 +41,7 @@ export const getAllPostsSummaries = async (
 					nodes {
 						title
 						slug
-						date
+						date: dateGmt
 						excerpt
 						featuredImage {
 							node {

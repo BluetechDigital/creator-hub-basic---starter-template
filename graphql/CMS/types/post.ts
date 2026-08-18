@@ -15,7 +15,9 @@ export type IProps = {
 	databaseId: number;
 	title: string;
 	slug: string;
+	/** Actually WPGraphQL's `dateGmt` field, fetched under this name via a query alias — run through `parseWpDate` before use, never `new Date()` directly (see `GetPostContentBySlug.ts`'s doc comment for why). */
 	date: string;
+	/** Actually WPGraphQL's `modifiedGmt` field — same `parseWpDate` caveat as `date` above. */
 	modified: string;
 	content: string;
 	excerpt: string;

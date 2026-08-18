@@ -10,6 +10,7 @@ import Image from "next/image";
 import dateFormat from "dateformat";
 import DOMPurify from "isomorphic-dompurify";
 import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts";
+import { parseWpDate } from "@/graphql/CMS/parseWpDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -47,7 +48,7 @@ const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
                 />
             )}
             <h3 className={styles.postTitle}>{post.title}</h3>
-            <span className={styles.postDate}>{dateFormat(post.date, "mmmm dS, yyyy")}</span>
+            <span className={styles.postDate}>{dateFormat(parseWpDate(post.date), "mmmm dS, yyyy")}</span>
             {post.excerpt && <div className={styles.postExcerpt} dangerouslySetInnerHTML={cleanExcerpt} />}
         </Link>
     );

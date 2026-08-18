@@ -28,6 +28,16 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
  * "post content" and "comment count" have very different natural change
  * frequencies and folding them into one fetch meant they shared one cache
  * lifetime.
+ *
+ * `date: dateGmt` and `modified: modifiedGmt` alias WPGraphQL's GMT fields
+ * back onto their friendlier names (so `IPost.IProps` doesn't need a rename)
+ * — WPGraphQL's plain `date`/`modified` fields follow the WordPress site's
+ * own local-timezone setting and, like `dateGmt`, come back with no UTC
+ * marker either way, so parsing them naively with `new Date()` gets silently
+ * misread as whatever timezone happens to run the code. Callers must run
+ * these through `parseWpDate` rather than passing them to `new Date()`
+ * directly — see that function's doc comment (this exact bug was confirmed
+ * live on a comment date first, before being found here too).
  * @param slug The slug of the post to fetch content for.
  * @returns A promise resolving to the post's content fields, or `undefined` if the fetch/query failed or no post matched.
  */
@@ -41,8 +51,8 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 							databaseId
 							title
 							slug
-							date
-							modified
+							date: dateGmt
+							modified: modifiedGmt
 							content
 							excerpt
 							featuredImage {

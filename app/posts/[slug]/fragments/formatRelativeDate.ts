@@ -1,21 +1,4 @@
-/**
- * Normalizes a WPGraphQL `*Gmt` datetime string ("2026-08-18 05:19:28" — a
- * space instead of "T", no UTC marker) into a `Date` that's actually parsed
- * as UTC. Without this, `new Date(wpDateGmt)` silently treats the string as
- * local time in whichever timezone happens to run the code (the visitor's
- * browser, or the server during SSR) — confirmed live: a reply posted
- * seconds earlier showed as "3 hours ago" because the GMT string got
- * misread as local time, shifting the computed age by the visitor's UTC
- * offset. Must be fed a `*Gmt` field specifically, not WPGraphQL's plain
- * `date` field (site-local time) — using `date` here would just move the
- * same bug rather than fix it.
- * @param wpDateGmt A WPGraphQL `*Gmt` field's raw string value.
- */
-const toUtcDate = (wpDateGmt: string): Date => {
-	const isoLike = wpDateGmt.includes('T') ? wpDateGmt : wpDateGmt.replace(' ', 'T');
-	const hasTimezone = /[Zz]|[+-]\d{2}:?\d{2}$/.test(isoLike);
-	return new Date(hasTimezone ? isoLike : `${isoLike}Z`);
-};
+import { parseWpDate } from "@/graphql/CMS/parseWpDate";
 
 /**
  * Formats a date as a short relative string ("2 days ago", "3 months ago"),
@@ -25,12 +8,12 @@ const toUtcDate = (wpDateGmt: string): Date => {
  * enough not to warrant pulling in `date-fns`/`dayjs` just for this one call
  * site.
  * @param dateGmt A WPGraphQL `*Gmt` datetime field's value (UTC, regardless of
- * the WordPress site's local timezone setting) — see `toUtcDate`'s doc
+ * the WordPress site's local timezone setting) — see `parseWpDate`'s doc
  * comment for why it must be the GMT variant specifically.
  * @returns A short relative-time string, or `"just now"` for anything under a minute old.
  */
 export const formatRelativeDate = (dateGmt: string): string => {
-	const seconds = Math.floor((Date.now() - toUtcDate(dateGmt).getTime()) / 1000);
+	const seconds = Math.floor((Date.now() - parseWpDate(dateGmt).getTime()) / 1000);
 
 	const units: { limit: number; divisor: number; label: string }[] = [
 		{ limit: 60, divisor: 1, label: 'second' },

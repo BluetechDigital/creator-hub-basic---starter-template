@@ -6,6 +6,7 @@ import { FC } from "react";
 import Image from "next/image";
 import dateFormat from "dateformat";
 import * as IPost from "@/graphql/CMS/types/post";
+import { parseWpDate } from "@/graphql/CMS/parseWpDate";
 import EngagementBar from "@/app/posts/[slug]/fragments/EngagementBar";
 
 /* -----------------------------------------------------------------------------
@@ -94,7 +95,7 @@ const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentC
 							)
 						)}
 						<span className={styles.postMetaDot} aria-hidden="true" />
-						<span className={styles.postMetaText}>{dateFormat(post.date, "dddd, mmmm dS, yyyy")}</span>
+						<span className={styles.postMetaText}>{dateFormat(parseWpDate(post.date), "dddd, mmmm dS, yyyy")}</span>
 						{post.seo?.readingTime ? (
 							<>
 								<span className={styles.postMetaDot} aria-hidden="true" />
