@@ -9,6 +9,36 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     @apply block w-full bg-pure-white;
 }
 
+/* ---- Breadcrumbs ---- */
+
+.breadcrumbs {
+    @apply w-full max-w-360 mx-auto px-4 sm:px-8 pt-8;
+
+    & .breadcrumbsList {
+        @apply inline-flex flex-wrap items-center gap-3 bg-pure-black/5 rounded-full px-6 py-3;
+
+        & .breadcrumbItem {
+            @apply flex items-center gap-3 text-sm text-pure-black/60;
+
+            & a {
+                @apply font-medium text-pure-black/60 transition duration-300;
+
+                &:hover {
+                    @apply text-accent-dark;
+                }
+            }
+
+            & svg {
+                @apply text-pure-black/30;
+            }
+
+            & .breadcrumbCurrent {
+                @apply font-medium text-pure-black;
+            }
+        }
+    }
+}
+
 /* ---- Hero ---- */
 
 .postHero {

@@ -25,6 +25,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import ArticleContent from "@/components/Global/Elements/ArticleContent/ArticleContent";
 import { extractToc } from "@/components/Global/Elements/ArticleContent/extractToc";
 import LatestPosts from "@/components/Global/Elements/LatestPosts/LatestPosts";
+import Breadcrumbs from "@/app/posts/[slug]/fragments/Breadcrumbs";
 import PostHero from "@/app/posts/[slug]/fragments/PostHero";
 import TableOfContents from "@/app/posts/[slug]/fragments/TableOfContents";
 import ShareLinks from "@/app/posts/[slug]/fragments/ShareLinks";
@@ -185,6 +186,8 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 	return (
 		<article className={styles.singlePost}>
 			<StructuredData data={[breadcrumbSchema, articleSchema]} />
+
+			<Breadcrumbs postTitle={post.title} />
 
 			<PostHero
 				post={post}
