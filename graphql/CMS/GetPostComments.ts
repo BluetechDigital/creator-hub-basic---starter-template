@@ -40,6 +40,17 @@ export type IPostComments = {
  * the caller to batch-fetch like/dislike counts separately via
  * `getCommentReactions` — deliberately not fetched in this same query, for
  * the same isolation reason as `likes`/`dislikes` on posts.
+ *
+ * `date: dateGmt` aliases WPGraphQL's `dateGmt` field back onto `date` (so
+ * `IComment.IProps`/`formatRelativeDate` don't need a rename) — confirmed
+ * live that this WordPress install's `dateGmt` and site-local `date` fields
+ * come back as identical non-ISO strings ("2026-08-18 05:19:28", a space
+ * instead of "T", no UTC marker). `new Date()` on a string like that gets
+ * silently parsed as local time in whatever timezone happens to run the
+ * code, not UTC — using `dateGmt` specifically (always UTC, unlike `date`
+ * which follows the site's own timezone setting) is what lets
+ * `formatRelativeDate`'s `toUtcDate` helper parse it correctly everywhere,
+ * regardless of the WordPress site's or the visitor's timezone.
  * @param databaseId The post's `databaseId` (its numeric WP post ID).
  * @returns A promise resolving to `{commentCount, comments}`, or `undefined` if the fetch/query failed.
  */
@@ -54,7 +65,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 							id
 							databaseId
 							content
-							date
+							date: dateGmt
 							author {
 								node {
 									name
@@ -68,7 +79,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 									id
 									databaseId
 									content
-									date
+									date: dateGmt
 									author {
 										node {
 											name

@@ -13,6 +13,7 @@ export type IProps = {
 	/** The comment's numeric WP id — used to batch-fetch reactions (`getCommentReactions`) and as the `setCommentReaction` mutation target, since likes/dislikes are deliberately not part of this type (see `getPostComments`'s doc comment for why). */
 	databaseId: number;
 	content: string;
+	/** Actually WPGraphQL's `dateGmt` field, fetched under this name via a query alias — see `getPostComments`'s doc comment for why it has to be the GMT variant. */
 	date: string;
 	author?: {
 		node: {
