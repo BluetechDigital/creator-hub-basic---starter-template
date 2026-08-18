@@ -61,13 +61,20 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Promise for async server components/functions.
  *
  * @param params - Route params promise; resolves to `{slug}` for the current post.
- * @returns Next.js `Metadata` for this post.
+ * @returns Next.js `Metadata` for this post, or minimal no-index metadata if the slug
+ * doesn't match a published post — `SinglePostPage` below is what actually 404s; this
+ * just has to avoid crashing on `seo` being `undefined` in the meantime (same pattern
+ * as `app/[slug]/page.tsx`'s `generateMetadata`).
  */
 export const generateMetadata = async ({ params }: { params: { slug: string } }): Promise<Metadata> => {
 
 	const { slug } = await params;
 
-	const seo = await getAllSeoContent(slug, postType.posts) as ISeo.IProps;
+	const seo = await getAllSeoContent(slug, postType.posts) as ISeo.IProps | undefined;
+
+	if (!seo) {
+		return { robots: { follow: false, index: false } };
+	}
 
 	return {
 		title: seo.title,
@@ -136,15 +143,20 @@ const SinglePostPage = async ({ params }: { params: { slug: string } }) => {
 		notFound();
 	}
 
-	// getPostReactions resolves to undefined (shown as 0/0) when the simple-blogs-post-likes
-	// mu-plugin isn't installed yet — an expected state, not an error, so it's
-	// awaited plainly rather than wrapped in try/catch like getPostContentBySlug.
-	const reactions = await getPostReactions(post.databaseId);
-
-	// Isolated from getPostContentBySlug with its own short cache so a freshly
-	// approved comment shows up quickly instead of waiting on the post-content
-	// query's much longer cache lifetime — see GetPostComments.ts's doc comment.
-	const comments = await getPostComments(post.databaseId);
+	// getPostReactions and getPostComments don't depend on each other's result,
+	// so they run in parallel rather than as two sequential round trips. Both
+	// resolve to undefined (reactions shown as 0/0, comments as an empty list)
+	// on failure — including the mu-plugin not being installed yet for
+	// reactions, an expected state, not an error — so neither is wrapped in
+	// try/catch the way getPostContentBySlug is above.
+	const [reactions, comments] = await Promise.all([
+		getPostReactions(post.databaseId),
+		// Isolated from getPostContentBySlug with its own short cache so a
+		// freshly approved comment shows up quickly instead of waiting on the
+		// post-content query's much longer cache lifetime — see
+		// GetPostComments.ts's doc comment.
+		getPostComments(post.databaseId),
+	]);
 
 	// Comment-level like/dislike counts are fetched in one batched call for
 	// every comment/reply on the page (rather than one request per comment),

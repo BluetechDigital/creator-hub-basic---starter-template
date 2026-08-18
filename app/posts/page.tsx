@@ -3,6 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { Metadata, NextPage } from "next";
+import { notFound } from "next/navigation";
 import * as ISeo from "@/graphql/CMS/types/seo";
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import { postType, flexibleContentType, pageType } from "@/context/constants";
@@ -28,11 +29,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Builds Next.js `<head>` metadata (title, description, Open Graph, canonical, robots)
  * for the blog archive page, by querying WPGraphQL SEO fields for `pageType.posts`.
  *
- * @returns Next.js `Metadata` for the blog archive page.
+ * @returns Next.js `Metadata` for the blog archive page, or minimal no-index metadata
+ * if the WP "Blog" page this route depends on doesn't exist yet (a fresh fork, before
+ * anyone's created it) — `PostsArchivePage` below is what actually 404s; this just has
+ * to avoid crashing on `seo` being `undefined` in the meantime (same pattern as
+ * `app/[slug]/page.tsx`'s `generateMetadata`).
  */
 export const generateMetadata = async (): Promise<Metadata> => {
 
-  const seo = await getAllSeoContent(pageType?.posts, postType.pages) as ISeo.IProps;
+	const seo = await getAllSeoContent(pageType?.posts, postType.pages) as ISeo.IProps | undefined;
+
+	if (!seo) {
+		return { robots: { follow: false, index: false } };
+	}
 
 	return {
 		title: seo.title,
@@ -68,17 +77,31 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX Blog Archive Page Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * `RenderFlexibleContent`, which resolves each block to a component via
  * `DynamicComponentLoaders` further down the tree — including `AllBlogPosts`, which
  * a CMS editor places on this page to render the actual grid.
+ *
+ * `getAllPageACFFlexibleComponentsContent` resolves to `null` if the WP "Blog" page
+ * doesn't exist yet (a fresh fork, before anyone's created it in wp-admin) or on a
+ * network-level failure — both cases 404 cleanly here instead of `RenderFlexibleContent`
+ * crashing on a `null` `content` prop, matching `app/[slug]/page.tsx`'s `DynamicPages`.
  */
 const PostsArchivePage: NextPage = async () => {
 
-  // Current Page ACF Flexible Components Content
-  const pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
-  	pageType.posts,
-  	postType.pages,
-  	flexibleContentType.pages
-  ) as IFlexibleContent.IProps;
+	let pageACFFlexibleComponentsContent: IFlexibleContent.IProps | null = null;
 
-  return <RenderFlexibleContent content={pageACFFlexibleComponentsContent} />;
+	try {
+		pageACFFlexibleComponentsContent = await getAllPageACFFlexibleComponentsContent(
+			pageType.posts,
+			postType.pages,
+			flexibleContentType.pages
+		) as IFlexibleContent.IProps | null;
+	} catch (error) {
+		console.log(error);
+	}
+
+	if (!pageACFFlexibleComponentsContent) {
+		notFound();
+	}
+
+	return <RenderFlexibleContent content={pageACFFlexibleComponentsContent} />;
 }
 
 PostsArchivePage.displayName = 'PostsArchivePage';
