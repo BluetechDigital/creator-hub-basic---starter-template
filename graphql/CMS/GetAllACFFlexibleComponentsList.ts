@@ -21,6 +21,14 @@ ONLY THE COMPONENTS USED FOR THE CURRENT ${SLUG} PAGE XXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Executes a lightweight GraphQL query to retrieve the field group names
  * (component types) used on a specific page/post slug.
+ *
+ * `slug` is passed as a `$slug` GraphQL variable, not interpolated into the
+ * query string — it comes straight from the URL's route param, so a raw
+ * `where: {name: "${slug}"}` interpolation would let a crafted slug break
+ * out of the string literal and inject arbitrary GraphQL syntax. `postType`
+ * is still interpolated directly (as the root field name), which is safe
+ * since every call site passes one of this codebase's own `postType`
+ * constants, never external input.
  * @param slug The slug of the page or post to query.
  * @param postType The post type (e.g., 'page', 'post').
  * @param postTypeFlexibleContent The ACF type prefix (e.g., 'Page', 'Post').
@@ -45,8 +53,8 @@ export const getAllComponentFieldGroupNames = async (
             .join('\n');
 
         const getPagefieldGroupNameListQuery = `
-            {
-                flexibleComponents: ${postType}(where: {name: "${slug}", status: PUBLISH}) {
+            query GetFieldGroupNames($slug: String!) {
+                flexibleComponents: ${postType}(where: {name: $slug, status: PUBLISH}) {
                     edges {
                         node {
                             template {
@@ -69,7 +77,7 @@ export const getAllComponentFieldGroupNames = async (
         const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: getPagefieldGroupNameListQuery }),
+            body: JSON.stringify({ query: getPagefieldGroupNameListQuery, variables: { slug } }),
             // 🎯 OPTIMIZATION: Cache for 24 hours (86400 seconds)
             next: { revalidate: 86400 }
         });

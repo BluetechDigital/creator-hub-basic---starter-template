@@ -38,14 +38,20 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
  * these through `parseWpDate` rather than passing them to `new Date()`
  * directly — see that function's doc comment (this exact bug was confirmed
  * live on a comment date first, before being found here too).
+ *
+ * `slug` is passed as a `$slug` GraphQL variable, not interpolated into the
+ * query string — it comes straight from the URL's route param, so a raw
+ * `where: {name: "${slug}"}` interpolation would let a crafted slug (e.g.
+ * containing a `"`) break out of the string literal and inject arbitrary
+ * GraphQL syntax into the query.
  * @param slug The slug of the post to fetch content for.
  * @returns A promise resolving to the post's content fields, or `undefined` if the fetch/query failed or no post matched.
  */
 export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps | undefined> => {
 	try {
 		const content = `
-			{
-				posts(where: {name: "${slug}", status: PUBLISH}) {
+			query GetPostContentBySlug($slug: String!) {
+				posts(where: {name: $slug, status: PUBLISH}) {
 					edges {
 						node {
 							databaseId
@@ -89,7 +95,7 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { slug } }),
 			next: { revalidate: 86400 },
 		});
 

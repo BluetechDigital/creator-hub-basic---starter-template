@@ -49,16 +49,16 @@ export type IPostComments = {
  * silently parsed as local time in whatever timezone happens to run the
  * code, not UTC — using `dateGmt` specifically (always UTC, unlike `date`
  * which follows the site's own timezone setting) is what lets
- * `formatRelativeDate`'s `toUtcDate` helper parse it correctly everywhere,
- * regardless of the WordPress site's or the visitor's timezone.
+ * `parseWpDate` parse it correctly everywhere, regardless of the WordPress
+ * site's or the visitor's timezone.
  * @param databaseId The post's `databaseId` (its numeric WP post ID).
  * @returns A promise resolving to `{commentCount, comments}`, or `undefined` if the fetch/query failed.
  */
 export const getPostComments = async (databaseId: number): Promise<IPostComments | undefined> => {
 	try {
 		const content = `
-			{
-				post(id: ${databaseId}, idType: DATABASE_ID) {
+			query GetPostComments($databaseId: ID!) {
+				post(id: $databaseId, idType: DATABASE_ID) {
 					commentCount
 					comments(first: 20, where: { parent: 0 }) {
 						nodes {
@@ -99,7 +99,7 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { databaseId } }),
 			next: { revalidate: 60 },
 		});
 

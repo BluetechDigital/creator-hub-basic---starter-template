@@ -26,6 +26,11 @@ X 1. getAllFlexibleContentComponents: Orchestrator and Optimized Pass 2 Query X
  * This function orchestrates the two-pass query optimization:
  * 1. Executes a lightweight query to determine which components are active.
  * 2. Executes an optimized query fetching data only for those active components.
+ *
+ * `slug` is passed as a `$slug` GraphQL variable in both passes, not
+ * interpolated into the query string — see `GetAllACFFlexibleComponentsList.ts`'s
+ * doc comment for why a raw string interpolation here would be a GraphQL
+ * injection risk (`slug` comes straight from the URL's route param).
  * @param slug The slug of the page or post to fetch content for.
  * @param postType The WP post type (e.g., 'pages', 'posts').
  * @param postTypeFlexibleContent The ACF type name prefix (e.g., 'Page', 'Post').
@@ -88,8 +93,8 @@ export const getAllPageACFFlexibleComponentsContent = async (
 			.join('\n');
 		
 		const content = `
-			{
-        		flexibleComponents: ${postType}(where: {name: "${slug}", status: PUBLISH}) {
+			query GetPageFlexibleComponentsContent($slug: String!) {
+        		flexibleComponents: ${postType}(where: {name: $slug, status: PUBLISH}) {
         		  edges {
 						node {
 							template {
@@ -110,7 +115,7 @@ export const getAllPageACFFlexibleComponentsContent = async (
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { slug } }),
 			next: { revalidate: 86400 },
 		});
 

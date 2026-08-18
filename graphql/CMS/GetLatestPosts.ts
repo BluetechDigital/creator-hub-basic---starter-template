@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import * as IPost from "@/graphql/CMS/types/post";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+import { POST_SUMMARY_FIELDS } from "@/graphql/CMS/postSummaryFields";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -21,9 +22,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX LATEST POSTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * here) — newest-first is WPGraphQL's own default order for this connection, but it's
  * specified explicitly rather than relied upon.
  *
- * `date: dateGmt` aliases WPGraphQL's GMT field back onto `date` — see
- * `GetPostContentBySlug.ts`'s doc comment for why, and why callers must use
- * `parseWpDate` rather than `new Date()` on it.
+ * Field selection is shared with `GetAllPostsSummaries.ts` via
+ * `POST_SUMMARY_FIELDS` (`postSummaryFields.ts`) rather than duplicated, so
+ * both queries stay in sync with `IPost.ISummaryProps` automatically.
+ *
+ * `first`/`excludeId` are passed as GraphQL variables rather than
+ * interpolated into the query string, for consistency with every other
+ * query in this codebase after a GraphQL-injection review — see
+ * `GetPostContentBySlug.ts`'s doc comment for the higher-risk case
+ * (string slugs) this same fix addresses more critically elsewhere.
  * @param excludeId The `databaseId` of the post to exclude (the one currently being viewed).
  * @param first How many posts to return.
  * @returns A promise resolving to the post summaries, or `undefined` on failure.
@@ -34,28 +41,10 @@ export const getLatestPosts = async (
 ): Promise<IPost.ISummaryProps[] | undefined> => {
 	try {
 		const content = `
-			{
-				posts(first: ${first}, where: {status: PUBLISH, notIn: [${excludeId}], orderby: {field: DATE, order: DESC}}) {
+			query GetLatestPosts($first: Int!, $excludeId: ID!) {
+				posts(first: $first, where: {status: PUBLISH, notIn: [$excludeId], orderby: {field: DATE, order: DESC}}) {
 					nodes {
-						title
-						slug
-						date: dateGmt
-						excerpt
-						featuredImage {
-							node {
-								sourceUrl
-								altText
-							}
-						}
-						categories {
-							nodes {
-								name
-								slug
-							}
-						}
-						seo {
-							readingTime
-						}
+						${POST_SUMMARY_FIELDS}
 					}
 				}
 			}
@@ -64,7 +53,7 @@ export const getLatestPosts = async (
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { first, excludeId } }),
 			next: { revalidate: 86400 },
 		});
 

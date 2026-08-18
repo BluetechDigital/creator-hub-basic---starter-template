@@ -64,6 +64,28 @@ describe("getPostContentBySlug", () => {
 		);
 	});
 
+	it("sends the slug as a GraphQL variable rather than interpolating it into the query string", async () => {
+		setCmsEnv();
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { posts: { edges: [] } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getPostContentBySlug } = await importFreshModule();
+		// A slug containing a quote would break out of a raw string-interpolated
+		// query — passed as a variable instead, it can only ever be treated as
+		// a plain string value, never as injected GraphQL syntax.
+		await getPostContentBySlug('a", status: DRAFT, name: "b');
+
+		const [, requestInit] = mockFetch.mock.calls[0];
+		const body = JSON.parse((requestInit as RequestInit).body as string);
+
+		expect(body.variables).toEqual({ slug: 'a", status: DRAFT, name: "b' });
+		expect(body.query).not.toContain('a", status: DRAFT, name: "b');
+	});
+
 	it("returns undefined when the HTTP response is not ok", async () => {
 		setCmsEnv();
 

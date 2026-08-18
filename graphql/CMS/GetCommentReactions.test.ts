@@ -62,7 +62,7 @@ describe("getCommentReactions", () => {
 
 		const [, requestInit] = mockFetch.mock.calls[0];
 		const body = JSON.parse((requestInit as RequestInit).body as string);
-		expect(body.query).toContain("commentIn: [2, 3]");
+		expect(body.variables).toEqual({ commentDatabaseIds: [2, 3] });
 	});
 
 	it("returns undefined when the fields don't exist yet (mu-plugin not installed)", async () => {

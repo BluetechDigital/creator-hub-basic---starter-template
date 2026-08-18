@@ -39,8 +39,8 @@ export const getCommentReactions = async (commentDatabaseIds: number[]): Promise
 
 	try {
 		const content = `
-			{
-				comments(where: { commentIn: [${commentDatabaseIds.join(', ')}] }) {
+			query GetCommentReactions($commentDatabaseIds: [ID]) {
+				comments(where: { commentIn: $commentDatabaseIds }) {
 					nodes {
 						databaseId
 						likes
@@ -53,7 +53,7 @@ export const getCommentReactions = async (commentDatabaseIds: number[]): Promise
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { commentDatabaseIds } }),
 			next: { revalidate: 60 },
 		});
 

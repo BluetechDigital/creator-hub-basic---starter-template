@@ -47,7 +47,7 @@ describe("getAllPostsSummaries", () => {
 		expect(result).toEqual({ posts: [summary], pageInfo });
 	});
 
-	it("interpolates the after cursor into the query sent to fetch", async () => {
+	it("sends first/after as GraphQL variables rather than interpolating them into the query string", async () => {
 		setCmsEnv();
 
 		const mockFetch = vi.fn().mockResolvedValue({
@@ -57,13 +57,16 @@ describe("getAllPostsSummaries", () => {
 		vi.stubGlobal("fetch", mockFetch);
 
 		const { getAllPostsSummaries } = await importFreshModule();
-		await getAllPostsSummaries(12, "cursor-1");
+		// A cursor containing a quote would break out of a raw string-interpolated
+		// query — passed as a variable instead, it can only ever be treated as a
+		// plain string value, never as injected GraphQL syntax.
+		await getAllPostsSummaries(12, 'cursor", first: 9999, where: {status: DRAFT}, after: "');
 
 		const [, requestInit] = mockFetch.mock.calls[0];
 		const body = JSON.parse((requestInit as RequestInit).body as string);
 
-		expect(body.query).toContain('after: "cursor-1"');
-		expect(body.query).toContain("first: 12");
+		expect(body.variables).toEqual({ first: 12, after: 'cursor", first: 9999, where: {status: DRAFT}, after: "' });
+		expect(body.query).not.toContain('cursor", first: 9999');
 	});
 
 	it("returns undefined when the HTTP response is not ok", async () => {

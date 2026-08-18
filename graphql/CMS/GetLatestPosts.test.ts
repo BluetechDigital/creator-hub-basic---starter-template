@@ -48,7 +48,7 @@ describe("getLatestPosts", () => {
 		expect(result).toEqual([summary]);
 	});
 
-	it("interpolates the excludeId into the query sent to fetch", async () => {
+	it("sends first/excludeId as GraphQL variables rather than interpolating them into the query string", async () => {
 		setCmsEnv();
 
 		const mockFetch = vi.fn().mockResolvedValue({
@@ -63,8 +63,8 @@ describe("getLatestPosts", () => {
 		const [, requestInit] = mockFetch.mock.calls[0];
 		const body = JSON.parse((requestInit as RequestInit).body as string);
 
-		expect(body.query).toContain("notIn: [307]");
-		expect(body.query).toContain("first: 3");
+		expect(body.variables).toEqual({ first: 3, excludeId: 307 });
+		expect(body.query).not.toContain("307");
 	});
 
 	it("returns undefined when the HTTP response is not ok", async () => {

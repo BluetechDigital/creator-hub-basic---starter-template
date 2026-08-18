@@ -35,8 +35,8 @@ export type IPostReactions = {
 export const getPostReactions = async (databaseId: number): Promise<IPostReactions | undefined> => {
 	try {
 		const content = `
-			{
-				post(id: ${databaseId}, idType: DATABASE_ID) {
+			query GetPostReactions($databaseId: ID!) {
+				post(id: $databaseId, idType: DATABASE_ID) {
 					likes
 					dislikes
 				}
@@ -46,7 +46,7 @@ export const getPostReactions = async (databaseId: number): Promise<IPostReactio
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query: content }),
+			body: JSON.stringify({ query: content, variables: { databaseId } }),
 			next: { revalidate: 60 },
 		});
 
