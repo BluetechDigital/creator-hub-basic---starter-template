@@ -8,6 +8,7 @@ import dateFormat from "dateformat";
 import * as IPost from "@/graphql/CMS/types/post";
 import { parseWpDate } from "@/graphql/CMS/parseWpDate";
 import EngagementBar from "@/app/posts/[slug]/fragments/EngagementBar";
+import PostTaxonomies from "@/app/posts/[slug]/fragments/PostTaxonomies";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -40,7 +41,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
  * `EngagementBar` sits directly below the author bio (not after the article
  * body, where it originally lived) so a reader can react without scrolling
- * past the whole post first.
+ * past the whole post first. `PostTaxonomies` (categories/tags) sits between
+ * the bio and `EngagementBar`.
  * @param post The post's content fields, as returned by `getPostContentBySlug`.
  * @param initialLikes The post's current like count (`getPostReactions`, 0 if the likes mu-plugin isn't installed).
  * @param initialDislikes The post's current dislike count (`getPostReactions`, 0 if the likes mu-plugin isn't installed).
@@ -106,6 +108,7 @@ const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentC
 					{post.author?.node?.description && (
 						<p className={styles.postAuthorBio}>{post.author.node.description}</p>
 					)}
+					<PostTaxonomies categories={post.categories} tags={post.tags} />
 					<EngagementBar
 						postId={post.databaseId}
 						initialLikes={initialLikes}

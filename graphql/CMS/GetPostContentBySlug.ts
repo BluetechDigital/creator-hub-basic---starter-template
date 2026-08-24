@@ -44,6 +44,9 @@ if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
  * `where: {name: "${slug}"}` interpolation would let a crafted slug (e.g.
  * containing a `"`) break out of the string literal and inject arbitrary
  * GraphQL syntax into the query.
+ *
+ * `tags(first: 5)` caps the tag pills `PostTaxonomies` renders at the source,
+ * same as `postSummaryFields.ts` does for the "Latest news" cards.
  * @param slug The slug of the post to fetch content for.
  * @returns A promise resolving to the post's content fields, or `undefined` if the fetch/query failed or no post matched.
  */
@@ -78,6 +81,12 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 								}
 							}
 							categories {
+								nodes {
+									name
+									slug
+								}
+							}
+							tags(first: 5) {
 								nodes {
 									name
 									slug

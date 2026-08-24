@@ -69,6 +69,57 @@ describe("getAllPostsSummaries", () => {
 		expect(body.query).not.toContain('cursor", first: 9999');
 	});
 
+	it("maps filters onto tagSlugIn/categoryName/dateQuery GraphQL variables", async () => {
+		setCmsEnv();
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { posts: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getAllPostsSummaries } = await importFreshModule();
+		await getAllPostsSummaries(24, undefined, {
+			tagSlugs: ["ai", "ai-collections"],
+			categorySlug: "uncategorized",
+			dateFrom: "2026-01-01",
+			dateTo: "2026-02-15",
+		});
+
+		const [, requestInit] = mockFetch.mock.calls[0];
+		const body = JSON.parse((requestInit as RequestInit).body as string);
+
+		expect(body.variables).toEqual({
+			first: 24,
+			after: null,
+			tagSlugIn: ["ai", "ai-collections"],
+			categoryName: "uncategorized",
+			dateQuery: {
+				after: { year: 2026, month: 1, day: 1 },
+				before: { year: 2026, month: 2, day: 15 },
+				inclusive: true,
+			},
+		});
+	});
+
+	it("omits tagSlugIn/categoryName/dateQuery entirely when no filters are passed", async () => {
+		setCmsEnv();
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { posts: { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getAllPostsSummaries } = await importFreshModule();
+		await getAllPostsSummaries(24);
+
+		const [, requestInit] = mockFetch.mock.calls[0];
+		const body = JSON.parse((requestInit as RequestInit).body as string);
+
+		expect(body.variables).toEqual({ first: 24, after: null });
+	});
+
 	it("returns undefined when the HTTP response is not ok", async () => {
 		setCmsEnv();
 

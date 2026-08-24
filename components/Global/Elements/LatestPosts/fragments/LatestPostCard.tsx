@@ -30,8 +30,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX LatestPostCard Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Renders a single "Latest news" card. `featuredImage` is optional-chained since WP
  * posts aren't guaranteed to have one. `readingTime` comes from `post.seo` — the same
  * WPGraphQL Yoast field `app/posts/[slug]/page.tsx` reads for the current post itself.
+ *
+ * The grey pill row prefers the post's tags (already capped to 5 by the query — see
+ * `postSummaryFields.ts`) and falls back to its categories only when it has no tags at
+ * all, since a freshly published post is far more likely to be left in the default
+ * "Uncategorized" category than to have no tags set. Each pill links to
+ * `/posts?tag=<slug>` (or `?category=<slug>` when falling back) — the same archive-filter
+ * query params `PostFilters.tsx` reads/writes, so clicking one lands on the archive
+ * already filtered to it.
  */
 const LatestPostCard: FC<ILatestPostCard> = ({ post }) => {
+
+	const tagNodes = post.tags?.nodes ?? [];
+	const isTagPills = tagNodes.length > 0;
+	const pills = isTagPills ? tagNodes : post.categories?.nodes ?? [];
+	const pillFilterKey = isTagPills ? 'tag' : 'category';
 
 	return (
 		<div className={styles.latestPostCard}>
@@ -64,10 +77,16 @@ const LatestPostCard: FC<ILatestPostCard> = ({ post }) => {
 					dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.excerpt) }}
 				/>
 			)}
-			{post.categories?.nodes?.length ? (
+			{pills.length ? (
 				<div className={styles.latestPostTags}>
-					{post.categories.nodes.map((category) => (
-						<span key={category.slug} className={styles.latestPostTag}>{category.name}</span>
+					{pills.map((pill) => (
+						<Link
+							key={pill.slug}
+							href={`/posts?${pillFilterKey}=${pill.slug}`}
+							className={styles.latestPostTag}
+						>
+							{pill.name}
+						</Link>
 					))}
 				</div>
 			) : null}

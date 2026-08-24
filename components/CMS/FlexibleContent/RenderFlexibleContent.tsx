@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { FC, Suspense, ComponentType } from 'react';
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
+import * as IPost from "@/graphql/CMS/types/post";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Component Loaders XXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -53,19 +54,27 @@ import SVGLoader from "@/components/CMS/FlexibleContent/fragments/SVGLoader";
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Resolved Block XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & { simpleName: string };
+type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
+    simpleName: string;
+    filters?: IPost.IPostFilters;
+};
 
 /**
  * Dynamically imports and renders a single resolved block. Kept as its own tiny async
  * Server Component (rather than inlined in `RenderFlexibleContent`'s render loop) so each
  * block gets its own `<Suspense>` boundary and can resolve/stream independently instead of
  * the whole page waiting on the slowest block.
+ *
+ * `filters` (the blog archive's tag/category/date query params, parsed in
+ * `app/posts/page.tsx`) is passed to every block the same way `item`'s ACF fields
+ * already are — only `AllBlogPosts` reads it, every other block ignores the extra prop
+ * exactly as it already ignores whichever of `item`'s fields don't apply to it.
  */
-const ResolvedBlock = async ({ simpleName, ...item }: IResolvedBlockProps) => {
+const ResolvedBlock = async ({ simpleName, filters, ...item }: IResolvedBlockProps) => {
     const mod = await DynamicComponentLoaders[simpleName]();
     const Component = mod.default;
 
-    return <Component {...item} />;
+    return <Component {...item} filters={filters} />;
 };
 
 /* -----------------------------------------------------------------------------
@@ -74,6 +83,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Flexible Content Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 type IProps = {
     content: IFlexibleContent.IProps;
+    /** The blog archive's tag/category/date filters (parsed in `app/posts/page.tsx`) — only relevant to the `AllBlogPosts` block, but threaded through every block the same way `item`'s ACF fields are (see `ResolvedBlock`'s doc comment). */
+    filters?: IPost.IPostFilters;
 };
 
 /**
@@ -95,7 +106,7 @@ type IProps = {
  * 3. renders `ResolvedBlock` inside its own `<Suspense>` so each block streams in
  *    independently as its dynamic import (and any data it fetches) resolves.
  */
-const RenderFlexibleContent: FC<IProps> = ({ content }) => {
+const RenderFlexibleContent: FC<IProps> = ({ content, filters }) => {
     return (
         <>
             {content.map((item, index) => {
@@ -113,7 +124,7 @@ const RenderFlexibleContent: FC<IProps> = ({ content }) => {
                 return (
                     <section className={simpleName} key={item.fieldGroupName + "-" + index}>
                         <Suspense fallback={<SVGLoader/>}>
-                            <ResolvedBlock simpleName={simpleName} {...item} />
+                            <ResolvedBlock simpleName={simpleName} filters={filters} {...item} />
                         </Suspense>
                     </section>
                 );

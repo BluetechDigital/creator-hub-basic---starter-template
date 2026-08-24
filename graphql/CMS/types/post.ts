@@ -31,6 +31,8 @@ export type IProps = {
 		};
 	} | null;
 	categories?: { nodes: { name: string; slug: string }[] } | null;
+	/** Capped to the 5 most relevant tags at the query level — see `postSummaryFields.ts`. */
+	tags?: { nodes: { name: string; slug: string }[] } | null;
 	seo?: { readingTime: number } | null;
 };
 
@@ -38,7 +40,7 @@ export type IProps = {
 
 export type ISummaryProps = Pick<
 	IProps,
-	"title" | "slug" | "date" | "excerpt" | "featuredImage" | "categories" | "seo"
+	"title" | "slug" | "date" | "excerpt" | "featuredImage" | "categories" | "tags" | "seo"
 >;
 
 export type ISummaryResponse = {
@@ -46,6 +48,23 @@ export type ISummaryResponse = {
         nodes: ISummaryProps[];
         pageInfo: { hasNextPage: boolean; endCursor: string | null };
     } | null) | null;
+};
+
+/**
+ * Archive-grid filters accepted by `getAllPostsSummaries`. Category filtering is
+ * deliberately single-select (`categorySlug`, not an array) — it maps to WPGraphQL's
+ * slug-based `categoryName` where-arg, confirmed working directly against this
+ * project's live CMS; the multi-select alternative (`categoryIn`) takes numeric
+ * category *database IDs*, not slugs, which would need an extra slug→ID lookup query
+ * this pass doesn't add. `dateFrom`/`dateTo` are plain `"YYYY-MM-DD"` strings — split
+ * into WPGraphQL's `{year, month, day}` shape by `buildDateQueryInput` in
+ * `GetAllPostsSummaries.ts`, not passed through as-is.
+ */
+export type IPostFilters = {
+	tagSlugs?: string[];
+	categorySlug?: string;
+	dateFrom?: string;
+	dateTo?: string;
 };
 
 /* ---- Sitemap slugs (getAllPostsSlugs) ---- */

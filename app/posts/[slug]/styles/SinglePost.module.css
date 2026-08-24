@@ -95,6 +95,36 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     }
 }
 
+/* ---- Post taxonomies (categories + tags, above the engagement bar) ---- */
+
+.postTaxonomies {
+    @apply flex flex-wrap items-center gap-3;
+
+    & .postTaxonomiesCategories {
+        @apply text-sm text-pure-black font-medium;
+
+        & .postTaxonomiesCategoryLink {
+            @apply text-pure-black;
+
+            &:hover {
+                @apply underline text-accent-dark;
+            }
+        }
+    }
+
+    & .postTaxonomiesTags {
+        @apply flex flex-wrap gap-2;
+
+        & .postTaxonomyTag {
+            @apply inline-block px-4 py-2 text-xs text-pure-black font-medium bg-pure-black/10 rounded-full transition duration-300;
+
+            &:hover {
+                @apply bg-pure-black/20;
+            }
+        }
+    }
+}
+
 /* ---- Body: sidebar + main column ---- */
 
 .postBody {

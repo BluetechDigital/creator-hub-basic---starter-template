@@ -8,6 +8,10 @@
  * `date: dateGmt` aliases WPGraphQL's GMT field back onto `date` — see
  * `GetPostContentBySlug.ts`'s doc comment for why, and why callers must use
  * `parseWpDate` rather than `new Date()` on it.
+ *
+ * `tags(first: 5)` caps the tag pills `LatestPostCard` renders at the source
+ * rather than slicing client-side — `categories` is still fetched alongside it
+ * so that card can fall back to the category pill when a post has no tags.
  */
 export const POST_SUMMARY_FIELDS = `
 	title
@@ -21,6 +25,12 @@ export const POST_SUMMARY_FIELDS = `
 		}
 	}
 	categories {
+		nodes {
+			name
+			slug
+		}
+	}
+	tags(first: 5) {
 		nodes {
 			name
 			slug

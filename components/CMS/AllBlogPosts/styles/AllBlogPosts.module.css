@@ -6,29 +6,180 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 .allBlogPosts {
-    @apply w-full h-full min-h-screen flex flex-col items-center justify-center self-center;
+    @apply w-full px-4 sm:px-8 py-20;
 }
 
-.postsGrid {
-    @apply w-full grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3;
-}
+/* ---- Header: static "Blogs" eyebrow + the ACF `title` heading ---- */
 
-.postCard {
-    @apply flex flex-col gap-2;
+.allBlogPostsHeader {
+    @apply max-w-2xl mx-auto mb-16 text-center;
 
-    & .postThumbnail {
-        @apply w-full h-auto rounded;
+    & .allBlogPostsEyebrow {
+        @apply inline-block mb-4 text-sm text-accent-dark font-medium;
     }
 
-    & .postTitle {
-        @apply text-base font-medium;
+    & .allBlogPostsHeading {
+        @apply text-4xl sm:text-5xl lg:text-6xl text-pure-black;
+    }
+}
+
+/* ---- PostFilters: category select + tag search + active chips + date range ---- */
+
+.postFilters {
+    @apply w-full max-w-360 mx-auto mb-10 flex flex-col gap-4;
+
+    & .postFiltersPrimaryRow {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
+    & .postFiltersSelect {
+        @apply px-4 py-2 text-sm text-pure-black font-medium bg-pure-black/5 rounded-full border-0 cursor-pointer;
+    }
+
+    & .postFiltersTagSearch {
+        @apply px-4 py-2 text-sm text-pure-black bg-pure-black/5 rounded-full border-0;
+
+        &::placeholder {
+            @apply text-pure-black/40;
+        }
+
+        &:focus {
+            @apply outline-none ring-2 ring-accent-default;
+        }
+    }
+
+    & .postFiltersTagChip {
+        @apply inline-flex items-center gap-2 px-4 py-2 text-xs text-accent-dark font-medium bg-accent-default/20 rounded-full;
+
+        & button {
+            @apply text-accent-dark/70 leading-none cursor-pointer;
+
+            &:hover {
+                @apply text-accent-dark;
+            }
+        }
+    }
+
+    & .postFiltersDateRange {
+        @apply flex flex-wrap items-center gap-4;
+
+        & .postFiltersDateLabel {
+            @apply flex items-center gap-2 text-sm text-pure-black/60;
+
+            & input {
+                @apply px-3 py-2 text-sm text-pure-black bg-pure-black/5 rounded-full border-0;
+            }
+        }
+    }
+
+    & .postFiltersClear {
+        @apply text-sm text-pure-black/60 font-medium underline transition duration-300 cursor-pointer;
+
+        &:hover {
+            @apply text-accent-dark;
+        }
+    }
+}
+
+/* ---- Grid: featured card + responsive card grid + "Show more" ---- */
+
+.postsGrid {
+    @apply w-full max-w-360 mx-auto flex flex-col gap-12;
+}
+
+.postsGridColumns {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8;
+}
+
+.postsGridEmpty {
+    @apply w-full max-w-360 mx-auto text-center text-pure-black/60;
+}
+
+/* FeaturedPostCard — the most recent post, full-width with its image as a
+backdrop and the date/title overlaid on a dark gradient so the white text
+stays legible on a photo, without darkening the rest of the (light-theme)
+page. */
+
+.featuredPostCard {
+    @apply relative block w-full;
+
+    &:hover .featuredPostImage {
+        @apply scale-110;
+    }
+
+    &:hover .featuredPostTitle {
+        @apply underline;
+    }
+
+    & .featuredPostImageWrapper {
+        @apply relative w-full h-96 md:h-128 overflow-hidden rounded-3xl;
+
+        & .featuredPostImage {
+            @apply absolute inset-0 w-full h-full object-cover transition duration-700;
+        }
+
+        & .featuredPostOverlay {
+            @apply absolute inset-0 bg-linear-to-t from-pure-black/80 via-pure-black/10 to-transparent pointer-events-none;
+        }
+    }
+
+    & .featuredPostContent {
+        @apply absolute bottom-0 left-0 right-0 p-8 md:p-12;
+
+        & .featuredPostDate {
+            @apply block mb-2 text-sm text-pure-white/70 font-medium;
+        }
+
+        & .featuredPostTitle {
+            @apply text-2xl md:text-4xl text-pure-white;
+        }
+    }
+}
+
+/* PostCard — its own component (PostCard.tsx), kept as its own nested group
+rather than nested inside .postsGridColumns above, even though it's a DOM
+descendant of it, since it's logically a separate component. */
+
+.postCard {
+    @apply flex flex-col;
+
+    &:hover .postThumbnail {
+        @apply scale-110;
+    }
+
+    &:hover .postTitle {
+        @apply underline;
+    }
+
+    & .postThumbnailWrapper {
+        @apply mb-6 overflow-hidden rounded-3xl;
+
+        & .postThumbnail {
+            @apply w-full h-64 object-cover transition duration-700;
+        }
     }
 
     & .postDate {
-        @apply text-sm opacity-70;
+        @apply block mb-2 text-sm text-pure-black/60 font-medium;
+    }
+
+    & .postTitle {
+        @apply block mb-3 text-2xl text-pure-black;
     }
 
     & .postExcerpt {
-        @apply text-sm;
+        @apply text-pure-black/60;
+    }
+}
+
+.showMoreWrapper {
+    @apply flex justify-center pt-8 border-t border-pure-black/10;
+}
+
+.showMoreButton {
+    @apply inline-flex items-center px-6 py-4 text-sm text-pure-black font-semibold bg-pure-black/5 rounded-full transition duration-300 cursor-pointer;
+
+    &:hover {
+        @apply bg-pure-black/10;
     }
 }

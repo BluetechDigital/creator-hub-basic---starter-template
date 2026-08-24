@@ -23,14 +23,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostCard Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Renders a single blog post summary card for the archive grid. `memo`-wrapped
- * client component since it does no data fetching of its own. `featuredImage` is
- * optional-chained since WP posts aren't guaranteed to have one — falls back to no
- * image rather than crashing. The excerpt is sanitized directly with DOMPurify
- * (same sanitizer `Paragraph`/`ArticleContent` use elsewhere) rather than reusing
- * `Paragraph` itself — `Paragraph` is built around `framer-motion`'s `useScroll` for
- * a fade-in effect this card never enables, and mounting that on every card in the
- * grid (up to `POSTS_PAGE_SIZE`) was pure unused scroll-tracking overhead.
+ * Renders a single blog post summary card for the archive grid: image, date,
+ * title, excerpt — in that order, following the reference design's card
+ * layout. `memo`-wrapped client component since it does no data fetching of
+ * its own. `featuredImage` is optional-chained since WP posts aren't
+ * guaranteed to have one — falls back to no image rather than crashing. The
+ * excerpt is sanitized directly with DOMPurify (same sanitizer `Paragraph`/
+ * `ArticleContent` use elsewhere) rather than reusing `Paragraph` itself —
+ * `Paragraph` is built around `framer-motion`'s `useScroll` for a fade-in
+ * effect this card never enables, and mounting that on every card in the grid
+ * (up to `POSTS_PAGE_SIZE`) was pure unused scroll-tracking overhead.
  */
 const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
 
@@ -39,16 +41,18 @@ const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
     return (
         <Link href={`/posts/${post.slug}`} className={styles.postCard}>
             {post.featuredImage?.node?.sourceUrl && (
-                <Image
-                    src={post.featuredImage.node.sourceUrl}
-                    alt={post.featuredImage.node.altText || post.title}
-                    width={480}
-                    height={320}
-                    className={styles.postThumbnail}
-                />
+                <div className={styles.postThumbnailWrapper}>
+                    <Image
+                        src={post.featuredImage.node.sourceUrl}
+                        alt={post.featuredImage.node.altText || post.title}
+                        width={480}
+                        height={320}
+                        className={styles.postThumbnail}
+                    />
+                </div>
             )}
-            <h3 className={styles.postTitle}>{post.title}</h3>
             <span className={styles.postDate}>{dateFormat(parseWpDate(post.date), "mmmm dS, yyyy")}</span>
+            <h3 className={styles.postTitle}>{post.title}</h3>
             {post.excerpt && <div className={styles.postExcerpt} dangerouslySetInnerHTML={cleanExcerpt} />}
         </Link>
     );
