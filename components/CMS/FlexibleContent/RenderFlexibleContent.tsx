@@ -124,7 +124,12 @@ const RenderFlexibleContent: FC<IProps> = ({ content, filters }) => {
                 return (
                     <section className={simpleName} key={item.fieldGroupName + "-" + index}>
                         <Suspense fallback={<SVGLoader/>}>
-                            <ResolvedBlock simpleName={simpleName} filters={filters} {...item} />
+                            {/* {...item} spreads before the explicit props (not after) so a raw
+                            ACF field that happened to be named "simpleName"/"filters" can never
+                            silently win over the real values — JSX spread order means the last
+                            key wins, and item is untyped CMS data, not a value this component
+                            controls. */}
+                            <ResolvedBlock {...item} simpleName={simpleName} filters={filters} />
                         </Suspense>
                     </section>
                 );

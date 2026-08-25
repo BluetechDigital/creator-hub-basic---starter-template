@@ -5,8 +5,17 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+/* min-h-screen restored to match every other flexible-content block
+(e.g. AllYoutubeVideos) — without it, a filterable archive with only a few
+posts collapses to its content height while an adjacent block on the same
+page still forces a full viewport, producing an unintentional-looking size
+jump between sections. flex items-center justify-center (which the other
+blocks use to vertically center short content) is deliberately not restored
+here — this block now holds a header, filter bar, grid, and "show more"
+control, and vertically centering that much content in the viewport would
+look wrong in a way the original single-purpose block never had to consider. */
 .allBlogPosts {
-    @apply w-full px-4 sm:px-8 py-20;
+    @apply w-full min-h-screen px-4 sm:px-8 py-20;
 }
 
 /* ---- Header: static "Blogs" eyebrow + the ACF `title` heading ---- */
@@ -168,7 +177,7 @@ descendant of it, since it's logically a separate component. */
     }
 
     & .postExcerpt {
-        @apply text-pure-black/60;
+        @apply text-sm text-pure-black/60;
     }
 }
 

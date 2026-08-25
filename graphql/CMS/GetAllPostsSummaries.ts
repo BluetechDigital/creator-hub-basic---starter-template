@@ -20,13 +20,27 @@ type IWpDateQueryBoundary = { year: number; month: number; day: number };
  * WPGraphQL's `dateQuery` where-arg expects for its `after`/`before` boundaries — a
  * bare ISO string isn't accepted there (confirmed against the live CMS while building
  * this), only the decomposed object is.
+ *
+ * Validates the split rather than trusting it — the archive filter bar is explicitly
+ * built to be shareable/bookmarkable, so a malformed `?from=` (a hand-edited link, a
+ * missing part like `"2026-2"`, non-numeric text) is a real input path, not just a
+ * UI-constrained one. Without this check, a bad date silently became `day: NaN`,
+ * which `JSON.stringify` turns into `null` in the outgoing GraphQL variables — either
+ * failing `dateQuery`'s variable coercion (emptying the *entire* archive, not just
+ * ignoring the bad boundary) or matching unintended dates, depending on the schema's
+ * nullability, with no validation error surfaced anywhere. Returning `undefined`
+ * instead just drops that boundary, same as if it had never been set.
  * @param date A `"YYYY-MM-DD"` string, or `undefined` if that boundary isn't set.
- * @returns The decomposed boundary, or `undefined` to leave that side of the range open.
+ * @returns The decomposed boundary, or `undefined` to leave that side of the range open
+ * (either because it wasn't set, or because it didn't parse as a real date).
  */
 const buildDateQueryBoundary = (date?: string): IWpDateQueryBoundary | undefined => {
 	if (!date) return undefined;
 
-	const [year, month, day] = date.split('-').map(Number);
+	const parts = date.split('-').map(Number);
+	if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return undefined;
+
+	const [year, month, day] = parts;
 	return { year, month, day };
 };
 

@@ -1,5 +1,15 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 
+// unstable_cache requires Next's request-scoped incremental-cache context,
+// which doesn't exist outside a real Next.js server runtime — calling the
+// real implementation here throws "Invariant: incrementalCache missing"
+// (confirmed directly). Mocked as a pass-through so these tests exercise the
+// underlying fetch/error-handling logic exactly as before caching was added,
+// without needing a real Next.js request context.
+vi.mock("next/cache", () => ({
+	unstable_cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+}));
+
 const originalEnv = { ...process.env };
 
 const importFreshModule = async () => {

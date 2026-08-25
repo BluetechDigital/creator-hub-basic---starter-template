@@ -2,6 +2,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+import { unstable_cache } from "next/cache";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
@@ -34,7 +35,7 @@ export type IPostFilterOptions = {
  * hundreds of distinct tags yet.
  * @returns A promise resolving to `{categories, tags}`, or `undefined` on failure.
  */
-export const getPostFilterOptions = async (): Promise<IPostFilterOptions | undefined> => {
+const fetchPostFilterOptions = async (): Promise<IPostFilterOptions | undefined> => {
 	try {
 		const content = `
 			query GetPostFilterOptions {
@@ -85,3 +86,26 @@ export const getPostFilterOptions = async (): Promise<IPostFilterOptions | undef
 		return undefined;
 	}
 };
+
+/**
+ * `AllBlogPosts` reads `searchParams` via `app/posts/page.tsx`, which makes
+ * the whole `/posts` route dynamic — so every tag/category/date filter click
+ * re-renders `AllBlogPosts` as a brand new request, even though this
+ * function's result never depends on which filters are active. Wrapping it
+ * in `unstable_cache` (keyed on nothing but its own name, since it takes no
+ * arguments and its result is identical for every caller) memoizes it across
+ * those requests for `revalidate` seconds, so a filter click only re-runs the
+ * (genuinely filter-dependent) posts query, not this taxonomy fetch too.
+ *
+ * `unstable_cache` is soft-deprecated in favor of the `'use cache'` directive
+ * as of Next.js 16, but that directive requires opting into Cache Components
+ * (`next.config.ts`'s `cacheComponents` flag), which this project doesn't
+ * enable — adopting it project-wide is a bigger change than this one
+ * function's caching warrants, so `unstable_cache` (still fully functional,
+ * just not the newest API) is the deliberately scoped choice here.
+ */
+export const getPostFilterOptions = unstable_cache(
+	fetchPostFilterOptions,
+	['post-filter-options'],
+	{ revalidate: 86400 },
+);

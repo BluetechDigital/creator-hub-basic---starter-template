@@ -67,6 +67,30 @@ export type IPostFilters = {
 	dateTo?: string;
 };
 
+/**
+ * Splits a comma-separated `tag` query param (`"ai,ai-collections"`) into a
+ * trimmed, non-empty slug list. Shared by `app/posts/page.tsx` (server-side
+ * filtering) and `PostFilters.tsx` (the chip row's client-side read of the
+ * same URL) so both parse `?tag=` identically — these two call sites used to
+ * each hand-roll this split, and had already drifted (one trimmed whitespace,
+ * the other didn't), silently disagreeing on edge cases like `?tag=ai,
+ * ai-collections` (a space after the comma).
+ * @param raw The raw `tag` query param value, or `null`/`undefined` if unset.
+ */
+export const parseTagSlugs = (raw?: string | null): string[] =>
+	raw ? raw.split(',').map((slug) => slug.trim()).filter(Boolean) : [];
+
+/**
+ * Whether any archive filter is active. Shared for the same reason
+ * `parseTagSlugs` is — `app/posts/page.tsx` (to decide `robots.index`) and
+ * `PostFilters.tsx` (to show/hide "Clear filters") used to each reimplement
+ * this exact four-field check under the same name, with nothing forcing the
+ * two definitions to stay in sync if a filter field is ever added.
+ * @param filters The currently-active archive filters.
+ */
+export const hasActiveFilters = (filters: IPostFilters): boolean =>
+	Boolean(filters.tagSlugs?.length || filters.categorySlug || filters.dateFrom || filters.dateTo);
+
 /* ---- Sitemap slugs (getAllPostsSlugs) ---- */
 
 /** A single published post's slug and last-modified date, mirroring `graphql/CMS/types/page.ts`'s `IProps`. */
