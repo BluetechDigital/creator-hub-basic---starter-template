@@ -65,6 +65,8 @@ export type IPostFilters = {
 	categorySlug?: string;
 	dateFrom?: string;
 	dateTo?: string;
+	/** Free-text title/content search — maps to WPGraphQL's `search` where-arg (standard `WP_Query` `s` behaviour, so it matches post content too, not just the title). */
+	search?: string;
 };
 
 /**
@@ -89,7 +91,7 @@ export const parseTagSlugs = (raw?: string | null): string[] =>
  * @param filters The currently-active archive filters.
  */
 export const hasActiveFilters = (filters: IPostFilters): boolean =>
-	Boolean(filters.tagSlugs?.length || filters.categorySlug || filters.dateFrom || filters.dateTo);
+	Boolean(filters.tagSlugs?.length || filters.categorySlug || filters.dateFrom || filters.dateTo || filters.search);
 
 /* ---- Sitemap slugs (getAllPostsSlugs) ---- */
 

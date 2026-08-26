@@ -115,7 +115,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Video Archive Page Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * instead of `RenderFlexibleContent` crashing on a `null` `content` prop, matching
  * `app/[slug]/page.tsx`'s `DynamicPages`.
  */
-const VideosArchivePage: NextPage<{ searchParams: ISearchParams }> = async ({ searchParams }) => {
+const VideosArchivePage: NextPage<{ searchParams: Promise<ISearchParams> }> = async ({ searchParams }) => {
 
 	let pageACFFlexibleComponentsContent: IFlexibleContent.IProps | null = null;
 

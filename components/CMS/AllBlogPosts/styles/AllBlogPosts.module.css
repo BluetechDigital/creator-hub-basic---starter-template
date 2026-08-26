@@ -37,6 +37,18 @@ look wrong in a way the original single-purpose block never had to consider. */
 .postFilters {
     @apply w-full max-w-360 mx-auto mb-10 flex flex-col gap-4;
 
+    & .postFiltersSearch {
+        @apply w-full max-w-md px-4 py-2 text-sm text-pure-black bg-pure-black/5 rounded-full border-0;
+
+        &::placeholder {
+            @apply text-pure-black/40;
+        }
+
+        &:focus {
+            @apply outline-none ring-2 ring-accent-default;
+        }
+    }
+
     & .postFiltersPrimaryRow {
         @apply flex flex-wrap items-center gap-3;
     }

@@ -4,7 +4,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, KeyboardEvent, useState } from "react";
+import { FC, KeyboardEvent, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { IPostFilterOptions, ITaxonomyTerm } from "@/graphql/CMS/GetPostFilterOptions";
 import * as IPost from "@/graphql/CMS/types/post";
@@ -20,16 +20,22 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX PostFilters Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Filter bar for the archive grid: a single-select category dropdown, a tag
- * search box (a native `<input list>` + `<datalist>` combo — no custom dropdown
- * component needed), and a from/to date range. Reads and writes this route's
- * `?tag=&category=&from=&to=` query params directly via
- * `useSearchParams`/`router.replace` rather than local component state, so
- * filtered views stay shareable/bookmarkable and back-button-able — the URL is
- * the only source of truth, matching how `AllBlogPosts.tsx` (a Server
- * Component) resolves the same params server-side for the actual data fetch.
- * `replace` (not `push`) is used so adjusting a filter doesn't fill browser
- * history with one entry per click/keystroke.
+ * Filter bar for the archive grid: a title/content search box, a single-select
+ * category dropdown, a tag search box (a native `<input list>` + `<datalist>`
+ * combo — no custom dropdown component needed), and a from/to date range.
+ * Reads and writes this route's `?search=&tag=&category=&from=&to=` query
+ * params directly via `useSearchParams`/`router.replace` rather than local
+ * component state, so filtered views stay shareable/bookmarkable and
+ * back-button-able — the URL is the only source of truth, matching how
+ * `AllBlogPosts.tsx` (a Server Component) resolves the same params
+ * server-side for the actual data fetch. `replace` (not `push`) is used so
+ * adjusting a filter doesn't fill browser history with one entry per
+ * click/keystroke.
+ *
+ * Always renders, even with no categories/tags in use (e.g. a fresh fork) —
+ * search and the date range are useful regardless of taxonomy state, unlike
+ * the category/tag controls, which individually hide themselves when their
+ * own option list is empty.
  *
  * The tag search box replaced an earlier design that rendered every tag as its
  * own button — fine for a handful of tags, but it doesn't scale: a site with
@@ -45,9 +51,23 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX PostFilters Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * WPGraphQL's multi-value `tagSlugIn`; `category` is single-select, matching
  * `IPost.IPostFilters`'s doc comment on why category filtering isn't
  * multi-value here.
+ *
+ * The title/content search box (`?search=`) debounces its URL update
+ * (`SEARCH_DEBOUNCE_MS`) instead of committing on every keystroke like the
+ * category/date controls do — unlike those, typing here would otherwise fire
+ * a full server round-trip (a new `getAllPostsSummaries` request) per
+ * character. Local `searchInput` state holds the raw typed value so the field
+ * still feels live; it's resynced from the URL when `?search=` changes for a
+ * reason other than this box's own debounce (e.g. "Clear filters") by
+ * adjusting state directly during render (comparing against `syncedSearch`)
+ * rather than in a `useEffect` — the React-recommended pattern for this exact
+ * "reset local state when a prop/external value changes" case, since it
+ * avoids the extra render pass a `useEffect`-based sync would cost.
  * @param categories Every category in use, for the dropdown's options.
  * @param tags Every tag in use, for the search box's suggestions.
  */
+const SEARCH_DEBOUNCE_MS = 400;
+
 const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 
 	const router = useRouter();
@@ -65,12 +85,28 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 	const activeCategory = searchParams.get('category') ?? '';
 	const activeFrom = searchParams.get('from') ?? '';
 	const activeTo = searchParams.get('to') ?? '';
+	const activeSearch = searchParams.get('search') ?? '';
+
+	const [searchInput, setSearchInput] = useState(activeSearch);
+
+	// Tracks the last `?search=` value already reflected into `searchInput`,
+	// so the render-time adjustment below only fires when the URL changed for
+	// a reason other than this box's own debounced write (e.g. "Clear
+	// filters", or a link landing here with `?search=` already set) — without
+	// this guard, every render would re-run the adjustment.
+	const [syncedSearch, setSyncedSearch] = useState(activeSearch);
+
+	if (activeSearch !== syncedSearch) {
+		setSyncedSearch(activeSearch);
+		setSearchInput(activeSearch);
+	}
 
 	const hasActiveFilters = IPost.hasActiveFilters({
 		tagSlugs: activeTags,
 		categorySlug: activeCategory || undefined,
 		dateFrom: activeFrom || undefined,
 		dateTo: activeTo || undefined,
+		search: activeSearch || undefined,
 	});
 
 	// Resolves the active tag *slugs* (all the URL/`getAllPostsSummaries` care
@@ -99,6 +135,17 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 		}
 		navigate(next);
 	};
+
+	// Debounces `searchInput` into `?search=` — see this component's own doc
+	// comment for why this control can't just call `setQueryParam` straight
+	// from `onChange` the way the category/date controls do.
+	useEffect(() => {
+		if (searchInput === activeSearch) return;
+
+		const timeout = setTimeout(() => setQueryParam('search', searchInput), SEARCH_DEBOUNCE_MS);
+		return () => clearTimeout(timeout);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchInput]);
 
 	const setTags = (nextTags: string[]) => setQueryParam('tag', nextTags.join(','));
 
@@ -131,10 +178,17 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 
 	const clearFilters = () => router.replace(pathname);
 
-	if (!categories.length && !tags.length) return null;
-
 	return (
 		<div className={styles.postFilters}>
+			<input
+				type="text"
+				aria-label="Search posts"
+				placeholder="Search posts…"
+				className={styles.postFiltersSearch}
+				value={searchInput}
+				onChange={(event) => setSearchInput(event.target.value)}
+			/>
+
 			<div className={styles.postFiltersPrimaryRow}>
 				{categories.length > 0 && (
 					<select

@@ -80,10 +80,13 @@ const buildDateQueryInput = (dateFrom?: string, dateTo?: string) => {
  * GraphQL injection risk the moment it is, so it's built safely from the
  * start rather than left as a bug waiting for that UI to land.
  *
- * `filters` maps onto three separate WPGraphQL where-args — `tagSlugIn`,
- * `categoryName`, `dateQuery` — all confirmed working directly against this
- * project's live CMS while building the archive's filter bar (see
- * `IPost.IPostFilters`'s doc comment for why category filtering is single-select).
+ * `filters` maps onto four separate WPGraphQL where-args — `tagSlugIn`,
+ * `categoryName`, `dateQuery`, `search` — all confirmed working directly against
+ * this project's live CMS while building the archive's filter bar (see
+ * `IPost.IPostFilters`'s doc comment for why category filtering is single-select,
+ * and for `search` matching post content as well as title — WPGraphQL's `search`
+ * where-arg is the standard `WP_Query` `s` param, there's no title-only
+ * equivalent in the default schema).
  * An unset filter field is simply `undefined` in the variables object, which
  * `JSON.stringify` drops — no conditional `where`-object assembly needed.
  * @param first Page size.
@@ -98,8 +101,8 @@ export const getAllPostsSummaries = async (
 ): Promise<{ posts: IPost.ISummaryProps[]; pageInfo: { hasNextPage: boolean; endCursor: string | null } } | undefined> => {
 	try {
 		const content = `
-			query GetAllPostsSummaries($first: Int!, $after: String, $tagSlugIn: [String], $categoryName: String, $dateQuery: DateQueryInput) {
-				posts(first: $first, after: $after, where: {status: PUBLISH, tagSlugIn: $tagSlugIn, categoryName: $categoryName, dateQuery: $dateQuery}) {
+			query GetAllPostsSummaries($first: Int!, $after: String, $tagSlugIn: [String], $categoryName: String, $dateQuery: DateQueryInput, $search: String) {
+				posts(first: $first, after: $after, where: {status: PUBLISH, tagSlugIn: $tagSlugIn, categoryName: $categoryName, dateQuery: $dateQuery, search: $search}) {
 					nodes {
 						${POST_SUMMARY_FIELDS}
 					}
@@ -117,6 +120,7 @@ export const getAllPostsSummaries = async (
 			tagSlugIn: filters?.tagSlugs,
 			categoryName: filters?.categorySlug,
 			dateQuery: buildDateQueryInput(filters?.dateFrom, filters?.dateTo),
+			search: filters?.search,
 		};
 
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {

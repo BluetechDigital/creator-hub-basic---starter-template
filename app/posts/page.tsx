@@ -38,6 +38,7 @@ type ISearchParams = {
 	category?: string | string[];
 	from?: string | string[];
 	to?: string | string[];
+	search?: string | string[];
 };
 
 /* -----------------------------------------------------------------------------
@@ -77,6 +78,7 @@ const parseFiltersFromSearchParams = (searchParams: ISearchParams): IPost.IPostF
 		categorySlug: toSingleParam(searchParams.category),
 		dateFrom: toSingleParam(searchParams.from),
 		dateTo: toSingleParam(searchParams.to),
+		search: toSingleParam(searchParams.search),
 	};
 };
 

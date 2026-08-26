@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 
 const mockReplace = vi.fn();
 const mockSearchParams = { value: new URLSearchParams() };
@@ -21,15 +21,16 @@ describe("AllBlogPosts PostFilters", () => {
 		mockSearchParams.value = new URLSearchParams();
 	});
 
-	it("renders nothing when there are no categories or tags", () => {
-		const { container } = render(<PostFilters categories={[]} tags={[]} />);
+	it("still renders the search box when there are no categories or tags", () => {
+		render(<PostFilters categories={[]} tags={[]} />);
 
-		expect(container).toBeEmptyDOMElement();
+		expect(screen.getByLabelText("Search posts")).toBeInTheDocument();
 	});
 
-	it("renders the category select and the tag search box", () => {
+	it("renders the search box, category select, and the tag search box", () => {
 		render(<PostFilters categories={categories} tags={tags} />);
 
+		expect(screen.getByLabelText("Search posts")).toBeInTheDocument();
 		expect(screen.getByLabelText("Filter by category")).toBeInTheDocument();
 		expect(screen.getByLabelText("Search tags")).toBeInTheDocument();
 	});
@@ -134,5 +135,56 @@ describe("AllBlogPosts PostFilters", () => {
 		fireEvent.change(screen.getByLabelText("From"), { target: { value: "2026-01-01" } });
 
 		expect(mockReplace).toHaveBeenLastCalledWith("/posts?from=2026-01-01");
+	});
+
+	describe("title/content search", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("does not navigate immediately while typing", () => {
+			render(<PostFilters categories={categories} tags={tags} />);
+
+			fireEvent.change(screen.getByLabelText("Search posts"), { target: { value: "hello" } });
+
+			expect(mockReplace).not.toHaveBeenCalled();
+		});
+
+		it("navigates to ?search=<value> after the debounce delay", () => {
+			render(<PostFilters categories={categories} tags={tags} />);
+
+			fireEvent.change(screen.getByLabelText("Search posts"), { target: { value: "hello" } });
+			act(() => { vi.advanceTimersByTime(400); });
+
+			expect(mockReplace).toHaveBeenLastCalledWith("/posts?search=hello");
+		});
+
+		it("clears ?search= after the debounce delay once the box is emptied", () => {
+			mockSearchParams.value = new URLSearchParams("search=hello");
+
+			render(<PostFilters categories={categories} tags={tags} />);
+
+			fireEvent.change(screen.getByLabelText("Search posts"), { target: { value: "" } });
+			act(() => { vi.advanceTimersByTime(400); });
+
+			expect(mockReplace).toHaveBeenLastCalledWith("/posts");
+		});
+	});
+
+	it("syncs the search box's value from the URL when it changes externally (e.g. Clear filters)", () => {
+		mockSearchParams.value = new URLSearchParams("search=hello");
+
+		const { rerender } = render(<PostFilters categories={categories} tags={tags} />);
+
+		expect(screen.getByLabelText("Search posts")).toHaveValue("hello");
+
+		mockSearchParams.value = new URLSearchParams();
+		rerender(<PostFilters categories={categories} tags={tags} />);
+
+		expect(screen.getByLabelText("Search posts")).toHaveValue("");
 	});
 });

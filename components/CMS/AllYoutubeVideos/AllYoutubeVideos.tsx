@@ -111,49 +111,67 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
  * Cards link to this app's own `/videos/{videoId}` pages, not out to youtube.com
  * — see `app/videos/[slug]/page.tsx`.
+ *
+ * `getAllQualifyingVideoIds`/`getAllYoutubePlaylists`/`getAllYoutubeChannelInfo`
+ * all throw on a genuine API/network failure (not just missing env vars) —
+ * caught here, same graceful-degradation shape as `AllBlogPosts.tsx`'s own
+ * `Promise.all`, so a transient YouTube API blip degrades this block to its
+ * empty state instead of crashing the whole `/videos` page.
  * @param title The ACF `title` field for this block's header.
  * @param page The requested `?page=` number from `app/videos/page.tsx`, clamped here into `[1, totalPages]`.
  */
 const AllYoutubeVideos = async ({ title, page }: IAllYoutubeVideos.IProps) => {
 
-	// Fetched inside the component so it runs per-request, matching Next's
-	// per-request fetch caching/revalidation instead of once at module load.
-	const [
-		allQualifyingVideoIds,
-		youtubeChannelPlaylists,
-		youtubeChannelInfo,
-	] = await Promise.all([
-		getAllQualifyingVideoIds({ minDurationSeconds: MIN_REGULAR_VIDEO_DURATION_SECONDS }),
-		getAllYoutubePlaylists(),
-		getAllYoutubeChannelInfo(),
-	]);
+	let allQualifyingVideoIds: string[] = [];
+	let youtubeChannelPlaylists: IAllYoutubeVideos.IVideosGrid["youtubeChannelPlaylists"] = [];
+	let youtubeChannelInfo: IAllYoutubeVideos.IVideosGrid["youtubeChannelInfo"] = {} as IAllYoutubeVideos.IVideosGrid["youtubeChannelInfo"];
+	let youtubeVideos: IAllYoutubeVideos.IVideosGrid["youtubeVideos"] = [];
+	let playlistVideoIds: IAllYoutubeVideos.IVideosGrid["playlistVideoIds"] = {};
+	let totalPages = 1;
+	let currentPage = 1;
 
-	const totalPages = computeTotalPages(allQualifyingVideoIds.length);
-	const currentPage = Math.min(Math.max(page ?? 1, 1), totalPages);
+	try {
+		// Fetched inside the component so it runs per-request, matching Next's
+		// per-request fetch caching/revalidation instead of once at module load.
+		[
+			allQualifyingVideoIds,
+			youtubeChannelPlaylists,
+			youtubeChannelInfo,
+		] = await Promise.all([
+			getAllQualifyingVideoIds({ minDurationSeconds: MIN_REGULAR_VIDEO_DURATION_SECONDS }),
+			getAllYoutubePlaylists(),
+			getAllYoutubeChannelInfo(),
+		]);
 
-	const pageVideoIds = sliceIdsForPage(allQualifyingVideoIds, currentPage);
-	const unorderedVideos = await getYoutubeVideosByIds(pageVideoIds);
+		totalPages = computeTotalPages(allQualifyingVideoIds.length);
+		currentPage = Math.min(Math.max(page ?? 1, 1), totalPages);
 
-	// getYoutubeVideosByIds doesn't guarantee the same order it was asked for
-	// (see its own doc comment) — restore catalog order (most recent first)
-	// so the hero cards on page 1 are genuinely the most recent uploads.
-	const videoById = new Map(unorderedVideos.map((video) => [video.videoId, video]));
-	const youtubeVideos = pageVideoIds
-		.map((id) => videoById.get(id))
-		.filter((video): video is (typeof unorderedVideos)[number] => Boolean(video));
+		const pageVideoIds = sliceIdsForPage(allQualifyingVideoIds, currentPage);
+		const unorderedVideos = await getYoutubeVideosByIds(pageVideoIds);
 
-	// Playlist video-ID membership, for VideosGrid's playlist filter — one
-	// playlistItems.list call chain per playlist (fully paginated, not capped
-	// at 50 — see getPlaylistVideoIds's doc comment for why that matters), run
-	// after the playlists themselves resolve. getPlaylistVideoIds never
-	// throws, so a single playlist's fetch failing only costs that one filter
-	// option, not the whole page.
-	const playlistVideoIdsEntries = await Promise.all(
-		youtubeChannelPlaylists.map(
-			async (playlist) => [playlist.id, await getPlaylistVideoIds(playlist.id)] as const,
-		),
-	);
-	const playlistVideoIds = Object.fromEntries(playlistVideoIdsEntries);
+		// getYoutubeVideosByIds doesn't guarantee the same order it was asked for
+		// (see its own doc comment) — restore catalog order (most recent first)
+		// so the hero cards on page 1 are genuinely the most recent uploads.
+		const videoById = new Map(unorderedVideos.map((video) => [video.videoId, video]));
+		youtubeVideos = pageVideoIds
+			.map((id) => videoById.get(id))
+			.filter((video): video is (typeof unorderedVideos)[number] => Boolean(video));
+
+		// Playlist video-ID membership, for VideosGrid's playlist filter — one
+		// playlistItems.list call chain per playlist (fully paginated, not capped
+		// at 50 — see getPlaylistVideoIds's doc comment for why that matters), run
+		// after the playlists themselves resolve. getPlaylistVideoIds never
+		// throws, so a single playlist's fetch failing only costs that one filter
+		// option, not the whole page.
+		const playlistVideoIdsEntries = await Promise.all(
+			youtubeChannelPlaylists.map(
+				async (playlist) => [playlist.id, await getPlaylistVideoIds(playlist.id)] as const,
+			),
+		);
+		playlistVideoIds = Object.fromEntries(playlistVideoIdsEntries);
+	} catch (error) {
+		console.log(error);
+	}
 
 	// Only offer playlists that actually share a video with the configured
 	// archive source — see this component's own doc comment for why.

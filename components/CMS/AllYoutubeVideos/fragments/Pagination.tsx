@@ -86,11 +86,8 @@ const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages
 
 	return (
 		<nav aria-label="Video archive pagination" className={styles.pagination}>
-			{currentPage > 1 ? (
-				<Link href={buildPageHref(currentPage - 1)} className={styles.paginationLink}>Previous</Link>
-			) : (
-				<span className={styles.paginationLinkDisabled} aria-disabled="true">Previous</span>
-			)}
+			{/* currentPage is always > 1 here — currentPage === 1 already returned above. */}
+			<Link href={buildPageHref(currentPage - 1)} className={styles.paginationLink}>Previous</Link>
 
 			{pageNumbers.map((page, index) => (
 				page === 'ellipsis' ? (
