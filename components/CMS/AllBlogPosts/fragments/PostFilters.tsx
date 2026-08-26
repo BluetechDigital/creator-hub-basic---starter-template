@@ -4,9 +4,10 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, useState } from "react";
+import { FC, KeyboardEvent, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { IPostFilterOptions, ITaxonomyTerm } from "@/graphql/CMS/GetPostFilterOptions";
+import * as IPost from "@/graphql/CMS/types/post";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -54,12 +55,23 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 	const searchParams = useSearchParams();
 	const [tagSearch, setTagSearch] = useState('');
 
-	const activeTags = searchParams.get('tag')?.split(',').filter(Boolean) ?? [];
+	// parseTagSlugs/hasActiveFilters (both from `graphql/CMS/types/post.ts`) are
+	// the same functions `app/posts/page.tsx` uses to resolve this route's
+	// server-side filters — sharing them means this client-side read of the URL
+	// can't quietly disagree with the server on what a `?tag=` value means or
+	// what counts as "a filter is active", the way two independently
+	// hand-rolled copies already had (one trimmed whitespace, the other didn't).
+	const activeTags = IPost.parseTagSlugs(searchParams.get('tag'));
 	const activeCategory = searchParams.get('category') ?? '';
 	const activeFrom = searchParams.get('from') ?? '';
 	const activeTo = searchParams.get('to') ?? '';
 
-	const hasActiveFilters = activeTags.length > 0 || Boolean(activeCategory) || Boolean(activeFrom) || Boolean(activeTo);
+	const hasActiveFilters = IPost.hasActiveFilters({
+		tagSlugs: activeTags,
+		categorySlug: activeCategory || undefined,
+		dateFrom: activeFrom || undefined,
+		dateTo: activeTo || undefined,
+	});
 
 	// Resolves the active tag *slugs* (all the URL/`getAllPostsSummaries` care
 	// about) back to their display names for the chip row — a tag slug an old
@@ -74,16 +86,21 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 		router.replace(query ? `${pathname}?${query}` : pathname);
 	};
 
-	const setTags = (nextTags: string[]) => {
+	// Shared by every filter control (tags, category, from, to) — each one is
+	// just "clone the current query string, set-or-delete this one key, then
+	// navigate," previously hand-duplicated as two near-identical functions.
+	const setQueryParam = (key: string, value: string) => {
 		const next = new URLSearchParams(searchParams.toString());
 
-		if (nextTags.length) {
-			next.set('tag', nextTags.join(','));
+		if (value) {
+			next.set(key, value);
 		} else {
-			next.delete('tag');
+			next.delete(key);
 		}
 		navigate(next);
 	};
+
+	const setTags = (nextTags: string[]) => setQueryParam('tag', nextTags.join(','));
 
 	const addTag = (slug: string) => {
 		if (!activeTags.includes(slug)) {
@@ -94,24 +111,22 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 
 	const removeTag = (slug: string) => setTags(activeTags.filter((tagSlug) => tagSlug !== slug));
 
-	// The datalist only ever hands back a suggestion's exact `value` text, so an
-	// exact (case-insensitive) name match is enough to tell "the visitor picked
-	// a suggestion" apart from "the visitor is still mid-typing."
-	const handleTagSearchChange = (value: string) => {
-		setTagSearch(value);
-		const matched = tags.find((tag) => tag.name.toLowerCase() === value.toLowerCase());
+	// Matching on every keystroke (this used to run from onChange) looks safe —
+	// "an exact name match means the visitor picked a datalist suggestion" — but
+	// breaks the moment one tag's full name is a prefix of another's: typing
+	// "AI-Collections" character by character passes through the exact text
+	// "AI" the instant a shorter "AI" tag exists, auto-adding the wrong tag and
+	// clearing the box mid-word. Committing only on blur/Enter instead gives the
+	// visitor a chance to keep typing past a coincidental prefix match.
+	const commitTagSearch = () => {
+		const matched = tags.find((tag) => tag.name.toLowerCase() === tagSearch.toLowerCase());
 		if (matched) addTag(matched.slug);
 	};
 
-	const setParam = (key: 'category' | 'from' | 'to', value: string) => {
-		const next = new URLSearchParams(searchParams.toString());
-
-		if (value) {
-			next.set(key, value);
-		} else {
-			next.delete(key);
-		}
-		navigate(next);
+	const handleTagSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+		if (event.key !== 'Enter') return;
+		event.preventDefault();
+		commitTagSearch();
 	};
 
 	const clearFilters = () => router.replace(pathname);
@@ -126,7 +141,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 						aria-label="Filter by category"
 						className={styles.postFiltersSelect}
 						value={activeCategory}
-						onChange={(event) => setParam('category', event.target.value)}
+						onChange={(event) => setQueryParam('category', event.target.value)}
 					>
 						<option value="">All categories</option>
 						{categories.map((category) => (
@@ -144,7 +159,9 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 							placeholder="Search tags…"
 							className={styles.postFiltersTagSearch}
 							value={tagSearch}
-							onChange={(event) => handleTagSearchChange(event.target.value)}
+							onChange={(event) => setTagSearch(event.target.value)}
+							onKeyDown={handleTagSearchKeyDown}
+							onBlur={commitTagSearch}
 						/>
 						<datalist id="post-filters-tag-options">
 							{tags
@@ -174,7 +191,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 					<input
 						type="date"
 						value={activeFrom}
-						onChange={(event) => setParam('from', event.target.value)}
+						onChange={(event) => setQueryParam('from', event.target.value)}
 					/>
 				</label>
 				<label className={styles.postFiltersDateLabel}>
@@ -182,7 +199,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 					<input
 						type="date"
 						value={activeTo}
-						onChange={(event) => setParam('to', event.target.value)}
+						onChange={(event) => setQueryParam('to', event.target.value)}
 					/>
 				</label>
 			</div>

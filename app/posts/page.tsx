@@ -26,12 +26,18 @@ import RenderFlexibleContent from "@/components/CMS/FlexibleContent/RenderFlexib
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-/** Raw archive-filter query params, before `parseFiltersFromSearchParams` below turns them into `IPost.IPostFilters`. */
+/**
+ * Raw archive-filter query params, before `parseFiltersFromSearchParams` below
+ * turns them into `IPost.IPostFilters`. Each value is `string | string[]` (not
+ * just `string`) because that's what Next.js's App Router actually hands a
+ * page for a *repeated* query key (`?tag=a&tag=b` → `tag: ["a", "b"]`) — see
+ * `toSingleParam`'s doc comment for what happens if that case isn't handled.
+ */
 type ISearchParams = {
-	tag?: string;
-	category?: string;
-	from?: string;
-	to?: string;
+	tag?: string | string[];
+	category?: string | string[];
+	from?: string | string[];
+	to?: string | string[];
 };
 
 /* -----------------------------------------------------------------------------
@@ -39,25 +45,40 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Filter Parsing XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
+ * Collapses a `string | string[] | undefined` query param down to a single
+ * `string | undefined`, taking the first value when a key was repeated in the
+ * URL. Confirmed live: without this, a crafted/malformed link like
+ * `?tag=ai&tag=news` makes `searchParams.tag` an array, and calling
+ * `.split(',')` on it directly throws (arrays have no `.split`), 500-ing the
+ * entire `/posts` route rather than just ignoring the duplicate key.
+ * @param value A single query param's raw value, as Next.js provides it.
+ */
+const toSingleParam = (value: string | string[] | undefined): string | undefined =>
+	Array.isArray(value) ? value[0] : value;
+
+/**
  * Turns this route's raw `?tag=&category=&from=&to=` query params into
  * `IPost.IPostFilters` — shared by `generateMetadata` (to decide `robots.index`)
  * and `PostsArchivePage` (to actually filter the grid) so both agree on what
- * counts as "a filter is active" from the exact same parsing logic.
- * `tag` is comma-separated (`?tag=ai,ai-collections`) since `tagSlugIn` accepts
- * multiple slugs; `category`/`from`/`to` are single values.
+ * counts as "a filter is active" from the exact same parsing logic. `tag`
+ * parsing itself is shared further still, via `IPost.parseTagSlugs` — also
+ * used by `PostFilters.tsx`'s client-side read of the same `?tag=` param, so
+ * the two can't quietly disagree on edge cases the way they used to.
+ * `category`/`from`/`to` are single values. Every field is run through
+ * `toSingleParam` first since a repeated query key resolves to an array, not
+ * a string.
  * @param searchParams This route's raw query params.
  */
-const parseFiltersFromSearchParams = (searchParams: ISearchParams): IPost.IPostFilters => ({
-	tagSlugs: searchParams.tag
-		? searchParams.tag.split(',').map((slug) => slug.trim()).filter(Boolean)
-		: undefined,
-	categorySlug: searchParams.category,
-	dateFrom: searchParams.from,
-	dateTo: searchParams.to,
-});
+const parseFiltersFromSearchParams = (searchParams: ISearchParams): IPost.IPostFilters => {
+	const tagSlugs = IPost.parseTagSlugs(toSingleParam(searchParams.tag));
 
-const hasActiveFilters = (filters: IPost.IPostFilters): boolean =>
-	Boolean(filters.tagSlugs?.length || filters.categorySlug || filters.dateFrom || filters.dateTo);
+	return {
+		tagSlugs: tagSlugs.length ? tagSlugs : undefined,
+		categorySlug: toSingleParam(searchParams.category),
+		dateFrom: toSingleParam(searchParams.from),
+		dateTo: toSingleParam(searchParams.to),
+	};
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -83,7 +104,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * to avoid crashing on `seo` being `undefined` in the meantime (same pattern as
  * `app/[slug]/page.tsx`'s `generateMetadata`).
  */
-export const generateMetadata = async ({ searchParams }: { searchParams: ISearchParams }): Promise<Metadata> => {
+export const generateMetadata = async ({ searchParams }: { searchParams: Promise<ISearchParams> }): Promise<Metadata> => {
 
 	const seo = await getAllSeoContent(pageType?.posts, postType.pages) as ISeo.IProps | undefined;
 
@@ -91,7 +112,7 @@ export const generateMetadata = async ({ searchParams }: { searchParams: ISearch
 		return { robots: { follow: false, index: false } };
 	}
 
-	const filtered = hasActiveFilters(parseFiltersFromSearchParams(await searchParams));
+	const filtered = IPost.hasActiveFilters(parseFiltersFromSearchParams(await searchParams));
 
 	return {
 		title: seo.title,
@@ -144,7 +165,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX Blog Archive Page Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * the same way they already ignore whichever of their sibling blocks' ACF fields don't
  * apply to them.
  */
-const PostsArchivePage: NextPage<{ searchParams: ISearchParams }> = async ({ searchParams }) => {
+const PostsArchivePage: NextPage<{ searchParams: Promise<ISearchParams> }> = async ({ searchParams }) => {
 
 	let pageACFFlexibleComponentsContent: IFlexibleContent.IProps | null = null;
 

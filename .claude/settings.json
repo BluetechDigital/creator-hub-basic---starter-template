@@ -6,7 +6,21 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(gh repo *)",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(git rm *)",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(curl -s http://localhost:3000/posts)",
+      "Bash(curl -s \"http://localhost:3000/posts/how-we-built-ai-collections-wrapping-up\" -o /tmp/post.html -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:3000/posts/how-we-built-ai-collections-wrapping-up\" -o /tmp/post2.html -w \"%{http_code}\\\\n\")",
+      "Bash(grep -oE '.{0,40}reactionPill.{0,40}' /tmp/post2.html)",
+      "Bash(grep -oE '.{0,40}commentPillButton.{0,40}' /tmp/post2.html)",
+      "Bash(grep -oE '.{0,40}postEngagement.{0,40}' /tmp/post2.html)",
+      "Bash(grep -oE '.{0,60}postAuthorBio.{0,400}' /tmp/post2.html)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -rm1 \"NEXT_PUBLIC_CMS_API_URL\" .env.local .env.development)",
+      "Bash(curl -s https://vzt.nmy.mybluehost.me/website_efb5c32a/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{ posts\\(where: {name: \\\\\"how-we-built-ai-collections-wrapping-up\\\\\", status: PUBLISH}\\) { edges { node { commentCount comments\\(first: 20\\) { nodes { id content date author { node { name } } } } } } } }\"}')",
+      "Bash(curl -s https://vzt.nmy.mybluehost.me/website_efb5c32a/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{ comments\\(first: 5\\) { nodes { id parentId replies\\(first: 5\\) { nodes { id content } } } } }\"}')",
+      "Bash(curl -s https://vzt.nmy.mybluehost.me/website_efb5c32a/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{ comments\\(first: 5, where: {parent: 0}\\) { nodes { id parentId } } }\"}')"
     ]
   }
 }
