@@ -8,4 +8,5 @@ XXXXXXXXXXXXX GraphQL Fragments for YouTubeVideoGrid ACF Component XXXXXXXXXXXXX
 export const YoutubeVideoGrid = `
     fieldGroupName
     displaySection
+    title
 `;

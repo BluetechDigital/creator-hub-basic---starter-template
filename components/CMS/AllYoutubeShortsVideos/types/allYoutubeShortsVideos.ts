@@ -9,7 +9,10 @@ import { IYoutubeVideos, IYoutubePlaylists, IYoutubeChannelInfo } from "@/api/Yo
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-export type IProps = IFlexibleContent.IBaseFixedProps & object;
+export type IProps = IFlexibleContent.IBaseFixedProps & {
+    /** ACF field — dynamic heading for this block's header, same pattern as `AllBlogPosts`'s. */
+    title?: string;
+};
 
 export type IVideosGrid = {
     youtubeVideos: IYoutubeVideos;

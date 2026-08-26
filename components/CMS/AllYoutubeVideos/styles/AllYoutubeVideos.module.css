@@ -6,21 +6,202 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 .allYoutubeVideos {
-    @apply w-full h-full min-h-screen flex flex-col items-center justify-center self-center;
+    @apply w-full px-4 sm:px-8 py-20;
 }
+
+/* ---- Header: static "Videos" eyebrow + the ACF `title` heading ---- */
+
+.allYoutubeVideosHeader {
+    @apply max-w-2xl mx-auto mb-16 text-center;
+
+    & .allYoutubeVideosEyebrow {
+        @apply inline-block mb-4 text-sm text-accent-dark font-medium;
+    }
+
+    & .allYoutubeVideosHeading {
+        @apply text-4xl sm:text-5xl lg:text-6xl text-pure-black;
+    }
+}
+
+/* ---- Filters: title search + playlist select + date range ---- */
+
+.videoFilters {
+    @apply w-full max-w-360 mx-auto mb-10 flex flex-wrap items-center gap-4;
+
+    & .videoFiltersSearch {
+        @apply px-4 py-2 text-sm text-pure-black bg-pure-black/5 rounded-full border-0;
+
+        &::placeholder {
+            @apply text-pure-black/40;
+        }
+
+        &:focus {
+            @apply outline-none ring-2 ring-accent-default;
+        }
+    }
+
+    & .videoFiltersSelect {
+        @apply px-4 py-2 text-sm text-pure-black font-medium bg-pure-black/5 rounded-full border-0 cursor-pointer;
+    }
+
+    & .videoFiltersDateRange {
+        @apply flex flex-wrap items-center gap-4;
+
+        & .videoFiltersDateLabel {
+            @apply flex items-center gap-2 text-sm text-pure-black/60;
+
+            & input {
+                @apply px-3 py-2 text-sm text-pure-black bg-pure-black/5 rounded-full border-0;
+            }
+        }
+    }
+
+    & .videoFiltersClear {
+        @apply text-sm text-pure-black/60 font-medium underline transition duration-300 cursor-pointer;
+
+        &:hover {
+            @apply text-accent-dark;
+        }
+    }
+}
+
+/* ---- Grid: hero row + a uniform 4-per-row card grid + pagination ---- */
 
 .videosGrid {
-    @apply w-full grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3;
+    @apply w-full max-w-360 mx-auto flex flex-col gap-12;
 }
 
-.videoCard {
-    @apply flex flex-col gap-2;
+/* One consistent 4-per-row grid for both "the rest of page 1" and every page
+after it — see VideosGrid.tsx's doc comment for why only page 1 additionally
+gets the .featuredVideosRow hero pair above it. */
 
-    & .videoThumbnail {
-        @apply w-full h-auto rounded;
+.videosGridColumns {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8;
+}
+
+.featuredVideosRow {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-8;
+}
+
+.videosGridEmpty {
+    @apply w-full max-w-360 mx-auto text-center text-pure-black/60;
+}
+
+/* FeaturedVideoCard — rendered as one of a 2-up pair (.featuredVideosRow above),
+thumbnail as a backdrop with the date/title overlaid on a dark gradient. Same
+treatment as AllBlogPosts's FeaturedPostCard, just shorter than that one's
+single full-width card since two of these sit side by side here. */
+
+.featuredVideoCard {
+    @apply relative block w-full;
+
+    &:hover .featuredVideoImage {
+        @apply scale-110;
+    }
+
+    &:hover .featuredVideoTitle {
+        @apply underline;
+    }
+
+    & .featuredVideoImageWrapper {
+        @apply relative w-full h-72 md:h-96 overflow-hidden rounded-3xl;
+
+        & .featuredVideoImage {
+            @apply absolute inset-0 w-full h-full object-cover transition duration-700;
+        }
+
+        & .featuredVideoOverlay {
+            @apply absolute inset-0 bg-linear-to-t from-pure-black/80 via-pure-black/10 to-transparent pointer-events-none;
+        }
+    }
+
+    & .featuredVideoContent {
+        @apply absolute bottom-0 left-0 right-0 p-8 md:p-12;
+
+        & .featuredVideoDate {
+            @apply block mb-2 text-sm text-pure-white/70 font-medium;
+        }
+
+        & .featuredVideoTitle {
+            @apply text-2xl md:text-4xl text-pure-white;
+        }
+    }
+}
+
+/* VideoCard — its own component (VideoCard.tsx), kept as its own nested group
+rather than nested inside .videosGridColumns above, even though it's a DOM
+descendant of it, since it's logically a separate component. */
+
+.videoCard {
+    @apply flex flex-col;
+
+    &:hover .videoThumbnail {
+        @apply scale-110;
+    }
+
+    &:hover .videoTitle {
+        @apply underline;
+    }
+
+    & .videoThumbnailWrapper {
+        @apply mb-6 overflow-hidden rounded-3xl;
+
+        & .videoThumbnail {
+            @apply w-full h-64 object-cover transition duration-700;
+        }
+    }
+
+    & .videoDate {
+        @apply block mb-2 text-sm text-pure-black/60 font-medium;
     }
 
     & .videoTitle {
-        @apply text-base font-medium;
+        @apply block mb-3 text-2xl text-pure-black;
+    }
+
+    & .videoStats {
+        @apply flex flex-wrap items-center gap-2 text-sm text-pure-black/60;
+
+        & .videoStatsDot {
+            @apply w-1 h-1 rounded-full bg-pure-black/60;
+        }
+    }
+}
+
+.showMoreWrapper {
+    @apply flex justify-center pt-8 border-t border-pure-black/10;
+}
+
+.showMoreButton {
+    @apply inline-flex items-center px-6 py-4 text-sm text-pure-black font-semibold bg-pure-black/5 rounded-full transition duration-300 cursor-pointer;
+
+    &:hover {
+        @apply bg-pure-black/10;
+    }
+}
+
+/* ---- Pagination: page 2 onward's Previous / numbered / Next control ---- */
+
+.pagination {
+    @apply flex flex-wrap items-center justify-center gap-2 pt-8 border-t border-pure-black/10;
+
+    & .paginationLink {
+        @apply inline-flex items-center justify-center min-w-10 h-10 px-3 text-sm text-pure-black font-medium bg-pure-black/5 rounded-full transition duration-300;
+
+        &:hover {
+            @apply bg-pure-black/10;
+        }
+    }
+
+    & .paginationLinkActive {
+        @apply inline-flex items-center justify-center min-w-10 h-10 px-3 text-sm text-accent-dark font-semibold bg-accent-default/20 rounded-full;
+    }
+
+    & .paginationLinkDisabled {
+        @apply inline-flex items-center justify-center min-w-10 h-10 px-3 text-sm text-pure-black/30 cursor-not-allowed;
+    }
+
+    & .paginationEllipsis {
+        @apply inline-flex items-center justify-center min-w-10 h-10 text-sm text-pure-black/40;
     }
 }

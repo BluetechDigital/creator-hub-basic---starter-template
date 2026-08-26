@@ -35,6 +35,13 @@ export const pageType: IPage.ITypes = {
     // which is the WP post type queried for the actual blog posts themselves.
     // Confirmed against the live CMS: the archive page is titled "Posts" (slug "posts").
     posts: "Posts",
+    // The WP Page that hosts the YouTube video archive (`app/videos/`), same shape as
+    // `posts` above. WPGraphQL's `where: {name: $slug}` sanitizes this value before
+    // matching it against the page's actual slug (confirmed live — `where:
+    // {name: "Posts"}` and `where: {name: "posts"}` both match the same page), so exact
+    // capitalization here doesn't matter; what has to match is the page's real WordPress
+    // slug/permalink.
+    videos: "Videos",
 };
 
 // Preview pages

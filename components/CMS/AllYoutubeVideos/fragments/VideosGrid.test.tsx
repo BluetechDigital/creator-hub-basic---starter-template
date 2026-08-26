@@ -1,86 +1,204 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 import VideosGrid from "@/components/CMS/AllYoutubeVideos/fragments/VideosGrid";
 import type { IYoutubeVideos, IYoutubeChannelInfo, IYoutubePlaylists } from "@/api/YouTube/GetAllYoutubeContent";
 
-const youtubeVideos = [
-	{
-		kind: "youtube#video",
-		etag: "etag1",
-		id: "vid1",
-		videoId: "vid1",
-		snippet: {
-			publishedAt: "2026-01-01T00:00:00Z",
-			channelId: "UC_test_channel",
-			title: "HeroVoltsy Plays Pokemon TCG",
-			description: "A Pokemon TCG deep dive.",
-			thumbnails: {
-				default: { url: "https://i.ytimg.com/vi/vid1/default.jpg", width: 120, height: 90 },
-				medium: { url: "https://i.ytimg.com/vi/vid1/mqdefault.jpg", width: 320, height: 180 },
-				high: { url: "https://i.ytimg.com/vi/vid1/hqdefault.jpg", width: 480, height: 360 },
-			},
-			channelTitle: "HeroVoltsy",
-			categoryId: "20",
-			liveBroadcastContent: "none",
-			localized: { title: "HeroVoltsy Plays Pokemon TCG", description: "A Pokemon TCG deep dive." },
+const makeVideo = (n: number, publishedAt: string) => ({
+	videoId: `vid${n}`,
+	snippet: {
+		title: `Video ${n}`,
+		publishedAt,
+		thumbnails: {
+			high: { url: `https://i.ytimg.com/vi/vid${n}/hqdefault.jpg`, width: 480, height: 360 },
+			medium: { url: `https://i.ytimg.com/vi/vid${n}/mqdefault.jpg`, width: 320, height: 180 },
+			default: { url: `https://i.ytimg.com/vi/vid${n}/default.jpg`, width: 120, height: 90 },
 		},
-		status: {
-			uploadStatus: "processed",
-			privacyStatus: "public",
-			license: "youtube",
-			embeddable: true,
-			publicStatsViewable: true,
-			madeForKids: false,
-		},
-		statistics: { viewCount: "1000", likeCount: "100", favoriteCount: "0", commentCount: "10" },
-		contentDetails: {
-			duration: "PT4M13S",
-			dimension: "2d",
-			definition: "hd",
-			caption: "false",
-			licensedContent: true,
-			projection: "rectangular",
-		},
-		player: { embedHtml: "<iframe></iframe>" },
 	},
-] as unknown as IYoutubeVideos;
+	statistics: { viewCount: "100", likeCount: "10", favoriteCount: "0", commentCount: "1" },
+}) as unknown as IYoutubeVideos[number];
+
+const sixVideos = Array.from({ length: 6 }, (_, i) =>
+	makeVideo(i + 1, `2026-01-${String(28 - i).padStart(2, '0')}T00:00:00Z`),
+);
 
 const youtubeChannelInfo = {} as IYoutubeChannelInfo;
-const youtubeChannelPlaylists = [] as unknown as IYoutubePlaylists;
+const noPlaylists = [] as unknown as IYoutubePlaylists;
+
+const titleLink = (title: string) => screen.getByText(title).closest("a");
 
 describe("AllYoutubeVideos VideosGrid", () => {
-	it("renders a thumbnail, title, and watch link for each video", () => {
+	it("renders 2 hero cards and the rest in a flat grid on page 1", () => {
 		render(
 			<VideosGrid
-				youtubeVideos={youtubeVideos}
+				youtubeVideos={sixVideos}
 				youtubeChannelInfo={youtubeChannelInfo}
-				youtubeChannelPlaylists={youtubeChannelPlaylists}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
 			/>,
 		);
 
-		expect(screen.getByText("HeroVoltsy Plays Pokemon TCG")).toBeInTheDocument();
-
-		const thumbnail = screen.getByAltText("HeroVoltsy Plays Pokemon TCG");
-		expect(thumbnail).toBeInTheDocument();
-		expect(decodeURIComponent(thumbnail.getAttribute("src") ?? "")).toContain(
-			"https://i.ytimg.com/vi/vid1/hqdefault.jpg",
-		);
-
-		const link = screen.getByRole("link", { name: /HeroVoltsy Plays Pokemon TCG/i });
-		expect(link).toHaveAttribute("href", "https://www.youtube.com/watch?v=vid1");
-		expect(link).toHaveAttribute("target", "_blank");
+		expect(titleLink("Video 1")).toHaveAttribute("href", "/videos/video-1-vid1");
+		expect(titleLink("Video 2")).toHaveAttribute("href", "/videos/video-2-vid2");
+		expect(screen.getByText("Video 3")).toBeInTheDocument();
+		expect(screen.getByText("Video 6")).toBeInTheDocument();
 	});
 
-	it("renders nothing when there are no videos", () => {
-		const { container } = render(
+	it("renders no hero cards on page 2 — a flat grid only", () => {
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={2}
+				totalPages={2}
+			/>,
+		);
+
+		// All 6 videos render as plain grid cards — none get the hero treatment.
+		for (let n = 1; n <= 6; n++) {
+			expect(screen.getByText(`Video ${n}`)).toBeInTheDocument();
+		}
+	});
+
+	it("renders an empty-state message when there are no videos", () => {
+		render(
 			<VideosGrid
 				youtubeVideos={[] as unknown as IYoutubeVideos}
 				youtubeChannelInfo={youtubeChannelInfo}
-				youtubeChannelPlaylists={youtubeChannelPlaylists}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
 			/>,
 		);
 
-		expect(container.querySelectorAll("a")).toHaveLength(0);
+		expect(screen.getByText(/no videos published yet/i)).toBeInTheDocument();
+	});
+
+	it("shows Pagination only when there's more than one page and no filter is active", () => {
+		const { rerender } = render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
+			/>,
+		);
+
+		expect(screen.queryByRole("button", { name: /show more/i })).not.toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /show more/i })).not.toBeInTheDocument();
+
+		rerender(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={3}
+			/>,
+		);
+
+		expect(screen.getByRole("link", { name: /show more/i })).toHaveAttribute("href", "/videos?page=2");
+	});
+
+	it("hides Pagination while a filter is active", () => {
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={3}
+			/>,
+		);
+
+		expect(screen.getByRole("link", { name: /show more/i })).toBeInTheDocument();
+
+		fireEvent.change(screen.getByLabelText("Search videos"), { target: { value: "video 2" } });
+
+		expect(screen.queryByRole("link", { name: /show more/i })).not.toBeInTheDocument();
+	});
+
+	it("drops the hero treatment while a filter is active, rendering a flat matching grid", () => {
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
+			/>,
+		);
+
+		fireEvent.change(screen.getByLabelText("Search videos"), { target: { value: "video 3" } });
+
+		expect(screen.queryByText("Video 1")).not.toBeInTheDocument();
+		expect(screen.getByText("Video 3")).toBeInTheDocument();
+	});
+
+	it("filters by playlist membership within the current page's videos", () => {
+		const youtubeChannelPlaylists = [{ id: "pl1", title: "Playlist One" }] as unknown as IYoutubePlaylists;
+
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={youtubeChannelPlaylists}
+				playlistVideoIds={{ pl1: ["vid5"] }}
+				currentPage={1}
+				totalPages={1}
+			/>,
+		);
+
+		fireEvent.change(screen.getByLabelText("Filter by playlist"), { target: { value: "pl1" } });
+
+		expect(screen.queryByText("Video 1")).not.toBeInTheDocument();
+		expect(screen.getByText("Video 5")).toBeInTheDocument();
+	});
+
+	it("shows a no-matches message when filters exclude every video", () => {
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
+			/>,
+		);
+
+		fireEvent.change(screen.getByLabelText("Search videos"), { target: { value: "nonexistent" } });
+
+		expect(screen.getByText(/no videos match these filters/i)).toBeInTheDocument();
+	});
+
+	it("shows Clear filters when a filter is active, and restores the hero layout on click", () => {
+		render(
+			<VideosGrid
+				youtubeVideos={sixVideos}
+				youtubeChannelInfo={youtubeChannelInfo}
+				youtubeChannelPlaylists={noPlaylists}
+				playlistVideoIds={{}}
+				currentPage={1}
+				totalPages={1}
+			/>,
+		);
+
+		fireEvent.change(screen.getByLabelText("Search videos"), { target: { value: "video 3" } });
+		expect(screen.queryByText("Video 1")).not.toBeInTheDocument();
+
+		fireEvent.click(screen.getByRole("button", { name: /clear filters/i }));
+
+		expect(screen.getByText("Video 1")).toBeInTheDocument();
 	});
 });

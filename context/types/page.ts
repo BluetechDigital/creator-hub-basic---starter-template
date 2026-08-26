@@ -6,4 +6,5 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PAGES XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export type ITypes = {
     home: string;
     posts: string;
+    videos: string;
 };

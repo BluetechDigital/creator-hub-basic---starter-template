@@ -32,6 +32,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Youtube Shorts URL Builder XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 const buildShortsUrl = (videoId: string): string => `https://www.youtube.com/shorts/${videoId}`;
 
+// Shown when the ACF `title` field is absent.
+const DEFAULT_HEADING = "Latest shorts";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -43,8 +46,15 @@ XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * Complementary to AllYoutubeVideos: both read from the same `getAllYoutubeVideos()` result
  * and split it by duration — this component keeps Shorts (60s or less), while
  * AllYoutubeVideos keeps everything longer.
+ *
+ * Renders a "Shorts" eyebrow + the ACF `title` heading, same pattern as
+ * `AllBlogPosts`/`AllYoutubeVideos`. Everything else here — the unpaginated
+ * `getAllYoutubeVideos()` fetch, external youtube.com/shorts links — is
+ * unchanged; this component's own pagination/filter/internal-linking rework is
+ * a separate, later round, deliberately not bundled into this one.
+ * @param title The ACF `title` field for this block's header.
  */
-const AllYoutubeShortsVideos = async ({}: IAllYoutubeShortsVideos.IProps) => {
+const AllYoutubeShortsVideos = async ({ title }: IAllYoutubeShortsVideos.IProps) => {
 
 	// Fetched inside the component so it runs per-request, matching Next's
 	// per-request fetch caching/revalidation instead of once at module load.
@@ -69,6 +79,10 @@ const AllYoutubeShortsVideos = async ({}: IAllYoutubeShortsVideos.IProps) => {
 	return (
 		<div className={styles.allYouTubeShortsVideos}>
 			<StructuredData data={videoListSchema} />
+			<div className={styles.allYouTubeShortsVideosHeader}>
+				<span className={styles.allYouTubeShortsVideosEyebrow}>Shorts</span>
+				<h2 className={styles.allYouTubeShortsVideosHeading}>{title || DEFAULT_HEADING}</h2>
+			</div>
 			<VideosGrid
 				youtubeVideos={youtubeVideos}
 				youtubeChannelInfo={youtubeChannelInfo}

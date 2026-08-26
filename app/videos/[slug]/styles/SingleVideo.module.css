@@ -1,0 +1,106 @@
+@import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.singleVideo {
+    @apply block w-full bg-pure-white;
+}
+
+/* ---- Breadcrumbs — same shape as the single-post page's, just this route's own module ---- */
+
+.breadcrumbs {
+    @apply w-full max-w-360 mx-auto px-4 sm:px-8 pt-8;
+
+    & .breadcrumbsList {
+        @apply inline-flex flex-wrap items-center gap-3 bg-pure-black/5 rounded-full px-6 py-3;
+
+        & .breadcrumbItem {
+            @apply flex items-center gap-3 text-sm text-pure-black/60;
+
+            & a {
+                @apply font-medium text-pure-black/60 transition duration-300;
+
+                &:hover {
+                    @apply text-accent-dark;
+                }
+            }
+
+            & svg {
+                @apply text-pure-black/30;
+            }
+
+            & .breadcrumbCurrent {
+                @apply font-medium text-pure-black;
+            }
+        }
+    }
+}
+
+/* ---- Hero: embedded player + title/channel/date/stats ---- */
+
+.videoHero {
+    @apply w-full px-4 sm:px-8 pt-20 pb-16 border-b border-pure-black/10;
+
+    & .videoHeroInner {
+        @apply max-w-360 mx-auto flex flex-wrap items-center gap-12;
+    }
+
+    & .videoEmbedWrapper {
+        @apply relative w-full md:flex-1 aspect-video overflow-hidden rounded-3xl bg-pure-black;
+
+        & .videoEmbed {
+            @apply absolute inset-0 w-full h-full border-0;
+        }
+    }
+
+    & .videoHeroContent {
+        @apply w-full md:flex-1 flex flex-col gap-4;
+
+        & .videoTitle {
+            @apply text-pure-black tracking-tight;
+            /* Same fluid clamp formula as SinglePost.module.css's .postTitle. */
+            font-size: clamp(1.5rem, 1.236rem + 1.13vw, 2.25rem);
+        }
+
+        & .videoMeta {
+            @apply flex flex-wrap items-center gap-3;
+
+            & .videoMetaText {
+                @apply text-sm text-pure-black font-medium;
+            }
+
+            & .videoMetaDot {
+                @apply w-1 h-1 rounded-full bg-pure-black/60;
+            }
+        }
+
+        & .videoStatsRow {
+            @apply flex flex-wrap items-center gap-2 text-sm text-pure-black/60;
+
+            & .videoStatsDot {
+                @apply w-1 h-1 rounded-full bg-pure-black/60;
+            }
+        }
+    }
+}
+
+/* ---- Latest videos ---- */
+
+.latestVideos {
+    @apply w-full max-w-360 mx-auto px-4 sm:px-8 py-20;
+
+    & .latestVideosEyebrow {
+        @apply inline-block mb-4 text-sm text-accent-dark font-medium;
+    }
+
+    & .latestVideosHeading {
+        @apply mb-16 text-4xl sm:text-5xl lg:text-6xl text-pure-black;
+    }
+
+    & .latestVideosGrid {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+    }
+}

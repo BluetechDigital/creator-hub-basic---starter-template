@@ -7,4 +7,5 @@ XXXXXXXXXXXXX GraphQL Fragments for AllYoutubeVideos ACF Component XXXXXXXXXXXXX
 export const AllYoutubeVideos = `
     fieldGroupName
     displaySection
+    title
 `;

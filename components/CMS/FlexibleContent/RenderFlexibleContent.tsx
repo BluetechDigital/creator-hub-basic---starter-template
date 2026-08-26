@@ -57,6 +57,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Resolved Block XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
     simpleName: string;
     filters?: IPost.IPostFilters;
+    page?: number;
 };
 
 /**
@@ -66,15 +67,17 @@ type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
  * the whole page waiting on the slowest block.
  *
  * `filters` (the blog archive's tag/category/date query params, parsed in
- * `app/posts/page.tsx`) is passed to every block the same way `item`'s ACF fields
- * already are — only `AllBlogPosts` reads it, every other block ignores the extra prop
- * exactly as it already ignores whichever of `item`'s fields don't apply to it.
+ * `app/posts/page.tsx`) and `page` (the video archive's `?page=` number, parsed in
+ * `app/videos/page.tsx`) are passed to every block the same way `item`'s ACF fields
+ * already are — only `AllBlogPosts`/`AllYoutubeVideos` respectively read them, every
+ * other block ignores the extra props exactly as it already ignores whichever of
+ * `item`'s fields don't apply to it.
  */
-const ResolvedBlock = async ({ simpleName, filters, ...item }: IResolvedBlockProps) => {
+const ResolvedBlock = async ({ simpleName, filters, page, ...item }: IResolvedBlockProps) => {
     const mod = await DynamicComponentLoaders[simpleName]();
     const Component = mod.default;
 
-    return <Component {...item} filters={filters} />;
+    return <Component {...item} filters={filters} page={page} />;
 };
 
 /* -----------------------------------------------------------------------------
@@ -85,6 +88,8 @@ type IProps = {
     content: IFlexibleContent.IProps;
     /** The blog archive's tag/category/date filters (parsed in `app/posts/page.tsx`) — only relevant to the `AllBlogPosts` block, but threaded through every block the same way `item`'s ACF fields are (see `ResolvedBlock`'s doc comment). */
     filters?: IPost.IPostFilters;
+    /** The video archive's current `?page=` number (parsed in `app/videos/page.tsx`) — only relevant to the `AllYoutubeVideos` block, threaded the same way `filters` is. */
+    page?: number;
 };
 
 /**
@@ -106,7 +111,7 @@ type IProps = {
  * 3. renders `ResolvedBlock` inside its own `<Suspense>` so each block streams in
  *    independently as its dynamic import (and any data it fetches) resolves.
  */
-const RenderFlexibleContent: FC<IProps> = ({ content, filters }) => {
+const RenderFlexibleContent: FC<IProps> = ({ content, filters, page }) => {
     return (
         <>
             {content.map((item, index) => {
@@ -124,7 +129,7 @@ const RenderFlexibleContent: FC<IProps> = ({ content, filters }) => {
                 return (
                     <section className={simpleName} key={item.fieldGroupName + "-" + index}>
                         <Suspense fallback={<SVGLoader/>}>
-                            <ResolvedBlock simpleName={simpleName} filters={filters} {...item} />
+                            <ResolvedBlock simpleName={simpleName} filters={filters} page={page} {...item} />
                         </Suspense>
                     </section>
                 );
