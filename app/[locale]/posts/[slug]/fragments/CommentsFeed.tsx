@@ -12,6 +12,8 @@ import { formatRelativeDate } from "@/app/[locale]/posts/[slug]/fragments/format
 import CommentForm from "@/app/[locale]/posts/[slug]/fragments/CommentForm";
 import CommentReactions from "@/app/[locale]/posts/[slug]/fragments/CommentReactions";
 import { ICommentReactions } from "@/graphql/CMS/GetCommentReactions";
+import { formatTemplate } from "@/i18n/formatTemplate";
+import type { ISinglePostDict } from "@/app/[locale]/posts/[slug]/types/singlePost";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -28,6 +30,8 @@ type ICommentsFeed = {
 	comments: IComment.IProps[];
 	/** Maps a comment/reply's `databaseId` to its `{likes, dislikes}` — from `getCommentReactions`, `{}` if the reactions mu-plugin isn't installed yet (each comment then falls back to 0/0). */
 	commentReactions: Record<number, ICommentReactions>;
+	/** This route's `singlePost` dictionary slice — passed down unstripped from `page.tsx`, and forwarded again to the inline reply `CommentForm`, since a Client Component can't call `getDictionary()` itself. */
+	dict: ISinglePostDict;
 };
 
 /* -----------------------------------------------------------------------------
@@ -45,10 +49,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentEntry Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 const CommentEntry = ({
 	comment,
 	reactions,
+	anonymousLabel,
 	children,
 }: {
 	comment: IComment.IProps;
 	reactions: ICommentReactions;
+	anonymousLabel: string;
 	children?: ReactNode;
 }) => (
 	<>
@@ -63,7 +69,7 @@ const CommentEntry = ({
 		)}
 		<div className={styles.commentBody}>
 			<div className={styles.commentMeta}>
-				<span className={styles.commentAuthor}>{comment.author?.node?.name ?? 'Anonymous'}</span>
+				<span className={styles.commentAuthor}>{comment.author?.node?.name ?? anonymousLabel}</span>
 				<span className={styles.commentDate}>{formatRelativeDate(comment.date)}</span>
 			</div>
 			<div
@@ -110,28 +116,29 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentsFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * @param postId The post's `databaseId` — needed so an opened reply box knows which post to comment on.
  * @param comments The post's approved top-level comments, in the order WPGraphQL returns them.
  * @param commentReactions Each comment/reply's like/dislike counts, keyed by `databaseId`.
+ * @param dict This route's `singlePost` dictionary slice.
  */
-const CommentsFeed = ({ postId, comments, commentReactions }: ICommentsFeed) => {
+const CommentsFeed = ({ postId, comments, commentReactions, dict }: ICommentsFeed) => {
 	const [openReplyId, setOpenReplyId] = useState<string | null>(null);
 
 	return (
 		<section id="comments" className={styles.commentsFeed}>
 			<h2 className={styles.commentsHeading}>
-				{comments.length.toLocaleString()} {comments.length === 1 ? 'Comment' : 'Comments'}
+				{formatTemplate(comments.length === 1 ? dict.commentsOne : dict.commentsMany, { count: comments.length.toLocaleString() })}
 			</h2>
 			{comments.length === 0 ? (
-				<p className={styles.commentsEmpty}>No comments yet — be the first to share your thoughts.</p>
+				<p className={styles.commentsEmpty}>{dict.commentsEmpty}</p>
 			) : (
 				<ul className={styles.commentsList}>
 					{comments.map((comment) => (
 						<li key={comment.id} className={styles.commentItem}>
-							<CommentEntry comment={comment} reactions={commentReactions[comment.databaseId] ?? NO_REACTIONS}>
+							<CommentEntry comment={comment} reactions={commentReactions[comment.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous}>
 								<button
 									type="button"
 									onClick={() => setOpenReplyId(openReplyId === comment.id ? null : comment.id)}
 									className={styles.commentReplyToggle}
 								>
-									Reply
+									{dict.reply}
 								</button>
 
 								{openReplyId === comment.id && (
@@ -140,6 +147,7 @@ const CommentsFeed = ({ postId, comments, commentReactions }: ICommentsFeed) => 
 											postId={postId}
 											parentId={comment.id}
 											onCancel={() => setOpenReplyId(null)}
+											dict={dict}
 										/>
 									</div>
 								)}
@@ -148,7 +156,7 @@ const CommentsFeed = ({ postId, comments, commentReactions }: ICommentsFeed) => 
 									<ul className={styles.commentReplies}>
 										{comment.replies.nodes.map((reply) => (
 											<li key={reply.id} className={styles.commentItem}>
-												<CommentEntry comment={reply} reactions={commentReactions[reply.databaseId] ?? NO_REACTIONS} />
+												<CommentEntry comment={reply} reactions={commentReactions[reply.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous} />
 											</li>
 										))}
 									</ul>

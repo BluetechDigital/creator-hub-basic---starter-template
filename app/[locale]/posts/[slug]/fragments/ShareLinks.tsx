@@ -23,6 +23,7 @@ import {
 } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa6";
 import type { IconType } from "react-icons";
+import type { ISinglePostDict } from "@/app/[locale]/posts/[slug]/types/singlePost";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -47,6 +48,15 @@ type ISocialLinkKey =
 // the aria-label. Rendered only when the creator has actually filled the link
 // in, so this list updates itself — past and future articles alike — the
 // moment theme options change, with no per-post editing required.
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+type IShareLinks = {
+	/** Only `copyLink`/`linkCopied` are read — passed down unstripped from `page.tsx` (see `ISinglePostDict`'s doc comment). */
+	dict: Pick<ISinglePostDict, "copyLink" | "linkCopied">;
+};
+
 const SOCIAL_PLATFORMS: { key: ISocialLinkKey; label: string; Icon: IconType }[] = [
 	{ key: "facebookLink", label: "Facebook", Icon: SiFacebook },
 	{ key: "twitterLink", label: "X", Icon: SiX },
@@ -75,8 +85,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX ShareLinks Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `buildPersonSchema`'s JSON-LD `sameAs`, rather than fetching it again here. Only
  * platforms with a filled-in URL render an icon. `'use client'` for the
  * copy-to-clipboard button's click state and for reading `GlobalContext`.
+ * @param dict This route's `singlePost` dictionary slice — `page.tsx` fetches
+ * it once and passes it down, since a Client Component can't call `getDictionary()` itself.
  */
-const ShareLinks = () => {
+const ShareLinks = ({ dict }: IShareLinks) => {
 	const [copied, setCopied] = useState(false);
 	const { themesOptionsContent } = useGlobalContext();
 
@@ -102,7 +114,7 @@ const ShareLinks = () => {
 	return (
 		<div className={styles.shareLinks}>
 			<button type="button" onClick={handleCopyLink} className={styles.copyLinkButton}>
-				{copied ? 'Copied!' : 'Copy Link'}
+				{copied ? dict.linkCopied : dict.copyLink}
 			</button>
 			{activeSocialLinks.length > 0 && (
 				<div className={styles.shareIcons}>

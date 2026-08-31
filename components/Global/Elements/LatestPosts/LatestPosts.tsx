@@ -3,6 +3,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { getLatestPosts } from "@/graphql/CMS/GetLatestPosts";
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary } from "@/i18n/dictionaries";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -35,7 +37,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX LatestPosts Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * body rather than module scope, same fetch convention as `AllBlogPosts`/
  * `AllYoutubeVideos` (see ARCHITECTURE.md §2). Renders nothing (not an empty
  * section) when there are no other posts to show yet — same graceful-empty-state
- * convention as `PostsGrid`.
+ * convention as `PostsGrid`. Reads the current locale directly (`getLocale()`) for
+ * its own "The latest news"/"From the blog" static UI strings, same self-fetching
+ * pattern as `PostTaxonomies.tsx`.
  * @param excludePostId The `databaseId` of the post currently being viewed.
  */
 const LatestPosts = async ({ excludePostId }: ILatestPosts) => {
@@ -50,10 +54,13 @@ const LatestPosts = async ({ excludePostId }: ILatestPosts) => {
 
 	if (!posts || posts.length === 0) return null;
 
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
+
 	return (
 		<section className={styles.latestPosts}>
-			<span className={styles.latestPostsEyebrow}>The latest news</span>
-			<h2 className={styles.latestPostsHeading}>From the blog</h2>
+			<span className={styles.latestPostsEyebrow}>{dict.latestPosts.eyebrow}</span>
+			<h2 className={styles.latestPostsHeading}>{dict.latestPosts.heading}</h2>
 			<div className={styles.latestPostsGrid}>
 				{posts.map((post) => (
 					<LatestPostCard key={post.slug} post={post} />

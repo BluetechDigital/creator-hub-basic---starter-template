@@ -9,6 +9,27 @@ vi.mock("@/app/[locale]/posts/[slug]/actions", () => ({
 import CommentsFeed from "@/app/[locale]/posts/[slug]/fragments/CommentsFeed";
 import type { IProps as IComment } from "@/graphql/CMS/types/comment";
 
+const dict = {
+	tableOfContents: "Table Of Contents",
+	copyLink: "Copy Link",
+	linkCopied: "Copied!",
+	commentsOne: "{count} Comment",
+	commentsMany: "{count} Comments",
+	commentsEmpty: "No comments yet — be the first to share your thoughts.",
+	reply: "Reply",
+	cancel: "Cancel",
+	anonymous: "Anonymous",
+	leaveComment: "Leave a comment",
+	nameLabel: "Name",
+	emailLabel: "Email",
+	commentLabel: "Comment",
+	sending: "Sending...",
+	postComment: "Post comment",
+	thanksComment: "Thanks for your comment! It may take a minute to appear.",
+	thanksReply: "Thanks for your reply! It may take a minute to appear.",
+	recaptchaRequired: "Please complete the reCAPTCHA check.",
+};
+
 const comments: IComment[] = [
 	{
 		id: "1",
@@ -21,7 +42,7 @@ const comments: IComment[] = [
 
 describe("CommentsFeed", () => {
 	it("renders each comment's author, date, and sanitized content", () => {
-		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} />);
+		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} dict={dict} />);
 
 		expect(screen.getByText("Jane Doe")).toBeInTheDocument();
 		expect(screen.getByText("Great post!")).toBeInTheDocument();
@@ -34,6 +55,7 @@ describe("CommentsFeed", () => {
 				postId={307}
 				comments={[{ ...comments[0], content: '<p>Hi</p><script>alert(1)</script>' }]}
 				commentReactions={{}}
+				dict={dict}
 			/>,
 		);
 
@@ -42,13 +64,13 @@ describe("CommentsFeed", () => {
 	});
 
 	it("shows an empty-state invite rather than nothing when there are no comments", () => {
-		render(<CommentsFeed postId={307} comments={[]} commentReactions={{}} />);
+		render(<CommentsFeed postId={307} comments={[]} commentReactions={{}} dict={dict} />);
 
 		expect(screen.getByText(/be the first to share your thoughts/i)).toBeInTheDocument();
 	});
 
 	it("opens an inline reply box when Reply is clicked, and closes it on Cancel", () => {
-		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} />);
+		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} dict={dict} />);
 
 		expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
 
@@ -77,7 +99,7 @@ describe("CommentsFeed", () => {
 			},
 		];
 
-		render(<CommentsFeed postId={307} comments={commentsWithReply} commentReactions={{}} />);
+		render(<CommentsFeed postId={307} comments={commentsWithReply} commentReactions={{}} dict={dict} />);
 
 		expect(screen.getByText("John Smith")).toBeInTheDocument();
 		expect(screen.getByText("Totally agree!")).toBeInTheDocument();
@@ -91,6 +113,7 @@ describe("CommentsFeed", () => {
 				postId={307}
 				comments={comments}
 				commentReactions={{ 1: { likes: 4, dislikes: 2 } }}
+				dict={dict}
 			/>,
 		);
 
@@ -99,7 +122,7 @@ describe("CommentsFeed", () => {
 	});
 
 	it("defaults a comment's reactions to 0/0 when it has no entry in commentReactions", () => {
-		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} />);
+		render(<CommentsFeed postId={307} comments={comments} commentReactions={{}} dict={dict} />);
 
 		expect(screen.getByRole("button", { name: "Like this comment" })).toHaveTextContent("0");
 		expect(screen.getByRole("button", { name: "Dislike this comment" })).toHaveTextContent("0");

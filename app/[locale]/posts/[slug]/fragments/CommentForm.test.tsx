@@ -9,13 +9,34 @@ vi.mock("@/app/[locale]/posts/[slug]/actions", () => ({
 
 import CommentForm from "@/app/[locale]/posts/[slug]/fragments/CommentForm";
 
+const dict = {
+	tableOfContents: "Table Of Contents",
+	copyLink: "Copy Link",
+	linkCopied: "Copied!",
+	commentsOne: "{count} Comment",
+	commentsMany: "{count} Comments",
+	commentsEmpty: "No comments yet — be the first to share your thoughts.",
+	reply: "Reply",
+	cancel: "Cancel",
+	anonymous: "Anonymous",
+	leaveComment: "Leave a comment",
+	nameLabel: "Name",
+	emailLabel: "Email",
+	commentLabel: "Comment",
+	sending: "Sending...",
+	postComment: "Post comment",
+	thanksComment: "Thanks for your comment! It may take a minute to appear.",
+	thanksReply: "Thanks for your reply! It may take a minute to appear.",
+	recaptchaRequired: "Please complete the reCAPTCHA check.",
+};
+
 describe("CommentForm", () => {
 	beforeEach(() => {
 		mockSubmitComment.mockReset();
 	});
 
 	it("renders name, email, and comment fields", () => {
-		render(<CommentForm postId={307} />);
+		render(<CommentForm postId={307} dict={dict} />);
 
 		expect(screen.getByLabelText("Name")).toBeInTheDocument();
 		expect(screen.getByLabelText("Email")).toBeInTheDocument();
@@ -25,7 +46,7 @@ describe("CommentForm", () => {
 	it("submits the comment and shows a confirmation message", async () => {
 		mockSubmitComment.mockResolvedValue({ success: true });
 
-		render(<CommentForm postId={307} />);
+		render(<CommentForm postId={307} dict={dict} />);
 
 		fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Jane Doe" } });
 		fireEvent.change(screen.getByLabelText("Email"), { target: { value: "jane@example.test" } });
@@ -48,7 +69,7 @@ describe("CommentForm", () => {
 			errors: { email: "Please enter a valid email address." },
 		});
 
-		render(<CommentForm postId={307} />);
+		render(<CommentForm postId={307} dict={dict} />);
 
 		fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Jane Doe" } });
 		fireEvent.change(screen.getByLabelText("Email"), { target: { value: "invalid" } });
@@ -64,7 +85,7 @@ describe("CommentForm", () => {
 	it("renders as a compact reply box with a Reply submit button and Cancel button when parentId/onCancel are set", () => {
 		const onCancel = vi.fn();
 
-		render(<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={onCancel} />);
+		render(<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={onCancel} dict={dict} />);
 
 		expect(screen.queryByText("Leave a comment")).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /^reply$/i })).toBeInTheDocument();
@@ -76,7 +97,7 @@ describe("CommentForm", () => {
 	it("submits a reply with the parentId included", async () => {
 		mockSubmitComment.mockResolvedValue({ success: true });
 
-		render(<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={vi.fn()} />);
+		render(<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={vi.fn()} dict={dict} />);
 
 		fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Jane Doe" } });
 		fireEvent.change(screen.getByLabelText("Email"), { target: { value: "jane@example.test" } });
@@ -96,8 +117,8 @@ describe("CommentForm", () => {
 	it("uses unique field ids so a main form and an open reply box never collide", () => {
 		render(
 			<>
-				<CommentForm postId={307} />
-				<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={vi.fn()} />
+				<CommentForm postId={307} dict={dict} />
+				<CommentForm postId={307} parentId="Y29tbWVudDoy" onCancel={vi.fn()} dict={dict} />
 			</>,
 		);
 

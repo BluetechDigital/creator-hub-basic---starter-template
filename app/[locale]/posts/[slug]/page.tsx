@@ -21,6 +21,7 @@ import { getCommentReactions } from "@/graphql/CMS/GetCommentReactions";
 // CMS content translation + locale-aware SEO
 import { translateFields } from "@/i18n/translateContent";
 import { buildLocaleAlternates } from "@/i18n/buildAlternates";
+import { getDictionary } from "@/i18n/dictionaries";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -145,12 +146,18 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Post Page Component XXXXXXXXXXXXXXXXXXXXXXXX
  * English. `content` is flagged as HTML (`textType=html`) since it's WP's
  * raw rendered post body, not plain text.
  *
+ * The `singlePost` dictionary slice is fetched once here and threaded down as a
+ * `dict` prop to `ShareLinks`/`CommentsFeed`/`CommentForm` — all three are Client
+ * Components, so none of them can call `getDictionary()` themselves the way
+ * `TableOfContents`/`Breadcrumbs`/`PostTaxonomies` do.
+ *
  * @param params - Route params promise; resolves to `{locale, slug}` for the current post.
  */
 const SinglePostPage = async ({ params }: { params: Promise<{ locale: string; slug: string }> }) => {
 
-	/* Extract slug directly from params to ensure it's resolved before use. */
-	const { slug } = await params;
+	/* Extract locale/slug directly from params to ensure they're resolved before use. */
+	const { locale, slug } = await params;
+	const dict = await getDictionary(locale);
 
 	// getPostContentBySlug throws on a network/fetch-level failure, not just a
 	// resolved-undefined GraphQL error — caught here so a CMS blip 404s cleanly
@@ -230,7 +237,7 @@ const SinglePostPage = async ({ params }: { params: Promise<{ locale: string; sl
 			<div className={styles.postBody}>
 				<aside className={styles.postSidebar}>
 					<TableOfContents headings={headings} />
-					<ShareLinks />
+					<ShareLinks dict={dict.singlePost} />
 				</aside>
 				<div className={styles.postMain}>
 					<ArticleContent content={contentWithAnchors} />
@@ -241,8 +248,9 @@ const SinglePostPage = async ({ params }: { params: Promise<{ locale: string; sl
 				postId={post.databaseId}
 				comments={comments?.comments ?? []}
 				commentReactions={commentReactions}
+				dict={dict.singlePost}
 			/>
-			<CommentForm postId={post.databaseId} />
+			<CommentForm postId={post.databaseId} dict={dict.singlePost} />
 
 			<LatestPosts excludePostId={post.databaseId} />
 		</article>

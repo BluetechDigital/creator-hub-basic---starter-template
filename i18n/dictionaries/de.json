@@ -47,8 +47,30 @@
 		"comments": "{count} Kommentare"
 	},
 	"latestPosts": {
+		"eyebrow": "Aktuelle Neuigkeiten",
+		"heading": "Aus dem Blog",
 		"blogPost": "Blogbeitrag",
 		"minRead": "{count} Min. Lesezeit"
+	},
+	"singlePost": {
+		"tableOfContents": "Inhaltsverzeichnis",
+		"copyLink": "Link kopieren",
+		"linkCopied": "Kopiert!",
+		"commentsOne": "{count} Kommentar",
+		"commentsMany": "{count} Kommentare",
+		"commentsEmpty": "Noch keine Kommentare — seien Sie der Erste, der seine Gedanken teilt.",
+		"reply": "Antworten",
+		"cancel": "Abbrechen",
+		"anonymous": "Anonym",
+		"leaveComment": "Kommentar hinterlassen",
+		"nameLabel": "Name",
+		"emailLabel": "E-Mail",
+		"commentLabel": "Kommentar",
+		"sending": "Wird gesendet…",
+		"postComment": "Kommentar veröffentlichen",
+		"thanksComment": "Danke für Ihren Kommentar! Es kann eine Minute dauern, bis er erscheint.",
+		"thanksReply": "Danke für Ihre Antwort! Es kann eine Minute dauern, bis sie erscheint.",
+		"recaptchaRequired": "Bitte bestätigen Sie die reCAPTCHA-Prüfung."
 	},
 	"notFound": {
 		"title": "404 - Seite nicht gefunden",

@@ -8,6 +8,7 @@ import { useId, useRef, useState } from "react";
 import { useFormik } from "formik";
 import ReCAPTCHA from "react-google-recaptcha";
 import { submitComment, ICommentFormValues } from "@/app/[locale]/posts/[slug]/actions";
+import type { ISinglePostDict } from "@/app/[locale]/posts/[slug]/types/singlePost";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -31,6 +32,8 @@ type ICommentForm = {
 	parentId?: string;
 	/** Shown as a "Cancel" button when set — used by the inline reply box to let a visitor close it without submitting. */
 	onCancel?: () => void;
+	/** This route's `singlePost` dictionary slice — passed down unstripped from `page.tsx`/`CommentsFeed.tsx`, since a Client Component can't call `getDictionary()` itself. */
+	dict: ISinglePostDict;
 };
 
 type IFormValues = Omit<ICommentFormValues, 'postId' | 'recaptchaToken' | 'parentId'>;
@@ -61,8 +64,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * @param postId The post's `databaseId` being commented on.
  * @param parentId The parent comment's global `id`, when replying; omit for a top-level comment.
  * @param onCancel Renders a "Cancel" button that calls this when set (reply-box mode only).
+ * @param dict This route's `singlePost` dictionary slice.
  */
-const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
+const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 	const uid = useId();
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const [submitted, setSubmitted] = useState(false);
@@ -77,7 +81,7 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 			const recaptchaToken = recaptchaRef.current?.getValue();
 
 			if (RECAPTCHA_SITE_KEY && !recaptchaToken) {
-				setGeneralError("Please complete the reCAPTCHA check.");
+				setGeneralError(dict.recaptchaRequired);
 				setSubmitting(false);
 				return;
 			}
@@ -101,11 +105,11 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 
 	return (
 		<div className={`${styles.commentForm} ${parentId ? styles.commentFormCompact : ''}`}>
-			{!parentId && <h2 className={styles.commentFormHeading}>Leave a comment</h2>}
+			{!parentId && <h2 className={styles.commentFormHeading}>{dict.leaveComment}</h2>}
 			<form onSubmit={formik.handleSubmit} noValidate>
 				<div className={styles.commentFormRow}>
 					<div className={styles.commentFormField}>
-						<label htmlFor={`comment-name-${uid}`}>Name</label>
+						<label htmlFor={`comment-name-${uid}`}>{dict.nameLabel}</label>
 						<input
 							id={`comment-name-${uid}`}
 							name="name"
@@ -117,7 +121,7 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 					</div>
 
 					<div className={styles.commentFormField}>
-						<label htmlFor={`comment-email-${uid}`}>Email</label>
+						<label htmlFor={`comment-email-${uid}`}>{dict.emailLabel}</label>
 						<input
 							id={`comment-email-${uid}`}
 							name="email"
@@ -130,7 +134,7 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 				</div>
 
 				<div className={styles.commentFormField}>
-					<label htmlFor={`comment-content-${uid}`}>{parentId ? 'Reply' : 'Comment'}</label>
+					<label htmlFor={`comment-content-${uid}`}>{parentId ? dict.reply : dict.commentLabel}</label>
 					<textarea
 						id={`comment-content-${uid}`}
 						name="content"
@@ -146,16 +150,16 @@ const CommentForm = ({ postId, parentId, onCancel }: ICommentForm) => {
 
 				{generalError ? <p className={styles.commentFormError} role="alert">{generalError}</p> : null}
 				{submitted ? (
-					<p role="status">Thanks for your {parentId ? 'reply' : 'comment'}! It may take a minute to appear.</p>
+					<p role="status">{parentId ? dict.thanksReply : dict.thanksComment}</p>
 				) : null}
 
 				<div className={styles.commentFormActions}>
 					<button type="submit" disabled={formik.isSubmitting} className={styles.commentFormSubmit}>
-						{formik.isSubmitting ? 'Sending...' : parentId ? 'Reply' : 'Post comment'}
+						{formik.isSubmitting ? dict.sending : parentId ? dict.reply : dict.postComment}
 					</button>
 					{onCancel ? (
 						<button type="button" onClick={onCancel} className={styles.commentFormCancel}>
-							Cancel
+							{dict.cancel}
 						</button>
 					) : null}
 				</div>

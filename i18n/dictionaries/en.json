@@ -47,8 +47,30 @@
 		"comments": "{count} comments"
 	},
 	"latestPosts": {
+		"eyebrow": "The latest news",
+		"heading": "From the blog",
 		"blogPost": "Blog Post",
 		"minRead": "{count} min read"
+	},
+	"singlePost": {
+		"tableOfContents": "Table Of Contents",
+		"copyLink": "Copy Link",
+		"linkCopied": "Copied!",
+		"commentsOne": "{count} Comment",
+		"commentsMany": "{count} Comments",
+		"commentsEmpty": "No comments yet — be the first to share your thoughts.",
+		"reply": "Reply",
+		"cancel": "Cancel",
+		"anonymous": "Anonymous",
+		"leaveComment": "Leave a comment",
+		"nameLabel": "Name",
+		"emailLabel": "Email",
+		"commentLabel": "Comment",
+		"sending": "Sending...",
+		"postComment": "Post comment",
+		"thanksComment": "Thanks for your comment! It may take a minute to appear.",
+		"thanksReply": "Thanks for your reply! It may take a minute to appear.",
+		"recaptchaRequired": "Please complete the reCAPTCHA check."
 	},
 	"notFound": {
 		"title": "404 - Not Found",
