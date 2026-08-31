@@ -29,8 +29,9 @@ import {
 // Themes Options
 import { getThemesOptionsContent } from "@/graphql/CMS/GetAllThemesOptions";
 
-// Static UI Dictionary
+// Static UI Dictionary + CMS content translation
 import { getDictionary } from "@/i18n/dictionaries";
+import { translateFields } from "@/i18n/translateContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -65,6 +66,41 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 const SITE_NAME: string | undefined = process.env.SITE_NAME;
 const SITE_URL: string | undefined = process.env.SITE_URL;
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXX Error Page Content Translation XXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+/**
+ * Translates `errorPageContent.title`/`.paragraph` (the 404/error page's own
+ * CMS-authored heading and WYSIWYG body — see `components/Global/Error/Error.tsx`)
+ * for non-English locales, before this content is put into `GlobalContext`.
+ * This is a WP theme-options singleton, not ACF flexible-content, so it isn't
+ * covered by `RenderFlexibleContent.tsx`'s `PROSE_FIELDS` translation — this is
+ * its own, separate call site, the same way `AllBlogPosts`/`AllYoutubeVideos`'s
+ * post/SEO content each get their own `translateFields` call rather than one
+ * shared pass over everything. `paragraph` is WordPress WYSIWYG HTML (rendered
+ * via `Paragraph.tsx`'s `dangerouslySetInnerHTML`, same as `TitleParagraph`'s
+ * own `paragraph` field), so it's translated in Azure's HTML mode.
+ *
+ * Guards on `content` being present rather than optional-chaining through to
+ * `translateFields` — `getThemesOptionsContent` can resolve to `undefined` on
+ * a CMS blip, and this is the root layout, wrapping every page on the site;
+ * a crash here would take the whole site down, not just the error page.
+ * @param content `getThemesOptionsContent`'s result, or `undefined` on failure.
+ */
+const translateErrorPageContent = async (
+	content: IGlobal.IProps["themesOptionsContent"],
+): Promise<IGlobal.IProps["themesOptionsContent"]> => {
+	if (!content) return content;
+
+	const translated = await translateFields(
+		{ title: content.errorPageContent.title, paragraph: content.errorPageContent.paragraph },
+		['paragraph'],
+	);
+
+	return { ...content, errorPageContent: { ...content.errorPageContent, ...translated } };
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -156,7 +192,7 @@ const RootLayout = async ({ children, params }: { children: ReactNode; params: P
 	];
 
 	const globalProps: IGlobal.IProps = {
-		themesOptionsContent,
+		themesOptionsContent: await translateErrorPageContent(themesOptionsContent),
 
 		// Website Links
 		mobileLinks,

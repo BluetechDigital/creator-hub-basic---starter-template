@@ -8,10 +8,10 @@ import { FC, memo, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import dateFormat from "dateformat";
 import DOMPurify from "isomorphic-dompurify";
 import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts";
 import { parseWpDate } from "@/graphql/CMS/parseWpDate";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -58,7 +58,7 @@ const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
                     />
                 </div>
             )}
-            <span className={styles.postDate}>{dateFormat(parseWpDate(post.date), "mmmm dS, yyyy")}</span>
+            <span className={styles.postDate}>{formatLocaleDate(parseWpDate(post.date), locale)}</span>
             <h3 className={styles.postTitle}>{post.title}</h3>
             {post.excerpt && <div className={styles.postExcerpt} dangerouslySetInnerHTML={cleanExcerpt} />}
         </Link>

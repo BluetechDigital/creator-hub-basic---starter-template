@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { ReactNode, useState } from "react";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import DOMPurify from "isomorphic-dompurify";
 import * as IComment from "@/graphql/CMS/types/comment";
@@ -50,11 +51,15 @@ const CommentEntry = ({
 	comment,
 	reactions,
 	anonymousLabel,
+	locale,
+	justNowLabel,
 	children,
 }: {
 	comment: IComment.IProps;
 	reactions: ICommentReactions;
 	anonymousLabel: string;
+	locale: string;
+	justNowLabel: string;
 	children?: ReactNode;
 }) => (
 	<>
@@ -70,7 +75,7 @@ const CommentEntry = ({
 		<div className={styles.commentBody}>
 			<div className={styles.commentMeta}>
 				<span className={styles.commentAuthor}>{comment.author?.node?.name ?? anonymousLabel}</span>
-				<span className={styles.commentDate}>{formatRelativeDate(comment.date)}</span>
+				<span className={styles.commentDate}>{formatRelativeDate(comment.date, locale, justNowLabel)}</span>
 			</div>
 			<div
 				className={styles.commentContent}
@@ -120,6 +125,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentsFeed Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
 const CommentsFeed = ({ postId, comments, commentReactions, dict }: ICommentsFeed) => {
 	const [openReplyId, setOpenReplyId] = useState<string | null>(null);
+	const { locale } = useParams<{ locale: string }>();
 
 	return (
 		<section id="comments" className={styles.commentsFeed}>
@@ -132,7 +138,7 @@ const CommentsFeed = ({ postId, comments, commentReactions, dict }: ICommentsFee
 				<ul className={styles.commentsList}>
 					{comments.map((comment) => (
 						<li key={comment.id} className={styles.commentItem}>
-							<CommentEntry comment={comment} reactions={commentReactions[comment.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous}>
+							<CommentEntry comment={comment} reactions={commentReactions[comment.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous} locale={locale} justNowLabel={dict.justNow}>
 								<button
 									type="button"
 									onClick={() => setOpenReplyId(openReplyId === comment.id ? null : comment.id)}
@@ -156,7 +162,7 @@ const CommentsFeed = ({ postId, comments, commentReactions, dict }: ICommentsFee
 									<ul className={styles.commentReplies}>
 										{comment.replies.nodes.map((reply) => (
 											<li key={reply.id} className={styles.commentItem}>
-												<CommentEntry comment={reply} reactions={commentReactions[reply.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous} />
+												<CommentEntry comment={reply} reactions={commentReactions[reply.databaseId] ?? NO_REACTIONS} anonymousLabel={dict.anonymous} locale={locale} justNowLabel={dict.justNow} />
 											</li>
 										))}
 									</ul>

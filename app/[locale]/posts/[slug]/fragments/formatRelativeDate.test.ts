@@ -14,37 +14,42 @@ describe("formatRelativeDate", () => {
 	});
 
 	it("returns 'just now' for anything under a minute old", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 30 * 1000).toISOString())).toBe('just now');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 30 * 1000).toISOString(), 'en', 'just now')).toBe('just now');
 	});
 
 	it("formats minutes", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 60 * 1000).toISOString())).toBe('5 minutes ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 60 * 1000).toISOString(), 'en', 'just now')).toBe('5 minutes ago');
 	});
 
 	it("uses the singular unit for a value of 1", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 60 * 60 * 1000).toISOString())).toBe('1 hour ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 60 * 60 * 1000).toISOString(), 'en', 'just now')).toBe('1 hour ago');
 	});
 
 	it("formats hours", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 3 * 60 * 60 * 1000).toISOString())).toBe('3 hours ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 3 * 60 * 60 * 1000).toISOString(), 'en', 'just now')).toBe('3 hours ago');
 	});
 
 	it("formats days", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 2 * 86400 * 1000).toISOString())).toBe('2 days ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 2 * 86400 * 1000).toISOString(), 'en', 'just now')).toBe('2 days ago');
 	});
 
 	it("formats months", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 90 * 86400 * 1000).toISOString())).toBe('2 months ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 90 * 86400 * 1000).toISOString(), 'en', 'just now')).toBe('2 months ago');
 	});
 
 	it("formats years", () => {
-		expect(formatRelativeDate(new Date(NOW.getTime() - 400 * 86400 * 1000).toISOString())).toBe('1 year ago');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 400 * 86400 * 1000).toISOString(), 'en', 'just now')).toBe('1 year ago');
 	});
 
 	it("handles WordPress's actual dateGmt shape (space-separated, no timezone marker) via parseWpDate", () => {
 		// 5 minutes before the fixed "NOW" (2026-08-17T12:00:00Z). Full
 		// UTC-vs-local-timezone coverage lives in parseWpDate.test.ts — this
 		// just confirms formatRelativeDate delegates to it correctly.
-		expect(formatRelativeDate('2026-08-17 11:55:00')).toBe('5 minutes ago');
+		expect(formatRelativeDate('2026-08-17 11:55:00', 'en', 'just now')).toBe('5 minutes ago');
+	});
+
+	it("formats in the requested locale, and returns the caller-supplied justNowLabel translation", () => {
+		expect(formatRelativeDate(new Date(NOW.getTime() - 2 * 86400 * 1000).toISOString(), 'fr', 'à l\'instant')).toBe('il y a 2 jours');
+		expect(formatRelativeDate(new Date(NOW.getTime() - 30 * 1000).toISOString(), 'fr', 'à l\'instant')).toBe('à l\'instant');
 	});
 });

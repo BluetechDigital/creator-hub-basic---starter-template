@@ -8,9 +8,9 @@ import { FC, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import dateFormat from "dateformat";
 import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts";
 import { parseWpDate } from "@/graphql/CMS/parseWpDate";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -59,7 +59,7 @@ const FeaturedPostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
 				<div className={styles.featuredPostOverlay} aria-hidden="true" />
 			</div>
 			<div className={styles.featuredPostContent}>
-				<span className={styles.featuredPostDate}>{dateFormat(parseWpDate(post.date), "mmmm dS, yyyy")}</span>
+				<span className={styles.featuredPostDate}>{formatLocaleDate(parseWpDate(post.date), locale)}</span>
 				<h3 className={styles.featuredPostTitle}>{post.title}</h3>
 			</div>
 		</Link>

@@ -8,9 +8,9 @@ import { FC, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import dateFormat from "dateformat";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 import { buildVideoSlug } from "@/api/YouTube/GetAllYoutubeContent";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -59,7 +59,7 @@ const FeaturedVideoCard: FC<IAllYoutubeVideos.IFeaturedVideoCard> = memo(({ vide
 				<div className={styles.featuredVideoOverlay} aria-hidden="true" />
 			</div>
 			<div className={styles.featuredVideoContent}>
-				<span className={styles.featuredVideoDate}>{dateFormat(new Date(video.snippet.publishedAt), "mmmm dS, yyyy")}</span>
+				<span className={styles.featuredVideoDate}>{formatLocaleDate(new Date(video.snippet.publishedAt), locale)}</span>
 				<h3 className={styles.featuredVideoTitle}>{video.snippet.title}</h3>
 			</div>
 		</Link>

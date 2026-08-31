@@ -6,6 +6,10 @@ vi.mock("@/app/[locale]/posts/[slug]/actions", () => ({
 	setCommentReaction: vi.fn(),
 }));
 
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
+
 import CommentsFeed from "@/app/[locale]/posts/[slug]/fragments/CommentsFeed";
 import type { IProps as IComment } from "@/graphql/CMS/types/comment";
 
@@ -13,6 +17,11 @@ const dict = {
 	tableOfContents: "Table Of Contents",
 	copyLink: "Copy Link",
 	linkCopied: "Copied!",
+	minRead: "{count} min read",
+	justNow: "just now",
+	likeThisPost: "Like this post",
+	dislikeThisPost: "Dislike this post",
+	viewComments: "View comments",
 	commentsOne: "{count} Comment",
 	commentsMany: "{count} Comments",
 	commentsEmpty: "No comments yet — be the first to share your thoughts.",

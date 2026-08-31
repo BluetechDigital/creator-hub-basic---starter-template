@@ -2,11 +2,12 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC } from "react";
 import Image from "next/image";
-import dateFormat from "dateformat";
 import * as IPost from "@/graphql/CMS/types/post";
 import { parseWpDate } from "@/graphql/CMS/parseWpDate";
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary, formatTemplate } from "@/i18n/dictionaries";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 import EngagementBar from "@/app/[locale]/posts/[slug]/fragments/EngagementBar";
 import PostTaxonomies from "@/app/[locale]/posts/[slug]/fragments/PostTaxonomies";
 
@@ -34,10 +35,18 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Renders the single post page's hero header: featured image, title, excerpt,
  * author (name — linked to `author.url` when present — avatar, and bio), date,
- * read time, and the like/dislike/comment-count engagement pill. Plain
- * presentational component, no data fetching of its own — `post` and the
- * reaction/comment counts are passed down already-resolved from
- * `SinglePostPage`.
+ * read time, and the like/dislike/comment-count engagement pill. Async Server
+ * Component — reads the current locale directly (`getLocale()`) for its own
+ * date formatting/"min read" text and to pass `dict.singlePost` down to
+ * `EngagementBar` (a Client Component, so it can't call `getDictionary()`
+ * itself) — same self-fetching pattern as `PostTaxonomies.tsx`/`TableOfContents.tsx`.
+ * `post` and the reaction/comment counts are still passed down already-resolved
+ * from `SinglePostPage`.
+ *
+ * The date is formatted via `formatLocaleDate` (native `Intl.DateTimeFormat`),
+ * not the `dateformat` package this used to use — see that helper's own doc
+ * comment for why (its i18n plugin isn't safe under Next's concurrent server
+ * process).
  *
  * `EngagementBar` sits directly below the author bio (not after the article
  * body, where it originally lived) so a reader can react without scrolling
@@ -48,7 +57,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * @param initialDislikes The post's current dislike count (`getPostReactions`, 0 if the likes mu-plugin isn't installed).
  * @param commentCount The post's approved comment count.
  */
-const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentCount }) => {
+const PostHero = async ({ post, initialLikes, initialDislikes, commentCount }: IPostHero) => {
+
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
 
 	return (
 		<header className={styles.postHero}>
@@ -97,11 +109,11 @@ const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentC
 							)
 						)}
 						<span className={styles.postMetaDot} aria-hidden="true" />
-						<span className={styles.postMetaText}>{dateFormat(parseWpDate(post.date), "dddd, mmmm dS, yyyy")}</span>
+						<span className={styles.postMetaText}>{formatLocaleDate(parseWpDate(post.date), locale, true)}</span>
 						{post.seo?.readingTime ? (
 							<>
 								<span className={styles.postMetaDot} aria-hidden="true" />
-								<span className={styles.postMetaText}>{post.seo.readingTime} min read</span>
+								<span className={styles.postMetaText}>{formatTemplate(dict.singlePost.minRead, { count: String(post.seo.readingTime) })}</span>
 							</>
 						) : null}
 					</div>
@@ -114,6 +126,7 @@ const PostHero: FC<IPostHero> = ({ post, initialLikes, initialDislikes, commentC
 						initialLikes={initialLikes}
 						initialDislikes={initialDislikes}
 						commentCount={commentCount}
+						dict={dict.singlePost}
 					/>
 				</div>
 			</div>

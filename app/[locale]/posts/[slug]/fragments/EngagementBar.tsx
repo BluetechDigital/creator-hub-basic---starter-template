@@ -7,6 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { useEffect, useState } from "react";
 import { setReaction } from "@/app/[locale]/posts/[slug]/actions";
 import { IReaction } from "@/graphql/CMS/SetPostReaction";
+import type { ISinglePostDict } from "@/app/[locale]/posts/[slug]/types/singlePost";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -23,6 +24,8 @@ type IEngagementBar = {
 	initialLikes: number;
 	initialDislikes: number;
 	commentCount: number;
+	/** Only `likeThisPost`/`dislikeThisPost`/`viewComments` are read (the reaction/comment-count aria-labels). */
+	dict: Pick<ISinglePostDict, "likeThisPost" | "dislikeThisPost" | "viewComments">;
 };
 
 /* -----------------------------------------------------------------------------
@@ -62,7 +65,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX EngagementBar Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * just won't successfully react until the plugin is installed, handled the
  * same as any other failed reaction attempt.
  */
-const EngagementBar = ({ postId, initialLikes, initialDislikes, commentCount }: IEngagementBar) => {
+const EngagementBar = ({ postId, initialLikes, initialDislikes, commentCount, dict }: IEngagementBar) => {
 	const [likes, setLikes] = useState(initialLikes);
 	const [dislikes, setDislikes] = useState(initialDislikes);
 	const [reaction, setReactionState] = useState<IReaction | undefined>(undefined);
@@ -108,7 +111,7 @@ const EngagementBar = ({ postId, initialLikes, initialDislikes, commentCount }: 
 					onClick={() => handleReact("like")}
 					disabled={isReacting}
 					aria-pressed={reaction === "like"}
-					aria-label="Like this post"
+					aria-label={dict.likeThisPost}
 					className={`${styles.reactionButton} ${reaction === "like" ? styles.reactionButtonActive : ''}`}
 				>
 					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -123,7 +126,7 @@ const EngagementBar = ({ postId, initialLikes, initialDislikes, commentCount }: 
 					onClick={() => handleReact("dislike")}
 					disabled={isReacting}
 					aria-pressed={reaction === "dislike"}
-					aria-label="Dislike this post"
+					aria-label={dict.dislikeThisPost}
 					className={`${styles.reactionButton} ${reaction === "dislike" ? styles.reactionButtonActive : ''}`}
 				>
 					<svg className={styles.reactionIconFlipped} width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -133,7 +136,7 @@ const EngagementBar = ({ postId, initialLikes, initialDislikes, commentCount }: 
 					<span className={styles.reactionCount}>{dislikes}</span>
 				</button>
 			</div>
-			<a href="#comments" aria-label="View comments" className={styles.commentPillButton}>
+			<a href="#comments" aria-label={dict.viewComments} className={styles.commentPillButton}>
 				<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M12.5 22C18.0228 22 22.5 17.5228 22.5 12C22.5 6.47715 18.0228 2 12.5 2C6.97715 2 2.5 6.47715 2.5 12C2.5 13.8214 2.98697 15.5291 3.83782 17L3 21.5L7.5 20.6622C8.97087 21.513 10.6786 22 12.5 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 				</svg>

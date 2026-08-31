@@ -58,6 +58,11 @@
 		"tableOfContents": "Table des matières",
 		"copyLink": "Copier le lien",
 		"linkCopied": "Copié !",
+		"minRead": "{count} min de lecture",
+		"justNow": "à l'instant",
+		"likeThisPost": "Aimer cet article",
+		"dislikeThisPost": "Ne pas aimer cet article",
+		"viewComments": "Voir les commentaires",
 		"commentsOne": "{count} commentaire",
 		"commentsMany": "{count} commentaires",
 		"commentsEmpty": "Aucun commentaire pour le moment — soyez le premier à partager votre avis.",
@@ -76,6 +81,7 @@
 	},
 	"notFound": {
 		"title": "404 - Page introuvable",
-		"description": "La page que vous recherchez n'existe pas."
+		"description": "La page que vous recherchez n'existe pas.",
+		"errorBadge": "Erreur 404"
 	}
 }

@@ -9,6 +9,12 @@ vi.mock("@/app/[locale]/posts/[slug]/actions", () => ({
 
 import EngagementBar from "@/app/[locale]/posts/[slug]/fragments/EngagementBar";
 
+const dict = {
+	likeThisPost: "Like this post",
+	dislikeThisPost: "Dislike this post",
+	viewComments: "View comments",
+};
+
 const clearReactionCookie = () => {
 	document.cookie = "reaction_307=; max-age=0; path=/";
 };
@@ -24,7 +30,7 @@ describe("EngagementBar", () => {
 	});
 
 	it("renders the initial like, dislike, and comment counts", () => {
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		expect(screen.getByText("4")).toBeInTheDocument();
 		expect(screen.getByText("1")).toBeInTheDocument();
@@ -32,7 +38,7 @@ describe("EngagementBar", () => {
 	});
 
 	it("links the comment count to #comments", () => {
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		expect(screen.getByRole("link")).toHaveAttribute("href", "#comments");
 	});
@@ -40,7 +46,7 @@ describe("EngagementBar", () => {
 	it("likes the post and sets the reaction cookie on click", async () => {
 		mockSetReaction.mockResolvedValue({ success: true, likes: 5, dislikes: 1 });
 
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Like this post" }));
 
@@ -57,7 +63,7 @@ describe("EngagementBar", () => {
 		document.cookie = "reaction_307=like; path=/";
 		mockSetReaction.mockResolvedValue({ success: true, likes: 3, dislikes: 2 });
 
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		await waitFor(() => {
 			expect(screen.getByRole("button", { name: "Like this post" })).toHaveAttribute("aria-pressed", "true");
@@ -80,7 +86,7 @@ describe("EngagementBar", () => {
 		document.cookie = "reaction_307=like; path=/";
 		mockSetReaction.mockResolvedValue({ success: true, likes: 3, dislikes: 1 });
 
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		await waitFor(() => {
 			expect(screen.getByRole("button", { name: "Like this post" })).toHaveAttribute("aria-pressed", "true");
@@ -99,7 +105,7 @@ describe("EngagementBar", () => {
 	it("renders the previously-set reaction from the cookie on mount", () => {
 		document.cookie = "reaction_307=dislike; path=/";
 
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		return waitFor(() => {
 			expect(screen.getByRole("button", { name: "Dislike this post" })).toHaveAttribute("aria-pressed", "true");
@@ -109,7 +115,7 @@ describe("EngagementBar", () => {
 	it("does not bump the counts when setReaction fails (e.g. mu-plugin not installed)", async () => {
 		mockSetReaction.mockResolvedValue({ success: false });
 
-		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} />);
+		render(<EngagementBar postId={307} initialLikes={4} initialDislikes={1} commentCount={2} dict={dict} />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Like this post" }));
 

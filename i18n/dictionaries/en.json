@@ -58,6 +58,11 @@
 		"tableOfContents": "Table Of Contents",
 		"copyLink": "Copy Link",
 		"linkCopied": "Copied!",
+		"minRead": "{count} min read",
+		"justNow": "just now",
+		"likeThisPost": "Like this post",
+		"dislikeThisPost": "Dislike this post",
+		"viewComments": "View comments",
 		"commentsOne": "{count} Comment",
 		"commentsMany": "{count} Comments",
 		"commentsEmpty": "No comments yet — be the first to share your thoughts.",
@@ -76,6 +81,7 @@
 	},
 	"notFound": {
 		"title": "404 - Not Found",
-		"description": "The page you are looking for does not exist."
+		"description": "The page you are looking for does not exist.",
+		"errorBadge": "Error 404"
 	}
 }

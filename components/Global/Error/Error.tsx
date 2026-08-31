@@ -7,8 +7,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FC, memo, useMemo } from "react";
+import { useParams } from "next/navigation";
 import useGlobalContext from "@/context/global";
-import { fadeIn, initialTwo } from "@/animations/animations";	
+import { getClientDictionary } from "@/i18n/dictionaries.client";
+import { fadeIn, initialTwo } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -30,13 +32,26 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Error Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * 404 error page content. Takes zero props — all of its text and background image
  * come from `errorPageContent` on `useGlobalContext()`, i.e. this is entirely
- * CMS-driven despite the empty component signature.
+ * CMS-driven despite the empty component signature (already machine-translated
+ * upstream, in `app/[locale]/layout.tsx`'s `translateErrorPageContent`, for
+ * non-English locales — this component just renders whatever it's given).
+ *
+ * The "Error 404" badge is genuinely static UI chrome, though, not CMS content —
+ * translated via `getClientDictionary()` (`useParams()` for the locale, same as
+ * every other Client Component in this app that needs it) rather than the usual
+ * `getDictionary()`: this component is rendered from both `not-found.tsx` (a
+ * Server Component, which could pass a `dict` prop) and `error.tsx` (a React
+ * error boundary, which can't — it renders outside the normal Server Component
+ * tree with no data-fetching hook of its own) — see `getClientDictionary()`'s
+ * own doc comment for why a client-safe dictionary exists for exactly this case.
  */
 const Error: FC = memo(() => {
 	const globalContext = useGlobalContext();
+	const { locale } = useParams<{ locale: string }>();
+	const dict = getClientDictionary(locale);
 
 	const errorPageContent = globalContext.themesOptionsContent.errorPageContent;
-	
+
 	return (
 		<div className={styles.error}>
 			<div className={styles.container}>
@@ -48,7 +63,7 @@ const Error: FC = memo(() => {
 							viewport={{once: true}}
 							className={styles.span}
 						>
-							Error 404
+							{dict.notFound.errorBadge}
 						</motion.span>
 						<ContentSliceRevealMaskAnimation>
 							<motion.h1

@@ -58,6 +58,11 @@
 		"tableOfContents": "Inhaltsverzeichnis",
 		"copyLink": "Link kopieren",
 		"linkCopied": "Kopiert!",
+		"minRead": "{count} Min. Lesezeit",
+		"justNow": "gerade eben",
+		"likeThisPost": "Diesen Beitrag mögen",
+		"dislikeThisPost": "Diesen Beitrag nicht mögen",
+		"viewComments": "Kommentare ansehen",
 		"commentsOne": "{count} Kommentar",
 		"commentsMany": "{count} Kommentare",
 		"commentsEmpty": "Noch keine Kommentare — seien Sie der Erste, der seine Gedanken teilt.",
@@ -76,6 +81,7 @@
 	},
 	"notFound": {
 		"title": "404 - Seite nicht gefunden",
-		"description": "Die gesuchte Seite existiert nicht."
+		"description": "Die gesuchte Seite existiert nicht.",
+		"errorBadge": "Fehler 404"
 	}
 }

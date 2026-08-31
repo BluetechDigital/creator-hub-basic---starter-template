@@ -8,10 +8,10 @@ import { FC, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import dateFormat from "dateformat";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 import { formatCount, buildVideoSlug } from "@/api/YouTube/GetAllYoutubeContent";
 import { formatTemplate } from "@/i18n/formatTemplate";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -58,7 +58,7 @@ const VideoCard: FC<IAllYoutubeVideos.IVideoCard> = memo(({ video, dict }) => {
 					className={styles.videoThumbnail}
 				/>
 			</div>
-			<span className={styles.videoDate}>{dateFormat(new Date(video.snippet.publishedAt), "mmmm dS, yyyy")}</span>
+			<span className={styles.videoDate}>{formatLocaleDate(new Date(video.snippet.publishedAt), locale)}</span>
 			<h3 className={styles.videoTitle}>{video.snippet.title}</h3>
 			<div className={styles.videoStats}>
 				<span>{formatTemplate(dict.views, { count: formatCount(video.statistics.viewCount) })}</span>

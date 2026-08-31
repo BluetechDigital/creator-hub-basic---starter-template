@@ -58,6 +58,11 @@
 		"tableOfContents": "Índice",
 		"copyLink": "Copiar link",
 		"linkCopied": "Copiado!",
+		"minRead": "{count} min de leitura",
+		"justNow": "agora mesmo",
+		"likeThisPost": "Gostar desta publicação",
+		"dislikeThisPost": "Não gostar desta publicação",
+		"viewComments": "Ver comentários",
 		"commentsOne": "{count} comentário",
 		"commentsMany": "{count} comentários",
 		"commentsEmpty": "Ainda não há comentários — seja o primeiro a partilhar a sua opinião.",
@@ -76,6 +81,7 @@
 	},
 	"notFound": {
 		"title": "404 - Página não encontrada",
-		"description": "A página que procura não existe."
+		"description": "A página que procura não existe.",
+		"errorBadge": "Erro 404"
 	}
 }

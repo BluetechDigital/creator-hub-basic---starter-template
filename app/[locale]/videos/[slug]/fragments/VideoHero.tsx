@@ -2,10 +2,11 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC } from "react";
-import dateFormat from "dateformat";
 import type { IYoutubeVideos } from "@/api/YouTube/GetAllYoutubeContent";
 import { formatCount } from "@/api/YouTube/GetAllYoutubeContent";
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary, formatTemplate } from "@/i18n/dictionaries";
+import { formatLocaleDate } from "@/i18n/formatLocaleDate";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -52,9 +53,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX VideoHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Scoping the override to this iframe's own attribute — rather than loosening
  * the global header — keeps the stricter policy intact for the rest of the
  * site's outgoing requests/navigations.
+ * `views`/`likes`/`comments` reuse the same `dict.videos.views`/`.likes`/
+ * `.comments` templates `VideoCard.tsx` already uses in the archive grid —
+ * these are this app's own UI chrome around YouTube's numeric stats, not
+ * YouTube's own content, unlike `video.snippet.title`/`channelTitle`, which
+ * stay untranslated (see this component's own doc comment above). The
+ * published date is formatted via `formatLocaleDate` (native
+ * `Intl.DateTimeFormat`), not the `dateformat` package this used to use —
+ * see that helper's own doc comment for why. Async Server Component — reads
+ * the current locale directly (`getLocale()`) for both.
  * @param video The video's full details, as returned by `getYoutubeVideoById`.
  */
-const VideoHero: FC<IVideoHero> = ({ video }) => {
+const VideoHero = async ({ video }: IVideoHero) => {
+
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
 
 	return (
 		<header className={styles.videoHero}>
@@ -74,14 +87,14 @@ const VideoHero: FC<IVideoHero> = ({ video }) => {
 					<div className={styles.videoMeta}>
 						<span className={styles.videoMetaText}>{video.snippet.channelTitle}</span>
 						<span className={styles.videoMetaDot} aria-hidden="true" />
-						<span className={styles.videoMetaText}>{dateFormat(new Date(video.snippet.publishedAt), "dddd, mmmm dS, yyyy")}</span>
+						<span className={styles.videoMetaText}>{formatLocaleDate(new Date(video.snippet.publishedAt), locale, true)}</span>
 					</div>
 					<div className={styles.videoStatsRow}>
-						<span>{formatCount(video.statistics.viewCount)} views</span>
+						<span>{formatTemplate(dict.videos.views, { count: formatCount(video.statistics.viewCount) })}</span>
 						<span className={styles.videoStatsDot} aria-hidden="true" />
-						<span>{formatCount(video.statistics.likeCount)} likes</span>
+						<span>{formatTemplate(dict.videos.likes, { count: formatCount(video.statistics.likeCount) })}</span>
 						<span className={styles.videoStatsDot} aria-hidden="true" />
-						<span>{formatCount(video.statistics.commentCount)} comments</span>
+						<span>{formatTemplate(dict.videos.comments, { count: formatCount(video.statistics.commentCount) })}</span>
 					</div>
 				</div>
 			</div>
