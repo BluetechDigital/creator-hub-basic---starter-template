@@ -56,10 +56,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Promise for async server components/functions.
  *
  * `title`/`description` are YouTube's own video metadata, not WPGraphQL/ACF
- * content — left untranslated for now, same Phase 1 scope boundary as ACF
- * flexible-content blocks (see `i18n`'s plan doc). `alternates` is still
- * rebuilt locale-aware via `buildLocaleAlternates`, since the route itself is
- * now locale-prefixed regardless of whether the video's own text is translated.
+ * content — a separate translation surface (the YouTube Data API, not Azure/
+ * WPGraphQL) that's deliberately left untranslated for now, unrelated to ACF
+ * flexible-content's `PROSE_FIELDS` translation in `RenderFlexibleContent.tsx`.
+ * `alternates` is still rebuilt locale-aware via `buildLocaleAlternates`, since
+ * the route itself is now locale-prefixed regardless of whether the video's
+ * own text is translated.
  * @param params - Route params promise; resolves to `{locale, slug}`.
  * @returns Next.js `Metadata` for this video, or minimal no-index metadata if the slug
  * doesn't resolve to a video — `SingleVideoPage` below is what actually 404s; this

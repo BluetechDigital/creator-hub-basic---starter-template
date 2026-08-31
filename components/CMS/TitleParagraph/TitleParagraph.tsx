@@ -40,6 +40,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX TitleParagraph Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * (emptiness already does that). It controls text ALIGNMENT — `true` centers the paragraph
  * at every breakpoint (`text-center lg:text-center`), `false` centers it on mobile but
  * left-aligns it on large screens (`text-center lg:text-left`).
+ *
+ * `title`/`paragraph` are already machine-translated for non-English locales by
+ * the time they reach this component — `RenderFlexibleContent.tsx`'s
+ * `ResolvedBlock` translates them upstream (`paragraph` via Azure's HTML mode,
+ * since it's WordPress WYSIWYG rich text, not plain text — see `PROSE_FIELDS`
+ * there). `displayParagraph` is a boolean, never translated.
  */
 const TitleParagraph: FC<ITitleParagraph.IProps> = ({
 	title,

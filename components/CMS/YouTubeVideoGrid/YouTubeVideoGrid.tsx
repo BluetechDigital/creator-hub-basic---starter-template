@@ -30,7 +30,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXX YoutubeVideoGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * The one change from a fully bare stub: the ACF `title` field now renders as
  * a plain heading when set, same as `AllBlogPosts`/`AllYoutubeVideos` — no
  * eyebrow label, since this block has no defined identity to label yet.
- * @param title The ACF `title` field, rendered as-is if present.
+ * @param title The ACF `title` field, rendered as-is if present — already
+ * machine-translated upstream in `RenderFlexibleContent.tsx`'s `ResolvedBlock`.
  */
 const YoutubeVideoGrid: FC<IYoutubeVideoGrid.IProps> = ({ title }) => {
 

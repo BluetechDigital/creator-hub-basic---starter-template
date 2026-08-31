@@ -12,6 +12,10 @@ import {
 	iso8601DurationToSeconds,
 } from "@/api/YouTube/GetAllYoutubeContent";
 
+// Static UI Dictionary
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary } from "@/i18n/dictionaries";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -32,9 +36,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Youtube Shorts URL Builder XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 const buildShortsUrl = (videoId: string): string => `https://www.youtube.com/shorts/${videoId}`;
 
-// Shown when the ACF `title` field is absent.
-const DEFAULT_HEADING = "Latest shorts";
-
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -47,14 +48,23 @@ XXXXXXXXXXXXXXXXXXXXX AllYoutubeShortsVideos Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * and split it by duration — this component keeps Shorts (60s or less), while
  * AllYoutubeVideos keeps everything longer.
  *
- * Renders a "Shorts" eyebrow + the ACF `title` heading, same pattern as
- * `AllBlogPosts`/`AllYoutubeVideos`. Everything else here — the unpaginated
- * `getAllYoutubeVideos()` fetch, external youtube.com/shorts links — is
- * unchanged; this component's own pagination/filter/internal-linking rework is
- * a separate, later round, deliberately not bundled into this one.
- * @param title The ACF `title` field for this block's header.
+ * Renders a "Shorts" eyebrow (`dict.videos.shortsEyebrow` — left untranslated in
+ * every locale on purpose, matching YouTube's own localized UI, which keeps
+ * "Shorts" as a product name rather than translating it) + the ACF `title`
+ * heading (falling back to `dict.videos.shortsDefaultHeading` when absent),
+ * same pattern as `AllBlogPosts`/`AllYoutubeVideos`. `title` itself is
+ * machine-translated upstream, in `RenderFlexibleContent.tsx`'s `ResolvedBlock`
+ * (see `PROSE_FIELDS` there), before it ever reaches this component. Everything
+ * else here — the unpaginated `getAllYoutubeVideos()` fetch, external
+ * youtube.com/shorts links — is unchanged; this component's own
+ * pagination/filter/internal-linking rework is a separate, later round,
+ * deliberately not bundled into this one.
+ * @param title The ACF `title` field for this block's header, already translated.
  */
 const AllYoutubeShortsVideos = async ({ title }: IAllYoutubeShortsVideos.IProps) => {
+
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
 
 	// Fetched inside the component so it runs per-request, matching Next's
 	// per-request fetch caching/revalidation instead of once at module load.
@@ -80,8 +90,8 @@ const AllYoutubeShortsVideos = async ({ title }: IAllYoutubeShortsVideos.IProps)
 		<div className={styles.allYouTubeShortsVideos}>
 			<StructuredData data={videoListSchema} />
 			<div className={styles.allYouTubeShortsVideosHeader}>
-				<span className={styles.allYouTubeShortsVideosEyebrow}>Shorts</span>
-				<h2 className={styles.allYouTubeShortsVideosHeading}>{title || DEFAULT_HEADING}</h2>
+				<span className={styles.allYouTubeShortsVideosEyebrow}>{dict.videos.shortsEyebrow}</span>
+				<h2 className={styles.allYouTubeShortsVideosHeading}>{title || dict.videos.shortsDefaultHeading}</h2>
 			</div>
 			<VideosGrid
 				youtubeVideos={youtubeVideos}

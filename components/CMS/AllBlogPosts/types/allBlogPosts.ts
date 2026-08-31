@@ -12,10 +12,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 export type IProps = IFlexibleContent.IBaseFixedProps & {
 	/**
-	 * ACF field — dynamic heading for the archive header. NOT YET queried in
-	 * `graphql/index.ts`'s fragment (see that file's doc comment for why) — always
-	 * `undefined` until that one-line addition is confirmed and made, so it stays
-	 * optional and `AllBlogPosts.tsx` falls back to a generic default heading.
+	 * ACF field — dynamic heading for the archive header, already machine-translated
+	 * for non-English locales by the time `AllBlogPosts.tsx` receives it (see
+	 * `RenderFlexibleContent.tsx`'s `PROSE_FIELDS`). Optional — `AllBlogPosts.tsx`
+	 * falls back to a generic default heading when a CMS editor hasn't set it.
 	 */
 	title?: string;
 	/**

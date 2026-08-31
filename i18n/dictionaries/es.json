@@ -32,6 +32,8 @@
 	"videos": {
 		"eyebrow": "Vídeos",
 		"defaultHeading": "Últimos vídeos",
+		"shortsEyebrow": "Shorts",
+		"shortsDefaultHeading": "Últimos Shorts",
 		"moreToWatch": "Más para ver",
 		"searchAriaLabel": "Buscar vídeos",
 		"searchPlaceholder": "Buscar vídeos…",

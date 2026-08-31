@@ -48,6 +48,8 @@ const dict = {
 	comments: "{count} comments",
 	eyebrow: "Videos",
 	defaultHeading: "Latest videos",
+	shortsEyebrow: "Shorts",
+	shortsDefaultHeading: "Latest shorts",
 	moreToWatch: "More to watch",
 };
 

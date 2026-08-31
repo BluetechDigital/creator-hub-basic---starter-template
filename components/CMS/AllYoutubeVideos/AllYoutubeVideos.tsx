@@ -117,7 +117,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * caught here, same graceful-degradation shape as `AllBlogPosts.tsx`'s own
  * `Promise.all`, so a transient YouTube API blip degrades this block to its
  * empty state instead of crashing the whole `/videos` page.
- * @param title The ACF `title` field for this block's header.
+ * @param title The ACF `title` field for this block's header, already machine-translated
+ * upstream in `RenderFlexibleContent.tsx`'s `ResolvedBlock` (see its `PROSE_FIELDS`).
  * @param page The requested `?page=` number from `app/[locale]/videos/page.tsx`, clamped here into `[1, totalPages]`.
  */
 const AllYoutubeVideos = async ({ title, page }: IAllYoutubeVideos.IProps) => {

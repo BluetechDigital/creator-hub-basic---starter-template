@@ -6,13 +6,9 @@ XXXXXXXXXXXXXX GraphQL Fragments for AllBlogPosts ACF Component XXXXXXXXXXXXXXXX
 // into the flexible-content query by getAllComponentsGrapghQLFragments. The actual post
 // data is fetched separately via getAllPostsSummaries, not through this fragment.
 //
-// TODO: add the archive header's `title` field here once it exists in WordPress and its
-// exact ACF GraphQL field name is confirmed — do NOT guess it. Querying a field that
-// doesn't exist in the schema fails the *entire* flexible-content request for every block
-// on the page, not just this one (confirmed the hard way earlier in this project — see
-// git history), so this stays out until the name is verified against the live schema.
-// `components/CMS/AllBlogPosts/types/allBlogPosts.ts`'s `title` prop is already wired to
-// receive it the moment this fragment adds it.
+// `title` (the archive header's dynamic heading) is confirmed live against the schema
+// and machine-translated for non-English locales in RenderFlexibleContent.tsx's
+// ResolvedBlock (see its PROSE_FIELDS allowlist) before it ever reaches AllBlogPosts.tsx.
 export const AllBlogPosts = `
     fieldGroupName
     displaySection

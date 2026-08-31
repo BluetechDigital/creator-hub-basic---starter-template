@@ -50,9 +50,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
  * SEO text fields are machine-translated for non-English locales via
  * `translateFields` (a no-op for English) — see `i18n/translateContent.ts`.
- * The page's own ACF flexible-content body is not (Phase 2 scope — see this
- * feature's plan doc). `alternates` is rebuilt via `buildLocaleAlternates`
- * rather than trusting Yoast's raw un-prefixed `seo.canonical`.
+ * The page's own ACF flexible-content body is translated separately, block by
+ * block, in `RenderFlexibleContent.tsx`'s `ResolvedBlock` — only the allowlisted
+ * prose fields in its `PROSE_FIELDS` map, not a blind walk of every ACF field
+ * (see that file's doc comment for why). `alternates` is rebuilt via
+ * `buildLocaleAlternates` rather than trusting Yoast's raw un-prefixed
+ * `seo.canonical`.
  * @param params - Route params promise; resolves to `{locale, slug}` for the current page.
  * @returns Next.js `Metadata` for this page, or minimal no-index metadata if the slug
  * doesn't match a published page — `DynamicPages` below is what actually 404s; this just

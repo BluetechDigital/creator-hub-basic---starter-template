@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { FC, Suspense, ComponentType } from 'react';
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import * as IPost from "@/graphql/CMS/types/post";
+import { translateFields } from "@/i18n/translateContent";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Component Loaders XXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -51,6 +52,65 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import SVGLoader from "@/components/CMS/FlexibleContent/fragments/SVGLoader";
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXX ACF Prose Field Translation XXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+/**
+ * Per-block-type allowlist of which ACF fields hold genuine translatable prose,
+ * built from an actual audit of every registered block's GraphQL fragment
+ * (`components/CMS/*\/graphql/index.ts`) and its rendering component — not a
+ * blind "translate every string field" walker over untyped CMS data, which
+ * risks silently mistranslating a non-prose field (a CSS class, a form field
+ * name, a URL) with no error anywhere. Confirmed live: every registered block
+ * not listed here queries no custom ACF fields beyond `fieldGroupName`/
+ * `displaySection` (still an unimplemented stub — e.g. `Hero`, `AboutUs`,
+ * `ContactForm`) or only non-prose fields (`TitleParagraph`'s
+ * `displayParagraph` is a boolean alignment toggle, not text, and is left out
+ * on purpose). `paragraph` is WordPress WYSIWYG HTML (see `Paragraph.tsx`'s
+ * `dangerouslySetInnerHTML`), so it's listed under `html`, not `plain`.
+ *
+ * Add a block here the day it gains a real prose field — the day a stub above
+ * gets built out, or a new block is registered with one — not before; an
+ * unlisted block's fields simply pass through untranslated, same as today.
+ */
+export const PROSE_FIELDS: Record<string, { plain?: string[]; html?: string[] }> = {
+    TitleParagraph: { plain: ["title"], html: ["paragraph"] },
+    AllBlogPosts: { plain: ["title"] },
+    AllYoutubeVideos: { plain: ["title"] },
+    AllYoutubeShortsVideos: { plain: ["title"] },
+    YoutubeVideoGrid: { plain: ["title"] },
+};
+
+/**
+ * Picks a block's allowlisted prose fields out of its raw ACF `item` (only the
+ * ones actually present as non-empty strings — an unset optional ACF field is
+ * `undefined`/`null`, not something to round-trip through Azure as an empty
+ * string) and translates them via `translateFields` — a no-op for English, and
+ * for any block with no entry in `PROSE_FIELDS` at all.
+ * @param item The block's raw ACF fields, exactly as WPGraphQL returned them.
+ * @param prose This block's entry from `PROSE_FIELDS`, if it has one.
+ * @returns Just the translated fields (not the whole `item`), meant to be
+ * spread back over `item` by the caller.
+ */
+export const translateBlockProse = async (
+    item: Record<string, unknown>,
+    prose: { plain?: string[]; html?: string[] } | undefined,
+): Promise<Record<string, string>> => {
+    if (!prose) return {};
+
+    const fields: Record<string, string | null | undefined> = {};
+
+    for (const key of [...(prose.plain ?? []), ...(prose.html ?? [])]) {
+        const value = item[key];
+        if (typeof value === "string") fields[key] = value;
+    }
+
+    if (!Object.keys(fields).length) return {};
+
+    return translateFields(fields, prose.html ?? []) as Promise<Record<string, string>>;
+};
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Resolved Block XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -72,12 +132,21 @@ type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
  * already are — only `AllBlogPosts`/`AllYoutubeVideos` respectively read them, every
  * other block ignores the extra props exactly as it already ignores whichever of
  * `item`'s fields don't apply to it.
+ *
+ * Before rendering, this block's allowlisted ACF prose fields (`PROSE_FIELDS`,
+ * if it has an entry) are machine-translated for non-English locales — the
+ * ACF-content half of this project's i18n plan's Phase 2, complementing
+ * `translateFields`'s existing use on post content/SEO text. Every other ACF
+ * field (colors, URLs, IDs, booleans) passes through `item` completely
+ * untouched, translated or not.
  */
 const ResolvedBlock = async ({ simpleName, filters, page, ...item }: IResolvedBlockProps) => {
     const mod = await DynamicComponentLoaders[simpleName]();
     const Component = mod.default;
 
-    return <Component {...item} filters={filters} page={page} />;
+    const translatedFields = await translateBlockProse(item, PROSE_FIELDS[simpleName]);
+
+    return <Component {...item} {...translatedFields} filters={filters} page={page} />;
 };
 
 /* -----------------------------------------------------------------------------

@@ -38,12 +38,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX AllBlogPosts Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Renders the blog archive's header (a static "Blogs" eyebrow + the ACF `title`
- * field as the heading), the `PostFilters` bar, and the grid of published post
- * summaries. Async Server Component — data is fetched inside the component body
- * rather than at module scope so it runs per-request, matching Next's per-request
- * fetch caching/revalidation (see ARCHITECTURE.md §2's fetch convention, applied
- * here too).
+ * Renders the blog archive's header (a translated "Blogs" eyebrow + the ACF `title`
+ * field as the heading — `title` itself is machine-translated upstream, in
+ * `RenderFlexibleContent.tsx`'s `ResolvedBlock`, before this component ever sees it),
+ * the `PostFilters` bar, and the grid of published post summaries. Async Server
+ * Component — data is fetched inside the component body rather than at module scope
+ * so it runs per-request, matching Next's per-request fetch caching/revalidation (see
+ * ARCHITECTURE.md §2's fetch convention, applied here too).
  *
  * `getAllPostsSummaries` throws on a network/fetch-level failure (not just a
  * resolved-`undefined` GraphQL error) — caught here so a CMS blip degrades to an
