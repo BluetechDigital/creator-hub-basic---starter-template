@@ -1,0 +1,22 @@
+@import "tailwindcss/theme";
+@import "../../../../styles/theme.css";
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+.localeSwitcher {
+    @apply flex flex-wrap items-center gap-2;
+
+    & .localeLink {
+        @apply px-3 py-1 text-xs text-pure-black/60 font-medium rounded-full transition duration-300;
+
+        &:hover {
+            @apply text-pure-black bg-pure-black/5;
+        }
+    }
+
+    & .localeLinkActive {
+        @apply px-3 py-1 text-xs text-accent-dark font-semibold bg-accent-default/20 rounded-full;
+    }
+}

@@ -21,7 +21,7 @@ XXXXXXXXXXXXXXXXXXXXX Custom hook to use the Global context XXXXXXXXXXXXXXXXXXXX
 
 /**
  * Reads the Global context (site-wide theme options and menu/footer links populated in
- * `app/layout.tsx`).
+ * `app/[locale]/layout.tsx`).
  *
  * @throws {Error} If called outside of a `GlobalContextProvider` — the context defaults
  * to `undefined`, and that default is treated as "no provider" rather than a valid value.

@@ -6,6 +6,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { FC } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 
 /* -----------------------------------------------------------------------------
@@ -49,8 +50,9 @@ const buildPageNumbers = (currentPage: number, totalPages: number): (number | 'e
 	return result;
 };
 
-/** Page 1 has no `?page=` param at all — a plain `/videos` link, not `/videos?page=1`. */
-const buildPageHref = (page: number): string => (page === 1 ? '/videos' : `/videos?page=${page}`);
+/** Page 1 has no `?page=` param at all — a plain `/{locale}/videos` link, not `/{locale}/videos?page=1`. */
+const buildPageHref = (locale: string, page: number): string =>
+	(page === 1 ? `/${locale}/videos` : `/${locale}/videos?page=${page}`);
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX Pagination Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -65,18 +67,25 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Pagination Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * 2 — the only place "Show more" ever appears, per the confirmed design.
  * Page 2 onward shows full `Previous / 1 … N / Next` numbered pagination
  * instead. Renders nothing at all when there's only one page.
+ * Reads the current locale via `useParams()` (not a prop) to build its own
+ * links — the standard client-side equivalent to `getLocale()`, which a
+ * Client Component can't call itself. Called before the `totalPages <= 1`
+ * early return, since React hooks can't follow a conditional return.
  * @param currentPage The active page (already clamped by `AllYoutubeVideos.tsx`).
  * @param totalPages Total pages in the archive.
+ * @param dict This locale's `showMore`/`paginationAriaLabel`/`previous`/`next` dictionary strings.
  */
-const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages }) => {
+const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages, dict }) => {
+
+	const { locale } = useParams<{ locale: string }>();
 
 	if (totalPages <= 1) return null;
 
 	if (currentPage === 1) {
 		return (
 			<div className={styles.showMoreWrapper}>
-				<Link href={buildPageHref(2)} className={styles.showMoreButton}>
-					Show more
+				<Link href={buildPageHref(locale, 2)} className={styles.showMoreButton}>
+					{dict.showMore}
 				</Link>
 			</div>
 		);
@@ -85,9 +94,9 @@ const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages
 	const pageNumbers = buildPageNumbers(currentPage, totalPages);
 
 	return (
-		<nav aria-label="Video archive pagination" className={styles.pagination}>
+		<nav aria-label={dict.paginationAriaLabel} className={styles.pagination}>
 			{/* currentPage is always > 1 here — currentPage === 1 already returned above. */}
-			<Link href={buildPageHref(currentPage - 1)} className={styles.paginationLink}>Previous</Link>
+			<Link href={buildPageHref(locale, currentPage - 1)} className={styles.paginationLink}>{dict.previous}</Link>
 
 			{pageNumbers.map((page, index) => (
 				page === 'ellipsis' ? (
@@ -95,7 +104,7 @@ const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages
 				) : (
 					<Link
 						key={page}
-						href={buildPageHref(page)}
+						href={buildPageHref(locale, page)}
 						aria-current={page === currentPage ? 'page' : undefined}
 						className={page === currentPage ? styles.paginationLinkActive : styles.paginationLink}
 					>
@@ -105,9 +114,9 @@ const Pagination: FC<IAllYoutubeVideos.IPagination> = ({ currentPage, totalPages
 			))}
 
 			{currentPage < totalPages ? (
-				<Link href={buildPageHref(currentPage + 1)} className={styles.paginationLink}>Next</Link>
+				<Link href={buildPageHref(locale, currentPage + 1)} className={styles.paginationLink}>{dict.next}</Link>
 			) : (
-				<span className={styles.paginationLinkDisabled} aria-disabled="true">Next</span>
+				<span className={styles.paginationLinkDisabled} aria-disabled="true">{dict.next}</span>
 			)}
 		</nav>
 	);

@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
 
 import VideosGrid from "@/components/CMS/AllYoutubeVideos/fragments/VideosGrid";
 import type { IYoutubeVideos, IYoutubeChannelInfo, IYoutubePlaylists } from "@/api/YouTube/GetAllYoutubeContent";
@@ -25,6 +29,28 @@ const sixVideos = Array.from({ length: 6 }, (_, i) =>
 const youtubeChannelInfo = {} as IYoutubeChannelInfo;
 const noPlaylists = [] as unknown as IYoutubePlaylists;
 
+const dict = {
+	searchAriaLabel: "Search videos",
+	searchPlaceholder: "Search videos…",
+	playlistAriaLabel: "Filter by playlist",
+	allPlaylists: "All playlists",
+	from: "From",
+	to: "To",
+	clearFilters: "Clear filters",
+	showMore: "Show more",
+	empty: "No videos published yet — check back soon.",
+	noMatches: "No videos match these filters.",
+	paginationAriaLabel: "Video archive pagination",
+	previous: "Previous",
+	next: "Next",
+	views: "{count} views",
+	likes: "{count} likes",
+	comments: "{count} comments",
+	eyebrow: "Videos",
+	defaultHeading: "Latest videos",
+	moreToWatch: "More to watch",
+};
+
 const titleLink = (title: string) => screen.getByText(title).closest("a");
 
 describe("AllYoutubeVideos VideosGrid", () => {
@@ -37,11 +63,12 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
-		expect(titleLink("Video 1")).toHaveAttribute("href", "/videos/video-1-vid1");
-		expect(titleLink("Video 2")).toHaveAttribute("href", "/videos/video-2-vid2");
+		expect(titleLink("Video 1")).toHaveAttribute("href", "/en/videos/video-1-vid1");
+		expect(titleLink("Video 2")).toHaveAttribute("href", "/en/videos/video-2-vid2");
 		expect(screen.getByText("Video 3")).toBeInTheDocument();
 		expect(screen.getByText("Video 6")).toBeInTheDocument();
 	});
@@ -55,6 +82,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={2}
 				totalPages={2}
+				dict={dict}
 			/>,
 		);
 
@@ -73,6 +101,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
@@ -88,6 +117,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
@@ -102,10 +132,11 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={3}
+				dict={dict}
 			/>,
 		);
 
-		expect(screen.getByRole("link", { name: /show more/i })).toHaveAttribute("href", "/videos?page=2");
+		expect(screen.getByRole("link", { name: /show more/i })).toHaveAttribute("href", "/en/videos?page=2");
 	});
 
 	it("hides Pagination while a filter is active", () => {
@@ -117,6 +148,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={3}
+				dict={dict}
 			/>,
 		);
 
@@ -136,6 +168,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
@@ -156,6 +189,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{ pl1: ["vid5"] }}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
@@ -174,6 +208,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 
@@ -191,6 +226,7 @@ describe("AllYoutubeVideos VideosGrid", () => {
 				playlistVideoIds={{}}
 				currentPage={1}
 				totalPages={1}
+				dict={dict}
 			/>,
 		);
 

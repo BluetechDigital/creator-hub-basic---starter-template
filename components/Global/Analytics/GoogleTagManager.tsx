@@ -31,7 +31,7 @@ XXXXXXXXXXXXXXXXXXXXXXX Google Tag Manager Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Client-side Google Tag Manager loader. Rendered inside `CookiePolicyContextProvider`
- * in `app/layout.tsx` (not in `<head>` — `next/script`'s `afterInteractive` strategy
+ * in `app/[locale]/layout.tsx` (not in `<head>` — `next/script`'s `afterInteractive` strategy
  * doesn't require literal `<head>` placement, and being a provider descendant is what
  * lets this component read consent state) so it never loads before consent, it injects
  * the GTM bootstrap script via `next/script` and — because Next.js App Router
@@ -104,7 +104,7 @@ XXXXXXXXXX NoScript version for browsers with JavaScript disabled XXXXXXXXXXXXXX
 /**
  * `<noscript>` fallback for Google Tag Manager: an invisible tracking iframe for
  * visitors with JavaScript disabled, who never run the script-based tracker above.
- * Rendered immediately after the opening `<body>` tag in `app/layout.tsx`, matching
+ * Rendered immediately after the opening `<body>` tag in `app/[locale]/layout.tsx`, matching
  * Google's own placement convention — unlike {@link GoogleTagManager}, it isn't nested
  * inside `CookiePolicyContextProvider` (see that component's doc comment for why it
  * isn't consent-gated the same way). Renders nothing if `NEXT_PUBLIC_GTM_ID` is unset.

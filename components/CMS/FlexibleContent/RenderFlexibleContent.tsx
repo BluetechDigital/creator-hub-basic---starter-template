@@ -67,8 +67,8 @@ type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
  * the whole page waiting on the slowest block.
  *
  * `filters` (the blog archive's tag/category/date query params, parsed in
- * `app/posts/page.tsx`) and `page` (the video archive's `?page=` number, parsed in
- * `app/videos/page.tsx`) are passed to every block the same way `item`'s ACF fields
+ * `app/[locale]/posts/page.tsx`) and `page` (the video archive's `?page=` number, parsed in
+ * `app/[locale]/videos/page.tsx`) are passed to every block the same way `item`'s ACF fields
  * already are — only `AllBlogPosts`/`AllYoutubeVideos` respectively read them, every
  * other block ignores the extra props exactly as it already ignores whichever of
  * `item`'s fields don't apply to it.
@@ -86,9 +86,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Flexible Content Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 type IProps = {
     content: IFlexibleContent.IProps;
-    /** The blog archive's tag/category/date filters (parsed in `app/posts/page.tsx`) — only relevant to the `AllBlogPosts` block, but threaded through every block the same way `item`'s ACF fields are (see `ResolvedBlock`'s doc comment). */
+    /** The blog archive's tag/category/date filters (parsed in `app/[locale]/posts/page.tsx`) — only relevant to the `AllBlogPosts` block, but threaded through every block the same way `item`'s ACF fields are (see `ResolvedBlock`'s doc comment). */
     filters?: IPost.IPostFilters;
-    /** The video archive's current `?page=` number (parsed in `app/videos/page.tsx`) — only relevant to the `AllYoutubeVideos` block, threaded the same way `filters` is. */
+    /** The video archive's current `?page=` number (parsed in `app/[locale]/videos/page.tsx`) — only relevant to the `AllYoutubeVideos` block, threaded the same way `filters` is. */
     page?: number;
 };
 

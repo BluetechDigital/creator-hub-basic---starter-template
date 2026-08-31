@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
 
 import FeaturedPostCard from "@/components/CMS/AllBlogPosts/fragments/FeaturedPostCard";
 import type { ISummaryProps } from "@/graphql/CMS/types/post";
@@ -17,7 +21,7 @@ describe("AllBlogPosts FeaturedPostCard", () => {
 		render(<FeaturedPostCard post={post} />);
 
 		expect(screen.getByText("Featured Post")).toBeInTheDocument();
-		expect(screen.getByRole("link")).toHaveAttribute("href", "/posts/featured-post");
+		expect(screen.getByRole("link")).toHaveAttribute("href", "/en/posts/featured-post");
 
 		const image = screen.getByAltText("Hero");
 		expect(decodeURIComponent(image.getAttribute("src") ?? "")).toContain("https://example.test/hero.jpg");

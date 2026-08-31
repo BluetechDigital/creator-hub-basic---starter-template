@@ -13,6 +13,10 @@ import {
 	getPlaylistVideoIds,
 } from "@/api/YouTube/GetAllYoutubeContent";
 
+// Static UI Dictionary
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary } from "@/i18n/dictionaries";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -43,10 +47,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Configuration XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const PAGE_1_COUNT = 22;
 const SUBSEQUENT_PAGE_COUNT = 20;
 const MIN_REGULAR_VIDEO_DURATION_SECONDS = 60;
-
-// Shown when the ACF `title` field is absent — either a fresh fork before a CMS
-// editor has filled it in, or before the value has propagated.
-const DEFAULT_HEADING = "Latest videos";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Pagination Math XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -110,7 +110,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * listing them as filter options would always silently match nothing.
  *
  * Cards link to this app's own `/videos/{videoId}` pages, not out to youtube.com
- * — see `app/videos/[slug]/page.tsx`.
+ * — see `app/[locale]/videos/[slug]/page.tsx`.
  *
  * `getAllQualifyingVideoIds`/`getAllYoutubePlaylists`/`getAllYoutubeChannelInfo`
  * all throw on a genuine API/network failure (not just missing env vars) —
@@ -118,9 +118,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXX AllYoutubeVideos Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `Promise.all`, so a transient YouTube API blip degrades this block to its
  * empty state instead of crashing the whole `/videos` page.
  * @param title The ACF `title` field for this block's header.
- * @param page The requested `?page=` number from `app/videos/page.tsx`, clamped here into `[1, totalPages]`.
+ * @param page The requested `?page=` number from `app/[locale]/videos/page.tsx`, clamped here into `[1, totalPages]`.
  */
 const AllYoutubeVideos = async ({ title, page }: IAllYoutubeVideos.IProps) => {
+
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
 
 	let allQualifyingVideoIds: string[] = [];
 	let youtubeChannelPlaylists: IAllYoutubeVideos.IVideosGrid["youtubeChannelPlaylists"] = [];
@@ -186,8 +189,8 @@ const AllYoutubeVideos = async ({ title, page }: IAllYoutubeVideos.IProps) => {
 		<div className={styles.allYoutubeVideos}>
 			<StructuredData data={videoListSchema} />
 			<div className={styles.allYoutubeVideosHeader}>
-				<span className={styles.allYoutubeVideosEyebrow}>Videos</span>
-				<h2 className={styles.allYoutubeVideosHeading}>{title || DEFAULT_HEADING}</h2>
+				<span className={styles.allYoutubeVideosEyebrow}>{dict.videos.eyebrow}</span>
+				<h2 className={styles.allYoutubeVideosHeading}>{title || dict.videos.defaultHeading}</h2>
 			</div>
 			<VideosGrid
 				youtubeVideos={youtubeVideos}
@@ -196,6 +199,7 @@ const AllYoutubeVideos = async ({ title, page }: IAllYoutubeVideos.IProps) => {
 				playlistVideoIds={playlistVideoIds}
 				currentPage={currentPage}
 				totalPages={totalPages}
+				dict={{ ...dict.videos, ...dict.common }}
 			/>
 		</div>
 	);

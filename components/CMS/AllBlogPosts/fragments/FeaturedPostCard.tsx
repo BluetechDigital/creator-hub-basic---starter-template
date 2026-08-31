@@ -7,6 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { FC, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import dateFormat from "dateformat";
 import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts";
 import { parseWpDate } from "@/graphql/CMS/parseWpDate";
@@ -33,14 +34,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX FeaturedPostCard Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * same condition before deciding whether to treat a post as the featured card
  * at all, so this is really just a defensive second check, not the primary
  * gate.
+ * Reads the current locale via `useParams()` (not a prop) to build its own
+ * link — the standard client-side equivalent to `getLocale()`, which a Client
+ * Component can't call itself.
  * @param post The post to feature — normally the single most recent post.
  */
 const FeaturedPostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
 
+	const { locale } = useParams<{ locale: string }>();
+
 	if (!post.featuredImage?.node?.sourceUrl) return null;
 
 	return (
-		<Link href={`/posts/${post.slug}`} className={styles.featuredPostCard}>
+		<Link href={`/${locale}/posts/${post.slug}`} className={styles.featuredPostCard}>
 			<div className={styles.featuredPostImageWrapper}>
 				<Image
 					src={post.featuredImage.node.sourceUrl}

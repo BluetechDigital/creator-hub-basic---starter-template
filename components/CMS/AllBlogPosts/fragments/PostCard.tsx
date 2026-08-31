@@ -7,6 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { FC, memo, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import dateFormat from "dateformat";
 import DOMPurify from "isomorphic-dompurify";
 import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts";
@@ -33,13 +34,19 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX PostCard Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `Paragraph` is built around `framer-motion`'s `useScroll` for a fade-in
  * effect this card never enables, and mounting that on every card in the grid
  * (up to `POSTS_PAGE_SIZE`) was pure unused scroll-tracking overhead.
+ *
+ * Reads the current locale via `useParams()` (not a prop) to build its own
+ * link — a Client Component can't call `getLocale()`/`next/root-params`
+ * itself, but `useParams()` is the standard, stable client-side equivalent
+ * for reading a route's own dynamic segments, `locale` included.
  */
 const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
 
+    const { locale } = useParams<{ locale: string }>();
     const cleanExcerpt = useMemo(() => ({ __html: DOMPurify.sanitize(post.excerpt) }), [post.excerpt]);
 
     return (
-        <Link href={`/posts/${post.slug}`} className={styles.postCard}>
+        <Link href={`/${locale}/posts/${post.slug}`} className={styles.postCard}>
             {post.featuredImage?.node?.sourceUrl && (
                 <div className={styles.postThumbnailWrapper}>
                     <Image

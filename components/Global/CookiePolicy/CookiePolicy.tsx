@@ -25,19 +25,33 @@ import Paragraph from "@/components/Global/Elements/Paragraph/Paragraph";
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-type IProps = object;
+type ICookiePolicyDict = {
+    body: string;
+    accept: string;
+    acceptAriaLabel: string;
+    decline: string;
+    declineAriaLabel: string;
+};
+
+type IProps = {
+    /** The `cookiePolicy` slice of the current locale's dictionary — passed down
+     * from `app/[locale]/layout.tsx` (a Server Component) since this is a Client
+     * Component and can't load the dictionary itself. */
+    dict: ICookiePolicyDict;
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXX Cookie Policy Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Cookie consent banner. Takes no props — its rendering is driven entirely by the
- * `hasConsent` value read from `useCookiePolicy()` context: it returns `null` until
- * a decision has been made, and otherwise renders an accept/decline banner that
- * calls `acceptCookies`/`refuseCookies` from the same context.
+ * Cookie consent banner. Rendering is driven entirely by the `hasConsent` value
+ * read from `useCookiePolicy()` context: it returns `null` until a decision has
+ * been made, and otherwise renders an accept/decline banner that calls
+ * `acceptCookies`/`refuseCookies` from the same context.
+ * @param dict This locale's `cookiePolicy` dictionary strings.
  */
-const CookiePolicy: FC<IProps> = () => {
+const CookiePolicy: FC<IProps> = ({ dict }) => {
 
     const { hasConsent, acceptCookies, refuseCookies } = useCookiePolicy();
 
@@ -52,7 +66,7 @@ const CookiePolicy: FC<IProps> = () => {
             <div className={styles.content}>
                 <Paragraph
                     className={styles.paragraph}
-                    content={`<p>We use cookies to improve your browsing experience. Learn about our Privacy policy here.</p>`}
+                    content={`<p>${dict.body}</p>`}
                 />
                 <div className={styles.buttonSection}>
                     <motion.button
@@ -60,20 +74,20 @@ const CookiePolicy: FC<IProps> = () => {
                         whileInView={fadeInUp}
                         onClick={acceptCookies}
                         viewport={{ once: true }}
-                        aria-label="Accept cookies"
+                        aria-label={dict.acceptAriaLabel}
                         className={styles.acceptButton}
                     >
-                        Accept Cookies
+                        {dict.accept}
                     </motion.button>
                     <motion.button
                         initial={initial}
                         whileInView={fadeInUp}
                         onClick={refuseCookies}
                         viewport={{ once: true }}
-                        aria-label="Decline cookies"
+                        aria-label={dict.declineAriaLabel}
                         className={styles.declineButton}
                     >
-                        Decline
+                        {dict.decline}
                     </motion.button>
                 </div>
             </div>

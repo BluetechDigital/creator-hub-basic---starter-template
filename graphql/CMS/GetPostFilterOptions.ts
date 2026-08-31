@@ -88,7 +88,7 @@ const fetchPostFilterOptions = async (): Promise<IPostFilterOptions | undefined>
 };
 
 /**
- * `AllBlogPosts` reads `searchParams` via `app/posts/page.tsx`, which makes
+ * `AllBlogPosts` reads `searchParams` via `app/[locale]/posts/page.tsx`, which makes
  * the whole `/posts` route dynamic — so every tag/category/date filter click
  * re-renders `AllBlogPosts` as a brand new request, even though this
  * function's result never depends on which filters are active. Wrapping it

@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
 
 import FeaturedVideoCard from "@/components/CMS/AllYoutubeVideos/fragments/FeaturedVideoCard";
 import type { IYoutubeVideos } from "@/api/YouTube/GetAllYoutubeContent";
@@ -24,7 +28,7 @@ describe("AllYoutubeVideos FeaturedVideoCard", () => {
 		expect(screen.getByText("Featured Video")).toBeInTheDocument();
 
 		const link = screen.getByRole("link");
-		expect(link).toHaveAttribute("href", "/videos/featured-video-vid1");
+		expect(link).toHaveAttribute("href", "/en/videos/featured-video-vid1");
 
 		const image = screen.getByAltText("Featured Video");
 		expect(decodeURIComponent(image.getAttribute("src") ?? "")).toContain(

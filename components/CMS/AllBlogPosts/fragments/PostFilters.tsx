@@ -8,6 +8,8 @@ import { FC, KeyboardEvent, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { IPostFilterOptions, ITaxonomyTerm } from "@/graphql/CMS/GetPostFilterOptions";
 import * as IPost from "@/graphql/CMS/types/post";
+import { formatTemplate } from "@/i18n/formatTemplate";
+import type { IDictionary } from "@/i18n/dictionaries";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -65,10 +67,20 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX PostFilters Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * avoids the extra render pass a `useEffect`-based sync would cost.
  * @param categories Every category in use, for the dropdown's options.
  * @param tags Every tag in use, for the search box's suggestions.
+ * @param dict This locale's `posts`/`common` dictionary strings.
  */
 const SEARCH_DEBOUNCE_MS = 400;
 
-const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
+type IProps = IPostFilterOptions & {
+	// The full merged `posts`/`common` dictionary slice — `AllBlogPosts.tsx` passes
+	// it down unstripped (matching what it also hands to `PostsGrid`), so this type
+	// matches what's actually passed rather than narrowing to only the keys this
+	// component itself reads (`eyebrow`/`defaultHeading` go unused here, same as
+	// `showMore` — harmless, just not read).
+	dict: IDictionary["posts"] & IDictionary["common"];
+};
+
+const PostFilters: FC<IProps> = ({ categories, tags, dict }) => {
 
 	const router = useRouter();
 	const pathname = usePathname();
@@ -76,7 +88,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 	const [tagSearch, setTagSearch] = useState('');
 
 	// parseTagSlugs/hasActiveFilters (both from `graphql/CMS/types/post.ts`) are
-	// the same functions `app/posts/page.tsx` uses to resolve this route's
+	// the same functions `app/[locale]/posts/page.tsx` uses to resolve this route's
 	// server-side filters — sharing them means this client-side read of the URL
 	// can't quietly disagree with the server on what a `?tag=` value means or
 	// what counts as "a filter is active", the way two independently
@@ -182,8 +194,8 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 		<div className={styles.postFilters}>
 			<input
 				type="text"
-				aria-label="Search posts"
-				placeholder="Search posts…"
+				aria-label={dict.searchAriaLabel}
+				placeholder={dict.searchPlaceholder}
 				className={styles.postFiltersSearch}
 				value={searchInput}
 				onChange={(event) => setSearchInput(event.target.value)}
@@ -192,12 +204,12 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 			<div className={styles.postFiltersPrimaryRow}>
 				{categories.length > 0 && (
 					<select
-						aria-label="Filter by category"
+						aria-label={dict.categoryAriaLabel}
 						className={styles.postFiltersSelect}
 						value={activeCategory}
 						onChange={(event) => setQueryParam('category', event.target.value)}
 					>
-						<option value="">All categories</option>
+						<option value="">{dict.allCategories}</option>
 						{categories.map((category) => (
 							<option key={category.slug} value={category.slug}>{category.name}</option>
 						))}
@@ -209,8 +221,8 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 						<input
 							type="text"
 							list="post-filters-tag-options"
-							aria-label="Search tags"
-							placeholder="Search tags…"
+							aria-label={dict.tagSearchAriaLabel}
+							placeholder={dict.tagSearchPlaceholder}
 							className={styles.postFiltersTagSearch}
 							value={tagSearch}
 							onChange={(event) => setTagSearch(event.target.value)}
@@ -230,7 +242,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 						{tag.name}
 						<button
 							type="button"
-							aria-label={`Remove ${tag.name} filter`}
+							aria-label={formatTemplate(dict.removeTagFilter, { name: tag.name })}
 							onClick={() => removeTag(tag.slug)}
 						>
 							&times;
@@ -241,7 +253,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 
 			<div className={styles.postFiltersDateRange}>
 				<label className={styles.postFiltersDateLabel}>
-					From
+					{dict.from}
 					<input
 						type="date"
 						value={activeFrom}
@@ -249,7 +261,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 					/>
 				</label>
 				<label className={styles.postFiltersDateLabel}>
-					To
+					{dict.to}
 					<input
 						type="date"
 						value={activeTo}
@@ -260,7 +272,7 @@ const PostFilters: FC<IPostFilterOptions> = ({ categories, tags }) => {
 
 			{hasActiveFilters && (
 				<button type="button" className={styles.postFiltersClear} onClick={clearFilters}>
-					Clear filters
+					{dict.clearFilters}
 				</button>
 			)}
 		</div>

@@ -635,7 +635,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Single Youtube Video XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Fetches full details for a single video by its ID — used by
- * `app/videos/[slug]/page.tsx` to resolve the video a `/videos/{videoId}`
+ * `app/[locale]/videos/[slug]/page.tsx` to resolve the video a `/videos/{videoId}`
  * route is for. Same `part=` list as `getAllYoutubeVideos` (1 quota unit
  * regardless of how many parts are requested).
  * @param videoId The YouTube video ID to fetch.

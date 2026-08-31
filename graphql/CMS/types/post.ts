@@ -71,7 +71,7 @@ export type IPostFilters = {
 
 /**
  * Splits a comma-separated `tag` query param (`"ai,ai-collections"`) into a
- * trimmed, non-empty slug list. Shared by `app/posts/page.tsx` (server-side
+ * trimmed, non-empty slug list. Shared by `app/[locale]/posts/page.tsx` (server-side
  * filtering) and `PostFilters.tsx` (the chip row's client-side read of the
  * same URL) so both parse `?tag=` identically — these two call sites used to
  * each hand-roll this split, and had already drifted (one trimmed whitespace,
@@ -84,7 +84,7 @@ export const parseTagSlugs = (raw?: string | null): string[] =>
 
 /**
  * Whether any archive filter is active. Shared for the same reason
- * `parseTagSlugs` is — `app/posts/page.tsx` (to decide `robots.index`) and
+ * `parseTagSlugs` is — `app/[locale]/posts/page.tsx` (to decide `robots.index`) and
  * `PostFilters.tsx` (to show/hide "Clear filters") used to each reimplement
  * this exact four-field check under the same name, with nothing forcing the
  * two definitions to stay in sync if a filter field is ever added.

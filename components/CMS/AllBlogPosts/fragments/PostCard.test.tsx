@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
 
 import PostCard from "@/components/CMS/AllBlogPosts/fragments/PostCard";
 import type { ISummaryProps } from "@/graphql/CMS/types/post";
@@ -23,7 +27,7 @@ describe("AllBlogPosts PostCard", () => {
 		expect(decodeURIComponent(image.getAttribute("src") ?? "")).toContain("https://example.test/merch.jpg");
 
 		const link = screen.getByRole("link");
-		expect(link).toHaveAttribute("href", "/posts/herovoltsy-announces-new-merch");
+		expect(link).toHaveAttribute("href", "/en/posts/herovoltsy-announces-new-merch");
 	});
 
 	it("renders the sanitized excerpt", () => {

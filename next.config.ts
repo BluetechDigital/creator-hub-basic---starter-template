@@ -91,7 +91,9 @@ const nextConfig: NextConfig = {
 				],
 			},
 			{
-				source: "/[slug]",
+				// Was "/[slug]" — updated for the /[locale]/[slug] route depth once
+				// every page moved under app/[locale]/ for internationalization.
+				source: "/:locale/:slug",
 				headers: [
 					{
 						key: "Cache-Control",

@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+	useParams: () => ({ locale: "en" }),
+}));
 
 import VideoCard from "@/components/CMS/AllYoutubeVideos/fragments/VideoCard";
 import type { IYoutubeVideos } from "@/api/YouTube/GetAllYoutubeContent";
@@ -18,9 +22,11 @@ const video = {
 	statistics: { viewCount: "12500", likeCount: "980", favoriteCount: "0", commentCount: "42" },
 } as unknown as IYoutubeVideos[number];
 
+const dict = { views: "{count} views", likes: "{count} likes", comments: "{count} comments" };
+
 describe("AllYoutubeVideos VideoCard", () => {
 	it("renders the thumbnail, title, date, and a link to the internal video page", () => {
-		render(<VideoCard video={video} />);
+		render(<VideoCard video={video} dict={dict} />);
 
 		expect(screen.getByText("HeroVoltsy Plays Pokemon TCG")).toBeInTheDocument();
 
@@ -30,12 +36,12 @@ describe("AllYoutubeVideos VideoCard", () => {
 		);
 
 		const link = screen.getByRole("link");
-		expect(link).toHaveAttribute("href", "/videos/herovoltsy-plays-pokemon-tcg-vid1");
+		expect(link).toHaveAttribute("href", "/en/videos/herovoltsy-plays-pokemon-tcg-vid1");
 		expect(link).not.toHaveAttribute("target");
 	});
 
 	it("renders formatted views, likes, and comments — no dislikes", () => {
-		render(<VideoCard video={video} />);
+		render(<VideoCard video={video} dict={dict} />);
 
 		expect(screen.getByText("12.5K views")).toBeInTheDocument();
 		expect(screen.getByText("980 likes")).toBeInTheDocument();

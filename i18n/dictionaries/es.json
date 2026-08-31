@@ -1,0 +1,57 @@
+{
+	"common": {
+		"from": "Desde",
+		"to": "Hasta",
+		"clearFilters": "Borrar filtros",
+		"showMore": "Mostrar más"
+	},
+	"cookiePolicy": {
+		"body": "Utilizamos cookies para mejorar su experiencia de navegación. Conozca aquí nuestra política de privacidad.",
+		"accept": "Aceptar cookies",
+		"acceptAriaLabel": "Aceptar cookies",
+		"decline": "Rechazar",
+		"declineAriaLabel": "Rechazar cookies"
+	},
+	"breadcrumbs": {
+		"home": "Inicio",
+		"posts": "Publicaciones",
+		"videos": "Vídeos"
+	},
+	"posts": {
+		"eyebrow": "Blog",
+		"defaultHeading": "Últimas publicaciones del blog",
+		"searchAriaLabel": "Buscar publicaciones",
+		"searchPlaceholder": "Buscar publicaciones…",
+		"categoryAriaLabel": "Filtrar por categoría",
+		"allCategories": "Todas las categorías",
+		"tagSearchAriaLabel": "Buscar etiquetas",
+		"tagSearchPlaceholder": "Buscar etiquetas…",
+		"removeTagFilter": "Eliminar filtro {name}",
+		"empty": "Todavía no hay publicaciones — vuelve pronto."
+	},
+	"videos": {
+		"eyebrow": "Vídeos",
+		"defaultHeading": "Últimos vídeos",
+		"moreToWatch": "Más para ver",
+		"searchAriaLabel": "Buscar vídeos",
+		"searchPlaceholder": "Buscar vídeos…",
+		"playlistAriaLabel": "Filtrar por lista de reproducción",
+		"allPlaylists": "Todas las listas de reproducción",
+		"empty": "Todavía no hay vídeos publicados — vuelve pronto.",
+		"noMatches": "Ningún vídeo coincide con estos filtros.",
+		"paginationAriaLabel": "Paginación del archivo de vídeos",
+		"previous": "Anterior",
+		"next": "Siguiente",
+		"views": "{count} visualizaciones",
+		"likes": "{count} me gusta",
+		"comments": "{count} comentarios"
+	},
+	"latestPosts": {
+		"blogPost": "Entrada de blog",
+		"minRead": "{count} min de lectura"
+	},
+	"notFound": {
+		"title": "404 - Página no encontrada",
+		"description": "La página que buscas no existe."
+	}
+}

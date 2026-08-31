@@ -6,6 +6,11 @@ import * as IAllBlogPosts from "@/components/CMS/AllBlogPosts/types/allBlogPosts
 import { getAllPostsSummaries } from "@/graphql/CMS/GetAllPostsSummaries";
 import { getPostFilterOptions, IPostFilterOptions } from "@/graphql/CMS/GetPostFilterOptions";
 
+// Static UI Dictionary + CMS content translation
+import { getLocale } from "@/i18n/getLocale";
+import { getDictionary } from "@/i18n/dictionaries";
+import { translatePostSummaries } from "@/i18n/translateContent";
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -28,11 +33,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Configuration XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // not change the query shape.
 const POSTS_PAGE_SIZE = 24;
 
-// Shown when the ACF `title` field (see types/allBlogPosts.ts's doc comment) is
-// absent — either because it hasn't been queried yet, or because a CMS editor
-// hasn't filled it in on this particular fork.
-const DEFAULT_HEADING = "Latest from the blog";
-
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXX AllBlogPosts Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -50,11 +50,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX AllBlogPosts Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * empty grid instead of crashing the whole archive page. `getPostFilterOptions`
  * never throws (see its own doc comment) and is fetched in parallel since it's
  * independent of the posts fetch.
+ *
+ * `translatePostSummaries` (`i18n/translateContent.ts`) machine-translates
+ * each post's `title`/`excerpt` for non-English locales — a no-op for
+ * English, since the CMS is only ever written to in English. Category/tag
+ * *names* shown in `PostFilters` are deliberately left untranslated here —
+ * Phase 1's scope is post title/excerpt/content and SEO text, not taxonomy
+ * labels.
  * @param title See the `IProps` doc comment above.
  * @param filters The archive's active tag/category/date filters, parsed
- * server-side in `app/posts/page.tsx` from this route's query params.
+ * server-side in `app/[locale]/posts/page.tsx` from this route's query params.
  */
 const AllBlogPosts = async ({ title, filters }: IAllBlogPosts.IProps) => {
+
+	const locale = await getLocale();
+	const dict = await getDictionary(locale);
 
 	let posts: IAllBlogPosts.IPostsGrid["posts"] = [];
 	let categories: IPostFilterOptions["categories"] = [];
@@ -65,7 +75,7 @@ const AllBlogPosts = async ({ title, filters }: IAllBlogPosts.IProps) => {
 			getAllPostsSummaries(POSTS_PAGE_SIZE, undefined, filters),
 			getPostFilterOptions(),
 		]);
-		posts = summaries?.posts ?? [];
+		posts = await translatePostSummaries(summaries?.posts ?? []);
 		categories = filterOptions?.categories ?? [];
 		tags = filterOptions?.tags ?? [];
 	} catch (error) {
@@ -75,11 +85,11 @@ const AllBlogPosts = async ({ title, filters }: IAllBlogPosts.IProps) => {
 	return (
 		<div className={styles.allBlogPosts}>
 			<div className={styles.allBlogPostsHeader}>
-				<span className={styles.allBlogPostsEyebrow}>Blogs</span>
-				<h2 className={styles.allBlogPostsHeading}>{title || DEFAULT_HEADING}</h2>
+				<span className={styles.allBlogPostsEyebrow}>{dict.posts.eyebrow}</span>
+				<h2 className={styles.allBlogPostsHeading}>{title || dict.posts.defaultHeading}</h2>
 			</div>
-			<PostFilters categories={categories} tags={tags} />
-			<PostsGrid posts={posts} />
+			<PostFilters categories={categories} tags={tags} dict={{ ...dict.posts, ...dict.common }} />
+			<PostsGrid posts={posts} dict={{ ...dict.posts, ...dict.common }} />
 		</div>
 	);
 };

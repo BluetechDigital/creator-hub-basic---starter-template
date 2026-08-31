@@ -7,6 +7,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { FC, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import dateFormat from "dateformat";
 import * as IAllYoutubeVideos from "@/components/CMS/AllYoutubeVideos/types/allYouTubeVideos";
 import { buildVideoSlug } from "@/api/YouTube/GetAllYoutubeContent";
@@ -31,16 +32,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX FeaturedVideoCard Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * designator (unlike WordPress's ambiguous-timezone dates elsewhere in this app), so
  * it's safe to pass straight to `new Date()` here without the `parseWpDate` workaround
  * `PostHero`/`PostCard` need for WP dates.
+ * Reads the current locale via `useParams()` (not a prop) to build its own
+ * link — the standard client-side equivalent to `getLocale()`, which a Client
+ * Component can't call itself.
  * @param video The video to feature — normally the single most recent upload.
  */
 const FeaturedVideoCard: FC<IAllYoutubeVideos.IFeaturedVideoCard> = memo(({ video }) => {
+
+	const { locale } = useParams<{ locale: string }>();
 
 	const thumbnail = video.snippet.thumbnails.high
 		?? video.snippet.thumbnails.medium
 		?? video.snippet.thumbnails.default;
 
 	return (
-		<Link href={`/videos/${buildVideoSlug(video.snippet.title, video.videoId)}`} className={styles.featuredVideoCard}>
+		<Link href={`/${locale}/videos/${buildVideoSlug(video.snippet.title, video.videoId)}`} className={styles.featuredVideoCard}>
 			<div className={styles.featuredVideoImageWrapper}>
 				<Image
 					src={thumbnail.url}

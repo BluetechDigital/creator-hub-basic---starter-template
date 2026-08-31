@@ -61,6 +61,7 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 	playlistVideoIds,
 	currentPage,
 	totalPages,
+	dict,
 }) => {
 
 	const [titleSearch, setTitleSearch] = useState('');
@@ -96,7 +97,7 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 	};
 
 	if (!youtubeVideos.length) {
-		return <p className={styles.videosGridEmpty}>No videos published yet — check back soon.</p>;
+		return <p className={styles.videosGridEmpty}>{dict.empty}</p>;
 	}
 
 	const showHero = currentPage === 1 && !hasActiveFilters;
@@ -108,8 +109,8 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 			<div className={styles.videoFilters}>
 				<input
 					type="text"
-					aria-label="Search videos"
-					placeholder="Search videos…"
+					aria-label={dict.searchAriaLabel}
+					placeholder={dict.searchPlaceholder}
 					className={styles.videoFiltersSearch}
 					value={titleSearch}
 					onChange={(event) => setTitleSearch(event.target.value)}
@@ -117,12 +118,12 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 
 				{youtubeChannelPlaylists.length > 0 && (
 					<select
-						aria-label="Filter by playlist"
+						aria-label={dict.playlistAriaLabel}
 						className={styles.videoFiltersSelect}
 						value={playlistId}
 						onChange={(event) => setPlaylistId(event.target.value)}
 					>
-						<option value="">All playlists</option>
+						<option value="">{dict.allPlaylists}</option>
 						{youtubeChannelPlaylists.map((playlist) => (
 							<option key={playlist.id} value={playlist.id}>{playlist.title}</option>
 						))}
@@ -131,18 +132,18 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 
 				<div className={styles.videoFiltersDateRange}>
 					<label className={styles.videoFiltersDateLabel}>
-						From
+						{dict.from}
 						<input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
 					</label>
 					<label className={styles.videoFiltersDateLabel}>
-						To
+						{dict.to}
 						<input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
 					</label>
 				</div>
 
 				{hasActiveFilters && (
 					<button type="button" className={styles.videoFiltersClear} onClick={clearFilters}>
-						Clear filters
+						{dict.clearFilters}
 					</button>
 				)}
 			</div>
@@ -160,16 +161,16 @@ const VideosGrid: FC<IAllYoutubeVideos.IVideosGrid> = memo(({
 					{gridVideos.length > 0 && (
 						<div className={styles.videosGridColumns}>
 							{gridVideos.map((video) => (
-								<VideoCard key={video.videoId} video={video} />
+								<VideoCard key={video.videoId} video={video} dict={dict} />
 							))}
 						</div>
 					)}
 				</>
 			) : (
-				<p className={styles.videosGridEmpty}>No videos match these filters.</p>
+				<p className={styles.videosGridEmpty}>{dict.noMatches}</p>
 			)}
 
-			{!hasActiveFilters && <Pagination currentPage={currentPage} totalPages={totalPages} />}
+			{!hasActiveFilters && <Pagination currentPage={currentPage} totalPages={totalPages} dict={dict} />}
 		</div>
 	);
 });

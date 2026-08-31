@@ -49,12 +49,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX PostsGrid Component XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
  * `memo`-wrapped client component since it does no data fetching of its own.
  */
-const PostsGrid: FC<IAllBlogPosts.IPostsGrid> = memo(({ posts }) => {
+const PostsGrid: FC<IAllBlogPosts.IPostsGrid> = memo(({ posts, dict }) => {
 
     const [showAll, setShowAll] = useState(false);
 
     if (!posts.length) {
-        return <p className={styles.postsGridEmpty}>No posts published yet — check back soon.</p>;
+        return <p className={styles.postsGridEmpty}>{dict.empty}</p>;
     }
 
     const featuredPost = posts[0]?.featuredImage?.node?.sourceUrl ? posts[0] : null;
@@ -77,7 +77,7 @@ const PostsGrid: FC<IAllBlogPosts.IPostsGrid> = memo(({ posts }) => {
             {hasMore && (
                 <div className={styles.showMoreWrapper}>
                     <button type="button" className={styles.showMoreButton} onClick={() => setShowAll(true)}>
-                        Show more
+                        {dict.showMore}
                     </button>
                 </div>
             )}

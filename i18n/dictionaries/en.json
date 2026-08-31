@@ -1,0 +1,57 @@
+{
+	"common": {
+		"from": "From",
+		"to": "To",
+		"clearFilters": "Clear filters",
+		"showMore": "Show more"
+	},
+	"cookiePolicy": {
+		"body": "We use cookies to improve your browsing experience. Learn about our Privacy policy here.",
+		"accept": "Accept Cookies",
+		"acceptAriaLabel": "Accept cookies",
+		"decline": "Decline",
+		"declineAriaLabel": "Decline cookies"
+	},
+	"breadcrumbs": {
+		"home": "Home",
+		"posts": "Posts",
+		"videos": "Videos"
+	},
+	"posts": {
+		"eyebrow": "Blogs",
+		"defaultHeading": "Latest from the blog",
+		"searchAriaLabel": "Search posts",
+		"searchPlaceholder": "Search posts…",
+		"categoryAriaLabel": "Filter by category",
+		"allCategories": "All categories",
+		"tagSearchAriaLabel": "Search tags",
+		"tagSearchPlaceholder": "Search tags…",
+		"removeTagFilter": "Remove {name} filter",
+		"empty": "No posts published yet — check back soon."
+	},
+	"videos": {
+		"eyebrow": "Videos",
+		"defaultHeading": "Latest videos",
+		"moreToWatch": "More to watch",
+		"searchAriaLabel": "Search videos",
+		"searchPlaceholder": "Search videos…",
+		"playlistAriaLabel": "Filter by playlist",
+		"allPlaylists": "All playlists",
+		"empty": "No videos published yet — check back soon.",
+		"noMatches": "No videos match these filters.",
+		"paginationAriaLabel": "Video archive pagination",
+		"previous": "Previous",
+		"next": "Next",
+		"views": "{count} views",
+		"likes": "{count} likes",
+		"comments": "{count} comments"
+	},
+	"latestPosts": {
+		"blogPost": "Blog Post",
+		"minRead": "{count} min read"
+	},
+	"notFound": {
+		"title": "404 - Not Found",
+		"description": "The page you are looking for does not exist."
+	}
+}

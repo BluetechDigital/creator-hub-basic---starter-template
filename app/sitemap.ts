@@ -13,11 +13,9 @@ import { getAllPostsSlugs } from "@/graphql/CMS/GetAllPostsSlugs";
 // Videos
 import { getAllQualifyingVideoSummaries, buildVideoSlug } from "@/api/YouTube/GetAllYoutubeContent";
 
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
-const SITE_URL: string | undefined = process.env.SITE_URL;
+// Locale-aware hreflang
+import { defaultLocale } from "@/context/constants";
+import { buildLocaleAlternates } from "@/i18n/buildAlternates";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -30,7 +28,7 @@ type IKeys = {
 };
 
 // Videos use `videoId`/`title` (built into the actual /videos/[slug] route
-// param via `buildVideoSlug`, see app/videos/[slug]/page.tsx) and
+// param via `buildVideoSlug`, see app/[locale]/videos/[slug]/page.tsx) and
 // `publishedAt` in place of `slug`/`modified`.
 type IVideoKeys = {
 	videoId: string;
@@ -51,6 +49,12 @@ type IObject = {
 	changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 	lastModified: string;
 	priority: number;
+	// hreflang alternates for every supported locale + x-default, built via
+	// `buildLocaleAlternates` — one sitemap entry per English slug carrying
+	// every locale's URL, rather than emitting `locales.length`x flat entries
+	// per page/post/video. Translated variants reuse the English source's own
+	// `lastModified` (they're derived, not independently edited).
+	alternates: { languages: Record<string, string> };
 };
 
 /* -----------------------------------------------------------------------------
@@ -64,8 +68,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Sitemap XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * @returns The full `MetadataRoute.Sitemap` entry list for the site.
  */
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
-	const siteUrl: string | undefined = SITE_URL;
-
 	const [pagesSlugs, postsSlugs] = await Promise.all([
 		getAllPagesSlugs(),
 		getAllPostsSlugs(),
@@ -97,11 +99,14 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	// other's links (and the whole sitemap) along with it.
 	(pagesSlugs ?? []).map((keys: IKeys) => {
 
+		const { canonical, languages } = buildLocaleAlternates(defaultLocale, `/${keys.slug}`);
+
 		const object: IObject = {
-			url: `${siteUrl}/${keys.slug}`,
+			url: canonical,
 			changeFrequency: "monthly",
 			lastModified: `${keys.modified}`,
 			priority: 0.8,
+			alternates: { languages },
 		};
 
 		pagesLinks.push(object);
@@ -110,11 +115,14 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	/* POSTS */
 	(postsSlugs ?? []).map((keys: IKeys) => {
 
+		const { canonical, languages } = buildLocaleAlternates(defaultLocale, `/posts/${keys.slug}`);
+
 		const object: IObject = {
-			url: `${siteUrl}/posts/${keys.slug}`,
+			url: canonical,
 			changeFrequency: "weekly",
 			lastModified: `${keys.modified}`,
 			priority: 0.6,
+			alternates: { languages },
 		};
 
 		postsLinks.push(object);
@@ -122,14 +130,17 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 
 	/* VIDEOS */
 	// `/videos/{titleSlug}-{videoId}` — matches the actual
-	// app/videos/[slug]/page.tsx route param shape (`buildVideoSlug`).
+	// app/[locale]/videos/[slug]/page.tsx route param shape (`buildVideoSlug`).
 	videoSummaries.map((keys: IVideoKeys) => {
 
+		const { canonical, languages } = buildLocaleAlternates(defaultLocale, `/videos/${buildVideoSlug(keys.title, keys.videoId)}`);
+
 		const object: IObject = {
-			url: `${siteUrl}/videos/${buildVideoSlug(keys.title, keys.videoId)}`,
+			url: canonical,
 			changeFrequency: "monthly",
 			lastModified: `${keys.publishedAt}`,
 			priority: 0.5,
+			alternates: { languages },
 		};
 
 		videosLinks.push(object);

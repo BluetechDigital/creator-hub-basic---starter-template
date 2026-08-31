@@ -15,7 +15,7 @@ XXXXXXXXXXXXXXXXXXXXXX Create Global Context Provider XXXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Provides site-wide content (theme options and menu/footer links, fetched once in
- * `app/layout.tsx`) via `GlobalContext`, and wraps `children` in a `<motion.main>` that
+ * `app/[locale]/layout.tsx`) via `GlobalContext`, and wraps `children` in a `<motion.main>` that
  * transitions between its `"initial"` and `"animate"` states.
  *
  * Note: `initial="initial"` / `animate="animate"` here are framer-motion variant
@@ -23,7 +23,7 @@ XXXXXXXXXXXXXXXXXXXXXX Create Global Context Provider XXXXXXXXXXXXXXXXXXXXXXXXXX
  * (or elements within it) define matching `initial`/`animate` variants; otherwise these
  * props are no-ops.
  *
- * Wrapped in `memo` because it sits high in the tree (in `app/layout.tsx`, above
+ * Wrapped in `memo` because it sits high in the tree (in `app/[locale]/layout.tsx`, above
  * `children`) and its own props (`globalProps`) only change when global CMS content
  * changes, so re-rendering it on unrelated state changes elsewhere in the tree would be
  * wasted work.

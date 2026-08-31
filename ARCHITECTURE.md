@@ -8,12 +8,12 @@ conventions and doesn't need its own section here.
 
 Pages are not hand-built. A CMS editor composes a WordPress page out of ACF ("Advanced
 Custom Fields") flexible-content blocks — Hero, AboutUs, CallToAction, etc. — in whatever
-order they like, and `app/[slug]/page.tsx` renders whichever blocks that page actually has,
+order they like, and `app/[locale]/[slug]/page.tsx` renders whichever blocks that page actually has,
 in that order, with no per-page React code.
 
 **The pipeline, slug → rendered blocks:**
 
-1. `app/[slug]/page.tsx` calls `getAllPageACFFlexibleComponentsContent` (`graphql/CMS/`),
+1. `app/[locale]/[slug]/page.tsx` calls `getAllPageACFFlexibleComponentsContent` (`graphql/CMS/`),
    which runs a **two-pass GraphQL query** against WPGraphQL:
    - **Pass 1** (`GetAllACFFlexibleComponentsList.ts`) asks only for the `fieldGroupName` of
      each block on the page — a cheap query used to work out *which* blocks are present.
@@ -94,8 +94,8 @@ new pattern.
 
 Everything else in this repo talks to WordPress purely through WPGraphQL's existing schema —
 no custom WordPress code required. **One feature is the exception**: the single-post page's
-like/dislike buttons, on both posts (`app/posts/[slug]/fragments/EngagementBar.tsx`) and
-individual comments (`app/posts/[slug]/fragments/CommentReactions.tsx`).
+like/dislike buttons, on both posts (`app/[locale]/posts/[slug]/fragments/EngagementBar.tsx`) and
+individual comments (`app/[locale]/posts/[slug]/fragments/CommentReactions.tsx`).
 
 WordPress has no native "likes"/"dislikes" concept, so
 [`wordpress-mu-plugins/simple-blogs-post-likes.php`](./wordpress-mu-plugins/simple-blogs-post-likes.php)
