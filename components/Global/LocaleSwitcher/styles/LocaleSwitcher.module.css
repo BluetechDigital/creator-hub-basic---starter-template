@@ -2,21 +2,51 @@
 @import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+LocaleSwitcher — a self-contained flag dropdown (no Navbar exists yet in this
+starter to host it inside — see the component's own doc comment).
 ----------------------------------------------------------------------------- */
 
 .localeSwitcher {
-    @apply flex flex-wrap items-center gap-2;
+	@apply relative inline-flex items-center;
+}
 
-    & .localeLink {
-        @apply px-3 py-1 text-xs text-pure-black/60 font-medium rounded-full transition duration-300;
+.localeSwitcher .localeSwitcherTrigger {
+	@apply flex flex-row items-center gap-1.5 p-1 cursor-pointer bg-transparent border-0 text-inherit;
+}
 
-        &:hover {
-            @apply text-pure-black bg-pure-black/5;
-        }
-    }
+.localeSwitcher .localeSwitcherChevron {
+	@apply w-4 h-4 transition-transform ease-in-out duration-300;
+}
 
-    & .localeLinkActive {
-        @apply px-3 py-1 text-xs text-accent-dark font-semibold bg-accent-default/20 rounded-full;
-    }
+.localeSwitcher .localeSwitcherTrigger[aria-expanded="true"] .localeSwitcherChevron {
+	@apply rotate-180;
+}
+
+/* The flag chip — a fixed 4:3-ish rounded box the SVG fills. */
+.localeSwitcher .localeSwitcherFlag {
+	@apply block overflow-hidden rounded-[0.2rem] w-7 h-5 shrink-0 ring-1 ring-pure-black/10 shadow-sm;
+}
+
+.localeSwitcher .localeSwitcherFlag img {
+	@apply w-full h-full object-cover;
+}
+
+/* Dropdown panel */
+.localeSwitcher .localeSwitcherMenu {
+	@apply absolute right-0 top-full mt-2 z-999 min-w-44 p-1 list-none
+		bg-pure-white border border-solid border-light-grey rounded-lg shadow-xl;
+}
+
+.localeSwitcher .localeSwitcherItem,
+.localeSwitcher .localeSwitcherItemActive {
+	@apply flex flex-row items-center gap-3 w-full px-3 py-2 rounded-md
+		text-tiny tracking-[0.03rem] transition-all ease-in-out duration-300;
+}
+
+.localeSwitcher .localeSwitcherItem {
+	@apply text-pure-black hover:bg-accent-default/20;
+}
+
+.localeSwitcher .localeSwitcherItemActive {
+	@apply text-accent-dark font-semibold bg-accent-default/10;
 }
