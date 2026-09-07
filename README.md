@@ -121,8 +121,10 @@ see the corresponding section in `.env.example` and the matching file under `api
 | `NEXT_PUBLIC_GTM_ID` | **client** | Google Tag Manager container ID |
 | `EMAIL_USER` / `EMAIL_PASS` / `EMAIL_HOST` | server | Nodemailer credentials for the contact form. `EMAIL_HOST` accepts a literal SMTP hostname or a well-known service shorthand (`gmail`, `outlook365`, `hotmail`, `yahoo`, `icloud`, `zoho`) — see `config/nodemailer.ts` |
 | `CONTACT_FORM_RECIPIENT_EMAIL` | server | Optional: who contact-form submissions are delivered to. Falls back to `EMAIL_USER` if unset |
-| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | **client** | reCAPTCHA site key (safe to expose by design — must be `NEXT_PUBLIC_` since the widget renders client-side) |
-| `RECAPTCHA_SECRET_KEY` | server | reCAPTCHA server-side verification secret |
+| `NEXT_PUBLIC_GOOGLE_V3_RECAPTCHA_SITE_KEY` | **client** | reCAPTCHA **v3** site key (safe to expose by design — must be `NEXT_PUBLIC_` since `useRecaptchaV3` loads Google's script client-side; v3 is invisible, no widget) |
+| `GOOGLE_V3_RECAPTCHA_SECRET_KEY` | server | reCAPTCHA v3 server-side verification secret — see `config/recaptcha.ts` |
+| `GOOGLE_V3_RECAPTCHA_MIN_SCORE` | server | Optional minimum v3 score (0.0–1.0) a submission must clear; defaults to `0.5` |
+| `CREATOR_HUB_GRAPHQL_PROXY_SECRET` | server | Shared secret the WordPress `ch-security.php` mu-plugin requires on every GraphQL mutation — see `docs/comment-security.md` |
 
 ## Security headers
 

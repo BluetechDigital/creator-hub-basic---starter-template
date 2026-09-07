@@ -8,11 +8,11 @@ import "server-only";
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const RECAPTCHA_SECRET_KEY: string | undefined = process.env.RECAPTCHA_SECRET_KEY;
+const GOOGLE_V3_RECAPTCHA_SECRET_KEY: string | undefined = process.env.GOOGLE_V3_RECAPTCHA_SECRET_KEY;
 
 // v3 returns a 0.0–1.0 score (1.0 = very likely human). Anything at or above
 // this passes. Tune per traffic; 0.5 is Google's default recommendation.
-const MIN_SCORE = Number(process.env.RECAPTCHA_MIN_SCORE ?? "0.5");
+const MIN_SCORE = Number(process.env.GOOGLE_V3_RECAPTCHA_MIN_SCORE ?? "0.5");
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX reCAPTCHA Verification XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -33,7 +33,7 @@ type ISiteVerifyResponse = {
  * needs spam protection (contact form, comment form).
  *
  * FAIL BEHAVIOUR:
- *  - Production + `RECAPTCHA_SECRET_KEY` unset → **fail closed** (returns
+ *  - Production + `GOOGLE_V3_RECAPTCHA_SECRET_KEY` unset → **fail closed** (returns
  *    `false`). A production deploy with no bot protection is a misconfiguration,
  *    not a soft state to tolerate.
  *  - Non-production + secret unset → skip (returns `true`) so local dev and a
@@ -47,12 +47,12 @@ type ISiteVerifyResponse = {
  * `expectedAction` is given) for the right action.
  */
 export const verifyRecaptcha = async (token: string, expectedAction?: string): Promise<boolean> => {
-	if (!RECAPTCHA_SECRET_KEY) {
+	if (!GOOGLE_V3_RECAPTCHA_SECRET_KEY) {
 		if (process.env.NODE_ENV === "production") {
-			console.error("RECAPTCHA_SECRET_KEY is not set in production — rejecting the submission.");
+			console.error("GOOGLE_V3_RECAPTCHA_SECRET_KEY is not set in production — rejecting the submission.");
 			return false;
 		}
-		console.warn("RECAPTCHA_SECRET_KEY is not set; skipping reCAPTCHA verification (non-production).");
+		console.warn("GOOGLE_V3_RECAPTCHA_SECRET_KEY is not set; skipping reCAPTCHA verification (non-production).");
 		return true;
 	}
 
@@ -65,7 +65,7 @@ export const verifyRecaptcha = async (token: string, expectedAction?: string): P
 		const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
 			method: "POST",
 			headers: { "Content-Type": "application/x-www-form-urlencoded" },
-			body: new URLSearchParams({ secret: RECAPTCHA_SECRET_KEY, response: token }),
+			body: new URLSearchParams({ secret: GOOGLE_V3_RECAPTCHA_SECRET_KEY, response: token }),
 		});
 		data = await response.json();
 	} catch (error) {

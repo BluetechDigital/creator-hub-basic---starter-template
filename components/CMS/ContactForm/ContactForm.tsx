@@ -20,7 +20,7 @@ import styles from "@/components/CMS/ContactForm/styles/ContactForm.module.css";
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const RECAPTCHA_SITE_KEY: string | undefined = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+const RECAPTCHA_SITE_KEY: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_V3_RECAPTCHA_SITE_KEY;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ContactForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX

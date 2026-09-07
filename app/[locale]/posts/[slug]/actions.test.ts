@@ -47,7 +47,7 @@ describe("submitComment", () => {
 	beforeEach(() => {
 		mockCreateComment.mockReset();
 		mockCreateComment.mockResolvedValue({ success: true });
-		delete process.env.RECAPTCHA_SECRET_KEY;
+		delete process.env.GOOGLE_V3_RECAPTCHA_SECRET_KEY;
 	});
 
 	afterEach(() => {
@@ -129,7 +129,7 @@ describe("submitComment", () => {
 	});
 
 	it("fails reCAPTCHA verification when siteverify returns success: false, and submits no comment", async () => {
-		process.env.RECAPTCHA_SECRET_KEY = "secret";
+		process.env.GOOGLE_V3_RECAPTCHA_SECRET_KEY = "secret";
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: async () => ({ success: false }) }));
 
 		const { submitComment } = await importFreshModule();

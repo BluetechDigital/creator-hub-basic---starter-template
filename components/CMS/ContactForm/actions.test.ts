@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Why the dynamic import XXXXXXXXXXXXXXXXXXXXXXXXXX
-EMAIL_USER/CONTACT_FORM_RECIPIENT_EMAIL/RECAPTCHA_SECRET_KEY/SITE_NAME are read into
+EMAIL_USER/CONTACT_FORM_RECIPIENT_EMAIL/GOOGLE_V3_RECAPTCHA_SECRET_KEY/SITE_NAME are read into
 module-scope consts on import, not re-read per call — same pattern as
 api/YouTube/GetAllYoutubeContent.test.ts. Each test sets process.env *before*
 importing a fresh copy of the module via vi.resetModules().
@@ -39,7 +39,7 @@ describe("submitContactForm", () => {
 		mockSendMail.mockResolvedValue({});
 		process.env.EMAIL_USER = "site@example.test";
 		delete process.env.CONTACT_FORM_RECIPIENT_EMAIL;
-		delete process.env.RECAPTCHA_SECRET_KEY;
+		delete process.env.GOOGLE_V3_RECAPTCHA_SECRET_KEY;
 	});
 
 	afterEach(() => {
@@ -93,7 +93,7 @@ describe("submitContactForm", () => {
 	});
 
 	it("fails reCAPTCHA verification when siteverify returns success: false, and sends no emails", async () => {
-		process.env.RECAPTCHA_SECRET_KEY = "secret";
+		process.env.GOOGLE_V3_RECAPTCHA_SECRET_KEY = "secret";
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
 			json: async () => ({ success: false }),
 		}));
@@ -108,7 +108,7 @@ describe("submitContactForm", () => {
 		expect(mockSendMail).not.toHaveBeenCalled();
 	});
 
-	it("skips reCAPTCHA verification (and does not fail) when RECAPTCHA_SECRET_KEY is unset", async () => {
+	it("skips reCAPTCHA verification (and does not fail) when GOOGLE_V3_RECAPTCHA_SECRET_KEY is unset", async () => {
 		const { submitContactForm } = await importFreshModule();
 		const result = await submitContactForm(validSubmission);
 

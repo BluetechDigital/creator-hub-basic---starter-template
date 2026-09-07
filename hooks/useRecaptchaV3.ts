@@ -10,7 +10,7 @@ import { useCallback, useEffect } from "react";
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-const SITE_KEY: string | undefined = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+const SITE_KEY: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_V3_RECAPTCHA_SITE_KEY;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXX grecaptcha global shape XXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -54,7 +54,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX useRecaptchaV3 hook XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `verifyRecaptcha` checks its score + `action` against Google.
  *
  * v3 is invisible — no checkbox, no user interaction — so this replaces the v2
- * `<ReCAPTCHA>` widget entirely. When `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` is unset
+ * `<ReCAPTCHA>` widget entirely. When `NEXT_PUBLIC_GOOGLE_V3_RECAPTCHA_SITE_KEY` is unset
  * (a fork mid-setup) `execute` resolves to `""`; the Server Action then decides
  * whether to allow that (dev) or reject it (production) — see `verifyRecaptcha`.
  *

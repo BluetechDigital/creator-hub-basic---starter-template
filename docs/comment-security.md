@@ -53,7 +53,7 @@ assume a low-stakes site.
 | `config/rateLimit.ts` | per-process sliding-window pre-filter + `getRequestIp()`. |
 | `app/[locale]/posts/[slug]/actions.ts` | honeypot drop, link-count cap, rate limits (3 comments/min, 20 reactions/min per IP), reCAPTCHA action `"comment"`. |
 | `components/CMS/ContactForm/actions.tsx` | rate limit (3/min per IP), reCAPTCHA action `"contact"`. |
-| `config/recaptcha.ts` | **reCAPTCHA v3** — score + action check, `RECAPTCHA_MIN_SCORE` (default 0.5), **fails closed in production**. |
+| `config/recaptcha.ts` | **reCAPTCHA v3** — score + action check, `GOOGLE_V3_RECAPTCHA_MIN_SCORE` (default 0.5), **fails closed in production**. |
 | `hooks/useRecaptchaV3.ts` + `CommentForm.tsx` + `ContactForm.tsx` | invisible v3 token on submit (no widget); badge hidden site-wide in `globals.css` with the required attribution text on both forms. |
 | `next.config.ts` CSP | `'unsafe-eval'` is now **dev-only**; added `base-uri 'none'`, `form-action 'self'`; added reCAPTCHA hosts to `script-src` / `connect-src` / `frame-src`. |
 
@@ -72,11 +72,11 @@ order:
 
 1. **Generate the secret:** `openssl rand -hex 32`.
 2. **Next.js env:** set `CREATOR_HUB_GRAPHQL_PROXY_SECRET` in the hosting platform, and
-   optionally `RECAPTCHA_MIN_SCORE`. Deploy. (The mu-plugin still fails open at
+   optionally `GOOGLE_V3_RECAPTCHA_MIN_SCORE`. Deploy. (The mu-plugin still fails open at
    this point, so nothing breaks.)
 3. **Create a reCAPTCHA v3 key pair** at <https://www.google.com/recaptcha/admin>
-   (v2 keys will not work), set `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` /
-   `RECAPTCHA_SECRET_KEY`, redeploy.
+   (v2 keys will not work), set `NEXT_PUBLIC_GOOGLE_V3_RECAPTCHA_SITE_KEY` /
+   `GOOGLE_V3_RECAPTCHA_SECRET_KEY`, redeploy.
 4. **WordPress:** copy `ch-security.php` + `simple-blogs-post-likes.php` into
    `wp-content/mu-plugins/`, then add to `wp-config.php` (above "That's all, stop
    editing"):
