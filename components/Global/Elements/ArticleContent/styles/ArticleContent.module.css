@@ -39,6 +39,119 @@ under .articleContent so it only applies inside a rendered post body.
         @apply w-full h-auto rounded-2xl;
     }
 
+    /* ---- Image blocks ----
+    `figure.wp-block-image` — a standalone image, optionally with a caption. */
+
+    & :global(figure.wp-block-image) {
+        @apply m-0;
+
+        & figcaption {
+            @apply mt-2 text-center text-sm text-pure-black/60;
+        }
+    }
+
+    /* WP's lightbox trigger button — its behaviour needs the WP Interactivity
+    API JS, which isn't loaded on the headless frontend, so it's a dead button.
+    Hide it. */
+    & :global(.lightbox-trigger) {
+        @apply hidden;
+    }
+
+    /* Group wrapper (WonderBlocks patterns nest their content in one). */
+    & :global(.wp-block-group) {
+        @apply my-2;
+    }
+    & :global(.wp-block-group__inner-container) {
+        @apply w-full;
+    }
+
+    /* ---- Gallery block ----
+    Tailwind's preflight strips WordPress's own `wp-block-gallery` CSS, so
+    reproduce it: a responsive grid — 2-up on mobile, then the `columns-N`
+    count the block carries from `sm` up. `is-cropped` galleries (the block
+    editor's default) force every tile to a uniform 4:3 via `object-cover`,
+    matching what the editor shows. */
+
+    & :global(.wp-block-gallery) {
+        @apply grid grid-cols-2 gap-2 sm:gap-3 my-2;
+
+        & figure {
+            @apply m-0;
+        }
+
+        & img {
+            @apply block w-full h-auto rounded-lg;
+        }
+
+        & figcaption {
+            @apply text-center text-sm text-pure-black/60;
+            grid-column: 1 / -1;
+        }
+    }
+
+    & :global(.wp-block-gallery.is-cropped) img {
+        @apply h-full object-cover;
+        aspect-ratio: 4 / 3;
+    }
+
+    @media (min-width: 640px) {
+        & :global(.wp-block-gallery.columns-1) { grid-template-columns: 1fr; }
+        & :global(.wp-block-gallery.columns-3) { grid-template-columns: repeat(3, 1fr); }
+        & :global(.wp-block-gallery.columns-4) { grid-template-columns: repeat(4, 1fr); }
+        & :global(.wp-block-gallery.columns-5) { grid-template-columns: repeat(5, 1fr); }
+        & :global(.wp-block-gallery.columns-6) { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    /* Legacy gallery block (WP 5.0–5.8): `<ul class="wp-block-gallery">` of
+    `<li class="blocks-gallery-item">` rather than nested `<figure>`s. */
+    & :global(ul.wp-block-gallery) {
+        @apply grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 my-2 list-none pl-0;
+
+        & :global(.blocks-gallery-item) {
+            @apply m-0;
+        }
+
+        & img {
+            @apply block w-full h-full object-cover rounded-lg;
+            aspect-ratio: 4 / 3;
+        }
+    }
+
+    /* Columns block (`core/columns`) — WonderBlocks builds its "gallery" pattern
+    from this: `<div class="wp-block-columns">` of `<div class="wp-block-column">`,
+    each column holding one or more `<figure class="wp-block-image">`. Tailwind's
+    preflight strips WP's own `is-layout-flex` rules, so lay it out here: columns
+    side-by-side from `sm`, each column's images stacked with a small gap. */
+    & :global(.wp-block-columns) {
+        @apply flex flex-col sm:flex-row gap-3 sm:gap-4 my-2;
+    }
+
+    & :global(.wp-block-column) {
+        @apply flex-1 min-w-0 flex flex-col gap-3 sm:gap-4;
+    }
+
+    & :global(.wp-block-column figure.wp-block-image) {
+        @apply relative m-0 w-full;
+    }
+
+    & :global(.wp-block-column figure.wp-block-image img) {
+        @apply block w-full h-auto rounded-lg object-cover;
+    }
+
+    /* Classic `[gallery]` shortcode fallback (older posts). */
+    & :global(.gallery) {
+        @apply grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 my-2;
+
+        & :global(.gallery-item) {
+            @apply m-0;
+        }
+
+        & img {
+            @apply block w-full h-full object-cover rounded-lg;
+            aspect-ratio: 4 / 3;
+        }
+    }
+
     & blockquote {
         @apply flex flex-col gap-2 pl-6 border-l-2 border-accent-default text-xl text-pure-black;
     }
