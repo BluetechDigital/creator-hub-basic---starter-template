@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Why the dynamic import XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -102,6 +102,7 @@ describe("getTranslatedContent", () => {
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: false,
 			status: 401,
+			headers: new Headers(),
 			json: async () => ({ error: { message: "Access denied" } }),
 		});
 		vi.stubGlobal("fetch", mockFetch);
@@ -111,5 +112,83 @@ describe("getTranslatedContent", () => {
 		await expect(getTranslatedContent(["Hello"], "fr")).rejects.toThrow(
 			"Failed to translate content",
 		);
+		expect(mockFetch).toHaveBeenCalledTimes(1); // 401 isn't retryable — no retry attempted
+	});
+
+	describe("retrying a transient 429/503", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("retries a 429 with backoff and succeeds once Azure recovers", async () => {
+			setAzureEnv();
+
+			const throttled = { ok: false, status: 429, headers: new Headers(), json: async () => ({}) };
+			const succeeded = {
+				ok: true,
+				json: async () => ([{ translations: [{ text: "Bonjour", to: "fr" }] }]),
+			};
+			const mockFetch = vi.fn()
+				.mockResolvedValueOnce(throttled)
+				.mockResolvedValueOnce(succeeded);
+			vi.stubGlobal("fetch", mockFetch);
+
+			const { getTranslatedContent } = await importFreshModule();
+
+			const resultPromise = getTranslatedContent(["Hello"], "fr");
+			await vi.advanceTimersByTimeAsync(1000); // first backoff: 2^0 * 1000ms
+
+			expect(await resultPromise).toEqual(["Bonjour"]);
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+		});
+
+		it("honours the Retry-After header instead of the default backoff", async () => {
+			setAzureEnv();
+
+			const throttled = {
+				ok: false,
+				status: 429,
+				headers: new Headers({ "retry-after": "3" }),
+				json: async () => ({}),
+			};
+			const succeeded = { ok: true, json: async () => ([{ translations: [{ text: "Bonjour", to: "fr" }] }]) };
+			const mockFetch = vi.fn()
+				.mockResolvedValueOnce(throttled)
+				.mockResolvedValueOnce(succeeded);
+			vi.stubGlobal("fetch", mockFetch);
+
+			const { getTranslatedContent } = await importFreshModule();
+
+			const resultPromise = getTranslatedContent(["Hello"], "fr");
+
+			await vi.advanceTimersByTimeAsync(1000); // less than the 3s Retry-After — not retried yet
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+
+			await vi.advanceTimersByTimeAsync(2000); // now past the full 3s
+			expect(await resultPromise).toEqual(["Bonjour"]);
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+		});
+
+		it("gives up after MAX_RETRIES and throws", async () => {
+			setAzureEnv();
+
+			const throttled = { ok: false, status: 503, headers: new Headers(), json: async () => ({}) };
+			const mockFetch = vi.fn().mockResolvedValue(throttled);
+			vi.stubGlobal("fetch", mockFetch);
+
+			const { getTranslatedContent } = await importFreshModule();
+
+			const resultPromise = getTranslatedContent(["Hello"], "fr");
+			resultPromise.catch(() => {}); // avoid an unhandled-rejection warning while timers advance
+
+			await vi.advanceTimersByTimeAsync(20_000); // well past every backoff (1s + 2s + 4s)
+
+			await expect(resultPromise).rejects.toThrow("Failed to translate content");
+			expect(mockFetch).toHaveBeenCalledTimes(4); // the initial attempt + 3 retries
+		});
 	});
 });
