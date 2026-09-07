@@ -6,6 +6,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import validator from "validator";
 import { verifyRecaptcha } from "@/config/recaptcha";
+import { checkRateLimit, getRequestIp } from "@/config/rateLimit";
 import { createComment } from "@/graphql/CMS/CreateComment";
 import { setPostReaction, IReaction } from "@/graphql/CMS/SetPostReaction";
 import { setCommentReaction as setCommentReactionMutation } from "@/graphql/CMS/SetCommentReaction";
@@ -22,7 +23,21 @@ export type ICommentFormValues = {
 	recaptchaToken: string;
 	/** The parent comment's global GraphQL `id`, when replying; omit for a top-level comment. */
 	parentId?: string;
+	/** Honeypot — a hidden field real users never fill. A non-empty value means a bot. */
+	website?: string;
 };
+
+/** More than this many URLs in one comment reads as link spam, not a reader contribution. */
+const MAX_COMMENT_LINKS = 2;
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Rate limit windows XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Per-IP pre-filter (the authoritative limit is the mu-plugin's — see
+`config/rateLimit.ts`). Comments: 3/min. Reactions: 20/min (a legit reader
+toggling like<->dislike across several posts/comments shouldn't be blocked).
+----------------------------------------------------------------------------- */
+const COMMENT_RATE = { limit: 3, windowMs: 60_000 };
+const REACTION_RATE = { limit: 20, windowMs: 60_000 };
 
 type ICommentFormErrors = {
 	name?: string;
@@ -41,8 +56,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Submit Comment XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Server Action for the single-post comment form: validates input, verifies
- * reCAPTCHA (same shared check as `submitContactForm`), then calls `createComment`.
+ * Server Action for the single-post comment form: drops a honeypot-flagged
+ * submission silently, pre-filters by per-IP rate limit, validates input
+ * (including a link-flood cap), verifies reCAPTCHA v3 (score + `"comment"`
+ * action check, same shared check as `submitContactForm`), then calls
+ * `createComment` — the WordPress `ch-security.php` mu-plugin gates the
+ * mutation itself with a proxy secret, so this Server Action is the only path
+ * a comment can actually reach the CMS through (see `docs/comment-security.md`).
  * A `{success: true}` result means the comment was accepted, not that it's
  * necessarily publicly visible yet — whether a new comment publishes immediately
  * or waits for manual approval is a per-site WordPress Discussion setting (see
@@ -53,6 +73,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Submit Comment XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * (validation failures) or a `general`/`recaptcha` message (verification or submit failures).
  */
 export const submitComment = async (values: ICommentFormValues): Promise<ICommentFormResult> => {
+	// Honeypot: a bot filled the hidden field. Return the success shape without
+	// doing anything — never tell the bot it was caught.
+	if (values.website && values.website.trim() !== "") {
+		return { success: true };
+	}
+
+	const ip = await getRequestIp();
+	if (!checkRateLimit(`comment:${ip}`, COMMENT_RATE.limit, COMMENT_RATE.windowMs)) {
+		return { success: false, errors: { general: "You're commenting too quickly — please wait a moment and try again." } };
+	}
+
 	const errors: ICommentFormErrors = {};
 
 	const name = values.name?.trim() ?? "";
@@ -71,11 +102,15 @@ export const submitComment = async (values: ICommentFormValues): Promise<ICommen
 		errors.content = "Please enter a comment (2-5000 characters).";
 	}
 
+	if (content && (content.match(/https?:\/\//gi)?.length ?? 0) > MAX_COMMENT_LINKS) {
+		errors.content = "Please keep links in your comment to a minimum.";
+	}
+
 	if (Object.keys(errors).length > 0) {
 		return { success: false, errors };
 	}
 
-	const recaptchaValid = await verifyRecaptcha(values.recaptchaToken);
+	const recaptchaValid = await verifyRecaptcha(values.recaptchaToken, "comment");
 
 	if (!recaptchaValid) {
 		return { success: false, errors: { recaptcha: "reCAPTCHA verification failed. Please try again." } };
@@ -128,6 +163,11 @@ export const setReaction = async (
 	previousReaction: IReaction | undefined,
 	newReaction: IReaction | "none"
 ): Promise<{ success: true; likes: number; dislikes: number } | { success: false }> => {
+	const ip = await getRequestIp();
+	if (!checkRateLimit(`reaction:${ip}`, REACTION_RATE.limit, REACTION_RATE.windowMs)) {
+		return { success: false };
+	}
+
 	const reactions = await setPostReaction(postId, previousReaction, newReaction);
 
 	if (!reactions) {
@@ -162,6 +202,11 @@ export const setCommentReaction = async (
 	previousReaction: IReaction | undefined,
 	newReaction: IReaction | "none"
 ): Promise<{ success: true; likes: number; dislikes: number } | { success: false }> => {
+	const ip = await getRequestIp();
+	if (!checkRateLimit(`reaction:${ip}`, REACTION_RATE.limit, REACTION_RATE.windowMs)) {
+		return { success: false };
+	}
+
 	const reactions = await setCommentReactionMutation(commentId, previousReaction, newReaction);
 
 	if (!reactions) {

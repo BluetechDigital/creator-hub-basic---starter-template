@@ -14,6 +14,11 @@ vi.mock("@/config/nodemailer", () => ({
 	getEmailTransporter: () => ({ sendMail: mockSendMail }),
 }));
 
+// The rate-limit pre-filter reads the request IP from headers().
+vi.mock("next/headers", () => ({
+	headers: async () => new Map<string, string>(),
+}));
+
 const originalEnv = { ...process.env };
 
 const importFreshModule = async () => {

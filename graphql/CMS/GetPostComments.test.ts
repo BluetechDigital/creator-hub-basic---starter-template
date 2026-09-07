@@ -72,6 +72,43 @@ describe("getPostComments", () => {
 		expect(await getPostComments(307)).toEqual({ commentCount: 2, comments: [comment] });
 	});
 
+	it("server-side sanitizes comment and reply content", async () => {
+		setCmsEnv();
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({
+				data: {
+					post: {
+						commentCount: 1,
+						comments: {
+							nodes: [
+								{
+									id: "1",
+									content: '<p>hi</p><script>alert(1)</script><a href="https://evil.example">x</a>',
+									date: "2026-01-05T00:00:00",
+									author: { node: { name: "Jane" } },
+									replies: {
+										nodes: [
+											{ id: "2", content: '<p>ok<img src=x onerror="y()"></p>', date: "2026-01-06T00:00:00", author: { node: { name: "Bob" } } },
+										],
+									},
+								},
+							],
+						},
+					},
+				},
+			}),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getPostComments } = await importFreshModule();
+		const result = await getPostComments(307);
+
+		expect(result?.comments[0].content).toBe("<p>hi</p>x");
+		expect(result?.comments[0].replies?.nodes[0].content).toBe("<p>ok</p>");
+	});
+
 	it("defaults to a count of 0 and an empty list when the post has no comments", async () => {
 		setCmsEnv();
 

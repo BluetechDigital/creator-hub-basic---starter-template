@@ -4,9 +4,9 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { FC, useRef, useState } from "react";
+import { FC, useState } from "react";
 import { useFormik } from "formik";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useRecaptchaV3 } from "@/hooks/useRecaptchaV3";
 import * as IContactForm from "@/components/CMS/ContactForm/types/contactForm";
 import { submitContactForm, IContactFormValues } from "@/components/CMS/ContactForm/actions";
 
@@ -37,10 +37,11 @@ type IFormValues = Omit<IContactFormValues, 'recaptchaToken'>;
  * per-client design build (see `ARCHITECTURE.md`). Validation is intentionally
  * server-only (no client-side `validate`/`validationSchema`) so the `validator`
  * rules in `actions.ts` stay the single source of truth rather than being
- * duplicated on both sides.
+ * duplicated on both sides. Invisible reCAPTCHA v3 via `useRecaptchaV3` — no
+ * widget, no user interaction; see `hooks/useRecaptchaV3.ts`.
  */
 const ContactForm: FC<IContactForm.IProps> = ({}) => {
-	const recaptchaRef = useRef<ReCAPTCHA>(null);
+	const executeRecaptcha = useRecaptchaV3();
 	const [submitted, setSubmitted] = useState(false);
 	const [generalError, setGeneralError] = useState<string | null>(null);
 
@@ -50,17 +51,15 @@ const ContactForm: FC<IContactForm.IProps> = ({}) => {
 			setSubmitted(false);
 			setGeneralError(null);
 
-			const recaptchaToken = recaptchaRef.current?.getValue();
+			const recaptchaToken = await executeRecaptcha("contact");
 
 			if (RECAPTCHA_SITE_KEY && !recaptchaToken) {
-				setGeneralError("Please complete the reCAPTCHA check.");
+				setGeneralError("Verification failed — please try again.");
 				setSubmitting(false);
 				return;
 			}
 
-			const result = await submitContactForm({ ...values, recaptchaToken: recaptchaToken ?? "" });
-
-			recaptchaRef.current?.reset();
+			const result = await submitContactForm({ ...values, recaptchaToken });
 
 			if (result.success) {
 				setSubmitted(true);
@@ -113,16 +112,22 @@ const ContactForm: FC<IContactForm.IProps> = ({}) => {
 					{formik.errors.message ? <p className={styles.errorText}>{formik.errors.message}</p> : null}
 				</div>
 
-				{RECAPTCHA_SITE_KEY ? (
-					<ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} />
-				) : null}
-
 				{generalError ? <p className={styles.errorText} role="alert">{generalError}</p> : null}
 				{submitted ? <p role="status">Thanks — your message has been sent.</p> : null}
 
 				<button type="submit" disabled={formik.isSubmitting}>
 					{formik.isSubmitting ? 'Sending...' : 'Send message'}
 				</button>
+
+				{RECAPTCHA_SITE_KEY ? (
+					<p className={styles.recaptchaNote}>
+						This site is protected by reCAPTCHA and the Google{' '}
+						<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>{' '}
+						and{' '}
+						<a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>{' '}
+						apply.
+					</p>
+				) : null}
 			</form>
 		</div>
 	);

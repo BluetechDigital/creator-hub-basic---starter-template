@@ -27,13 +27,13 @@
  * Requires the WPGraphQL plugin to already be active.
  *
  * This does not create a new database table, does not touch any other post
- * or comment type, and does not require authentication to read/react — both
- * mutations are intentionally public (like/dislike buttons have to work for
- * anonymous site visitors), guarded instead by a short per-target/per-IP
- * rate limit below. The Next.js frontend pairs this with its own
- * client-side "current reaction" cookie, but that alone is trivially
- * bypassed (incognito, clearing cookies) — this server-side limit is the
- * real backstop.
+ * or comment type. Reads are public (like/dislike counts render for anyone);
+ * the two mutations are gated by `ch-security.php`'s proxy-secret check (so a
+ * write can only originate from the Next.js server) PLUS a short per-target/
+ * per-IP rate limit below. Install `ch-security.php` alongside this file — if
+ * it's absent the secret check is skipped (fail-open) and only the rate limit
+ * applies. The Next.js frontend also keeps a client-side "current reaction"
+ * cookie, but that alone is trivially bypassed (incognito, clearing cookies).
  */
 
 if (!defined('ABSPATH')) {
@@ -74,7 +74,9 @@ function chl_validate_reaction_value($value, $allow_null, $field_label) {
  * @param int $seconds How long a repeat reaction is blocked for.
  */
 function chl_enforce_reaction_rate_limit($key_prefix, $target_id, $seconds = 5) {
-    $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown';
+    $ip = function_exists('ch_client_ip')
+        ? ch_client_ip()
+        : (isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
     $rate_limit_key = $key_prefix . md5($ip . '_' . $target_id);
 
     if (get_transient($rate_limit_key)) {
@@ -134,6 +136,18 @@ function chl_get_comment_id($comment) {
     return 0;
 }
 
+/**
+ * Belt-and-braces proxy-secret check for the reaction mutations. `ch-security.php`
+ * already gates every mutation in `graphql_before_execute`; this repeats the check
+ * at the resolver so the mutations still refuse a direct hit even if only this file
+ * is installed. A no-op (fail-open) when ch-security.php is absent.
+ */
+function chl_require_trusted_proxy() {
+    if (function_exists('ch_request_is_trusted_proxy') && !ch_request_is_trusted_proxy()) {
+        throw new \GraphQL\Error\UserError('This operation is not allowed.');
+    }
+}
+
 add_action('graphql_register_types', function () {
 
     /* -------------------------------------------------------------------
@@ -188,6 +202,8 @@ add_action('graphql_register_types', function () {
             ],
         ],
         'mutateAndGetPayload' => function ($input) {
+            chl_require_trusted_proxy();
+
             $post_id = isset($input['postId']) ? absint($input['postId']) : 0;
 
             if (!$post_id || get_post_status($post_id) !== 'publish') {
@@ -274,6 +290,8 @@ add_action('graphql_register_types', function () {
             ],
         ],
         'mutateAndGetPayload' => function ($input) {
+            chl_require_trusted_proxy();
+
             $comment_id = isset($input['commentId']) ? absint($input['commentId']) : 0;
             $comment = $comment_id ? get_comment($comment_id) : null;
 

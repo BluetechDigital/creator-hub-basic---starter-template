@@ -123,6 +123,15 @@ and resolve to `undefined` rather than throwing; the frontend shows like/dislike
 and a button click silently no-ops instead of persisting. This folder existing (or not) can never
 affect a Vercel build.
 
+**Comment/reaction security** — comments are anonymous and auto-approved, so the write
+path is hardened at several layers: every WPGraphQL *mutation* requires an
+`X-Creator-Hub-Proxy-Secret` header (`wordpress-mu-plugins/ch-security.php` +
+`config/graphqlProxySecret.ts`), so only this server can call one; the `submitComment`
+Server Action adds a honeypot, link cap, per-IP rate limit and reCAPTCHA v3 score check;
+comment HTML is sanitized server-side (`graphql/CMS/sanitizeCommentHtml.ts`) before it
+enters the RSC payload. Full threat model, rollout and the infra checklist:
+[`docs/comment-security.md`](./docs/comment-security.md).
+
 ## Testing
 
 Vitest + React Testing Library (`npm test` / `npm run test:watch` / `npm run test:coverage`).

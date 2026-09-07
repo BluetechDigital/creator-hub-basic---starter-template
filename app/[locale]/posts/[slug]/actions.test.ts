@@ -23,6 +23,11 @@ vi.mock("@/graphql/CMS/SetCommentReaction", () => ({
 	setCommentReaction: mockSetCommentReaction,
 }));
 
+// The rate-limit pre-filter reads the request IP from headers().
+vi.mock("next/headers", () => ({
+	headers: async () => new Map<string, string>(),
+}));
+
 const originalEnv = { ...process.env };
 
 const importFreshModule = async () => {
@@ -82,6 +87,45 @@ describe("submitComment", () => {
 			authorEmail: "jane@example.test",
 			content: "This is a valid comment.",
 		});
+	});
+
+	it("silently drops a submission with the honeypot field filled, without calling createComment", async () => {
+		const { submitComment } = await importFreshModule();
+
+		const result = await submitComment({ ...validSubmission, website: "http://spam.example" });
+
+		expect(result.success).toBe(true);
+		expect(mockCreateComment).not.toHaveBeenCalled();
+	});
+
+	it("rejects a comment with more than two links", async () => {
+		const { submitComment } = await importFreshModule();
+
+		const result = await submitComment({
+			...validSubmission,
+			content: "buy http://a.example http://b.example http://c.example now",
+		});
+
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.errors.content).toBeDefined();
+		}
+		expect(mockCreateComment).not.toHaveBeenCalled();
+	});
+
+	it("rate-limits repeated submissions from the same request", async () => {
+		const { submitComment } = await importFreshModule();
+
+		await submitComment(validSubmission);
+		await submitComment(validSubmission);
+		await submitComment(validSubmission);
+		const fourth = await submitComment(validSubmission);
+
+		expect(fourth.success).toBe(false);
+		if (!fourth.success) {
+			expect(fourth.errors.general).toBeDefined();
+		}
+		expect(mockCreateComment).toHaveBeenCalledTimes(3);
 	});
 
 	it("fails reCAPTCHA verification when siteverify returns success: false, and submits no comment", async () => {

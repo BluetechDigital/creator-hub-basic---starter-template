@@ -4,9 +4,9 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { useFormik } from "formik";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useRecaptchaV3 } from "@/hooks/useRecaptchaV3";
 import { submitComment, ICommentFormValues } from "@/app/[locale]/posts/[slug]/actions";
 import type { ISinglePostDict } from "@/app/[locale]/posts/[slug]/types/singlePost";
 
@@ -38,6 +38,11 @@ type ICommentForm = {
 
 type IFormValues = Omit<ICommentFormValues, 'postId' | 'recaptchaToken' | 'parentId'>;
 
+// Honeypot: real users never see or fill this — a submission with it set is a bot
+// (`submitComment` silently drops it). Positioned off-screen rather than
+// `display:none`, which some bots skip.
+const HONEYPOT_FIELD = 'website';
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -45,8 +50,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Comment submission form — same shape as `components/CMS/ContactForm/ContactForm.tsx`
  * (`useFormik`, no client-side validation library since `actions.ts`'s `submitComment`
- * is the single source of truth for validation rules, same reCAPTCHA widget wired to
- * the shared `submitComment` Server Action). On success, shows a generic "may take a
+ * is the single source of truth for validation rules, invisible reCAPTCHA v3 via
+ * `useRecaptchaV3` wired to the shared `submitComment` Server Action). On success, shows a generic "may take a
  * minute to appear" message instead of appending to the visible feed — deliberately
  * doesn't promise instant visibility or claim moderation either way, since whether a
  * new comment publishes immediately or waits for approval is a per-site WordPress
@@ -68,17 +73,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CommentForm Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
 const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 	const uid = useId();
-	const recaptchaRef = useRef<ReCAPTCHA>(null);
+	const executeRecaptcha = useRecaptchaV3();
 	const [submitted, setSubmitted] = useState(false);
 	const [generalError, setGeneralError] = useState<string | null>(null);
 
 	const formik = useFormik<IFormValues>({
-		initialValues: { name: '', email: '', content: '' },
+		initialValues: { name: '', email: '', content: '', [HONEYPOT_FIELD]: '' },
 		onSubmit: async (values, { resetForm, setErrors, setSubmitting }) => {
 			setSubmitted(false);
 			setGeneralError(null);
 
-			const recaptchaToken = recaptchaRef.current?.getValue();
+			const recaptchaToken = await executeRecaptcha("comment");
 
 			if (RECAPTCHA_SITE_KEY && !recaptchaToken) {
 				setGeneralError(dict.recaptchaRequired);
@@ -86,9 +91,7 @@ const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 				return;
 			}
 
-			const result = await submitComment({ ...values, postId, parentId, recaptchaToken: recaptchaToken ?? "" });
-
-			recaptchaRef.current?.reset();
+			const result = await submitComment({ ...values, postId, parentId, recaptchaToken });
 
 			if (result.success) {
 				setSubmitted(true);
@@ -107,6 +110,19 @@ const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 		<div className={`${styles.commentForm} ${parentId ? styles.commentFormCompact : ''}`}>
 			{!parentId && <h2 className={styles.commentFormHeading}>{dict.leaveComment}</h2>}
 			<form onSubmit={formik.handleSubmit} noValidate>
+				<div className={styles.commentFormHoneypot} aria-hidden="true">
+					<label htmlFor={`comment-${HONEYPOT_FIELD}-${uid}`}>{dict.honeypotLabel}</label>
+					<input
+						id={`comment-${HONEYPOT_FIELD}-${uid}`}
+						name={HONEYPOT_FIELD}
+						type="text"
+						tabIndex={-1}
+						autoComplete="off"
+						value={formik.values[HONEYPOT_FIELD] ?? ''}
+						onChange={formik.handleChange}
+					/>
+				</div>
+
 				<div className={styles.commentFormRow}>
 					<div className={styles.commentFormField}>
 						<label htmlFor={`comment-name-${uid}`}>{dict.nameLabel}</label>
@@ -144,10 +160,6 @@ const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 					{formik.errors.content ? <p className={styles.commentFormError}>{formik.errors.content}</p> : null}
 				</div>
 
-				{RECAPTCHA_SITE_KEY ? (
-					<ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} />
-				) : null}
-
 				{generalError ? <p className={styles.commentFormError} role="alert">{generalError}</p> : null}
 				{submitted ? (
 					<p role="status">{parentId ? dict.thanksReply : dict.thanksComment}</p>
@@ -163,6 +175,16 @@ const CommentForm = ({ postId, parentId, onCancel, dict }: ICommentForm) => {
 						</button>
 					) : null}
 				</div>
+
+				{RECAPTCHA_SITE_KEY ? (
+					<p className={styles.commentFormRecaptchaNote}>
+						This site is protected by reCAPTCHA and the Google{' '}
+						<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>{' '}
+						and{' '}
+						<a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>{' '}
+						apply.
+					</p>
+				) : null}
 			</form>
 		</div>
 	);

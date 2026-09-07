@@ -77,7 +77,8 @@
 		"postComment": "Publier le commentaire",
 		"thanksComment": "Merci pour votre commentaire ! Il peut mettre une minute à apparaître.",
 		"thanksReply": "Merci pour votre réponse ! Elle peut mettre une minute à apparaître.",
-		"recaptchaRequired": "Veuillez valider le contrôle reCAPTCHA."
+		"recaptchaRequired": "Échec de la vérification — veuillez réessayer.",
+		"honeypotLabel": "Laissez ce champ vide"
 	},
 	"notFound": {
 		"title": "404 - Page introuvable",

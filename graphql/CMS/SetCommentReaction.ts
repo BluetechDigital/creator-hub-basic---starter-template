@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import { IReaction } from "@/graphql/CMS/SetPostReaction";
 import { ICommentReactions } from "@/graphql/CMS/GetCommentReactions";
+import { graphqlMutationHeaders } from "@/config/graphqlProxySecret";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -44,7 +45,7 @@ export const setCommentReaction = async (
 
 		const nextJSFetchResponse: Response = await fetch(GRAPHQL_ENDPOINT, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers: { 'Content-Type': 'application/json', ...graphqlMutationHeaders() },
 			body: JSON.stringify({
 				query: content,
 				variables: { commentId, previousReaction: previousReaction ?? null, newReaction },

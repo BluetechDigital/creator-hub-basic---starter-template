@@ -21,5 +21,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         & .field {
             @apply flex flex-col gap-1;
         }
+
+        & .recaptchaNote {
+            @apply text-xs text-pure-black/50;
+
+            & a {
+                @apply underline;
+
+                &:hover {
+                    @apply text-accent-dark;
+                }
+            }
+        }
     }
 }

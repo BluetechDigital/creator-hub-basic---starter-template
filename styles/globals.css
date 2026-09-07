@@ -82,6 +82,16 @@ a {
 }
 
 /* -----------------------------------------------------------------------------
+reCAPTCHA v3 badge — hidden site-wide. Google's terms allow this as long as the
+"protected by reCAPTCHA" attribution text is shown on each form that uses it
+(see CommentForm.tsx / ContactForm.tsx).
+----------------------------------------------------------------------------- */
+
+.grecaptcha-badge {
+    visibility: hidden;
+}
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXX DISABLING SCREEN CONTENT COPYING XXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 

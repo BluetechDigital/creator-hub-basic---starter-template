@@ -36,7 +36,8 @@ const dict = {
 	postComment: "Post comment",
 	thanksComment: "Thanks for your comment! It may take a minute to appear.",
 	thanksReply: "Thanks for your reply! It may take a minute to appear.",
-	recaptchaRequired: "Please complete the reCAPTCHA check.",
+	recaptchaRequired: "Verification failed — please try again.",
+	honeypotLabel: "Leave this field empty",
 };
 
 const comments: IComment[] = [

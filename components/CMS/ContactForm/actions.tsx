@@ -8,6 +8,7 @@ import validator from "validator";
 import { render } from "@react-email/components";
 import { getEmailTransporter } from "@/config/nodemailer";
 import { verifyRecaptcha } from "@/config/recaptcha";
+import { checkRateLimit, getRequestIp } from "@/config/rateLimit";
 import ContactNotificationEmail from "@/components/CMS/ContactForm/emails/ContactNotificationEmail";
 import ContactConfirmationEmail from "@/components/CMS/ContactForm/emails/ContactConfirmationEmail";
 
@@ -60,6 +61,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Submit Contact Form XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * (validation failures) or a `general`/`recaptcha` message (verification or send failures).
  */
 export const submitContactForm = async (values: IContactFormValues): Promise<IContactFormResult> => {
+	const ip = await getRequestIp();
+	if (!checkRateLimit(`contact:${ip}`, 3, 60_000)) {
+		return { success: false, errors: { general: "You're sending messages too quickly — please wait a moment and try again." } };
+	}
+
 	const errors: IContactFormErrors = {};
 
 	const name = values.name?.trim() ?? "";
@@ -82,7 +88,7 @@ export const submitContactForm = async (values: IContactFormValues): Promise<ICo
 		return { success: false, errors };
 	}
 
-	const recaptchaValid = await verifyRecaptcha(values.recaptchaToken);
+	const recaptchaValid = await verifyRecaptcha(values.recaptchaToken, "contact");
 
 	if (!recaptchaValid) {
 		return { success: false, errors: { recaptcha: "reCAPTCHA verification failed. Please try again." } };

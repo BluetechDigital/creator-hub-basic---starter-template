@@ -77,7 +77,8 @@
 		"postComment": "Publicar comentário",
 		"thanksComment": "Obrigado pelo seu comentário! Pode demorar um minuto a aparecer.",
 		"thanksReply": "Obrigado pela sua resposta! Pode demorar um minuto a aparecer.",
-		"recaptchaRequired": "Por favor, complete a verificação reCAPTCHA."
+		"recaptchaRequired": "Falha na verificação — tente novamente.",
+		"honeypotLabel": "Deixe este campo vazio"
 	},
 	"notFound": {
 		"title": "404 - Página não encontrada",

@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import * as IComment from "@/graphql/CMS/types/comment";
+import { sanitizeCommentHtml } from "@/graphql/CMS/sanitizeCommentHtml";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -119,9 +120,19 @@ export const getPostComments = async (databaseId: number): Promise<IPostComments
 
 		if (!response?.data?.post) return undefined;
 
+		// Authoritative server-side sanitize of every comment/reply body before
+		// it enters the RSC payload — see `sanitizeCommentHtml`'s doc comment.
+		const sanitizeComment = (comment: IComment.IProps): IComment.IProps => ({
+			...comment,
+			content: sanitizeCommentHtml(comment.content),
+			replies: comment.replies
+				? { nodes: comment.replies.nodes.map(sanitizeComment) }
+				: comment.replies,
+		});
+
 		return {
 			commentCount: response.data.post.commentCount ?? 0,
-			comments: response.data.post.comments?.nodes ?? [],
+			comments: (response.data.post.comments?.nodes ?? []).map(sanitizeComment),
 		};
 
 	} catch (error: unknown) {
