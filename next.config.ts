@@ -168,6 +168,12 @@ const nextConfig: NextConfig = {
 				pathname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATHNAME}/**`,
 			},
 			{
+				protocol: "https",
+				hostname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO}`,
+				port: "",
+				pathname: `${process.env.INSTAGRAM_IMAGE_REMOTE_PATHNAME_TWO || "/**"}`,
+			},
+			{
 				// WordPress author avatars — a fixed, universal host (not client-specific
 				// like the CMS/YouTube/Instagram hosts above), so hardcoded rather than
 				// read from an env var.

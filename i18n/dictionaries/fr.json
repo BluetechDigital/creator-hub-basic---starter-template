@@ -12,6 +12,12 @@
 		"decline": "Refuser",
 		"declineAriaLabel": "Refuser les cookies"
 	},
+	"instagramFeed": {
+		"empty": "Le flux Instagram n'est pas disponible pour le moment.",
+		"previous": "Image précédente",
+		"next": "Image suivante",
+		"viewOnInstagram": "Voir sur Instagram"
+	},
 	"breadcrumbs": {
 		"home": "Accueil",
 		"posts": "Articles",

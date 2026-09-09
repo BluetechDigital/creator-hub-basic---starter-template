@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render } from "@testing-library/react";
 
 const mockGetLocale = vi.fn();
 const mockGetTranslatedContent = vi.fn();
@@ -11,7 +12,7 @@ vi.mock("@/api/Translation/GetTranslatedContent", () => ({
 	getTranslatedContent: (...args: unknown[]) => mockGetTranslatedContent(...args),
 }));
 
-import { PROSE_FIELDS, translateBlockProse, DynamicComponentLoaders } from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
+import RenderFlexibleContent, { PROSE_FIELDS, translateBlockProse, DynamicComponentLoaders } from "@/components/CMS/FlexibleContent/RenderFlexibleContent";
 
 describe("PROSE_FIELDS", () => {
 	it("only allowlists fields on blocks that are actually registered in DynamicComponentLoaders", () => {
@@ -88,5 +89,27 @@ describe("translateBlockProse", () => {
 
 		expect(result).toEqual({ title: "Hello" });
 		expect(mockGetTranslatedContent).not.toHaveBeenCalled();
+	});
+});
+
+describe("RenderFlexibleContent", () => {
+	// getAllPageACFFlexibleComponentsContent (the sole real caller) returns
+	// null on any CMS fetch failure — a bad slug, a GraphQL error, an
+	// unreachable CMS — and both app/[locale]/page.tsx and
+	// app/[locale]/[slug]/page.tsx pass that straight through with a type
+	// cast that hides the null case from TypeScript. This guards the actual
+	// runtime behaviour: the page should render nothing for that block area,
+	// not crash with "Cannot read properties of null (reading 'map')".
+	it("renders nothing, without throwing, when content is null", () => {
+		expect(() => render(<RenderFlexibleContent content={null} />)).not.toThrow();
+	});
+
+	it("renders nothing, without throwing, when content is undefined", () => {
+		expect(() => render(<RenderFlexibleContent content={undefined} />)).not.toThrow();
+	});
+
+	it("renders nothing for an empty content array", () => {
+		const { container } = render(<RenderFlexibleContent content={[]} />);
+		expect(container).toBeEmptyDOMElement();
 	});
 });

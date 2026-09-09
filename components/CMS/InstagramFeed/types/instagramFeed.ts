@@ -8,4 +8,6 @@ import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-export type IProps = IFlexibleContent.IBaseFixedProps & object;
+export type IProps = IFlexibleContent.IBaseFixedProps & {
+	title?: string;
+};

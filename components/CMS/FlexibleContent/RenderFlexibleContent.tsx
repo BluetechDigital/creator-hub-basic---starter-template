@@ -79,6 +79,7 @@ export const PROSE_FIELDS: Record<string, { plain?: string[]; html?: string[] }>
     AllYoutubeVideos: { plain: ["title"] },
     AllYoutubeShortsVideos: { plain: ["title"] },
     YoutubeVideoGrid: { plain: ["title"] },
+    InstagramFeed: { plain: ["title"] },
 };
 
 /**
@@ -154,7 +155,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXX Flexible Content Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 type IProps = {
-    content: IFlexibleContent.IProps;
+    /**
+     * `getAllPageACFFlexibleComponentsContent` returns `null` on any CMS fetch
+     * failure (bad slug, a GraphQL error, the CMS being unreachable) — this
+     * accepts that directly, rather than trusting every call site to guard it
+     * first, since `page.tsx`/`[slug]/page.tsx` currently pass its result
+     * straight through with a type cast that hides the `null` case from
+     * TypeScript.
+     */
+    content: IFlexibleContent.IProps | null | undefined;
     /** The blog archive's tag/category/date filters (parsed in `app/[locale]/posts/page.tsx`) — only relevant to the `AllBlogPosts` block, but threaded through every block the same way `item`'s ACF fields are (see `ResolvedBlock`'s doc comment). */
     filters?: IPost.IPostFilters;
     /** The video archive's current `?page=` number (parsed in `app/[locale]/videos/page.tsx`) — only relevant to the `AllYoutubeVideos` block, threaded the same way `filters` is. */
@@ -183,7 +192,7 @@ type IProps = {
 const RenderFlexibleContent: FC<IProps> = ({ content, filters, page }) => {
     return (
         <>
-            {content.map((item, index) => {
+            {(content ?? []).map((item, index) => {
 
                 /* Efficiently extract the component's simple name (e.g. 'Hero', or 'AboutUs' or 'CallToAction')
                 by finding the index of the last underscore and slicing the string. Basically removing the long

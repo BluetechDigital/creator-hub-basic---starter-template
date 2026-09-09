@@ -2,31 +2,34 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Why the dynamic import XXXXXXXXXXXXXXXXXXXXXXXXXX
-INSTAGRAM_ACCESS_TOKEN is read into a module-scope const on import, not re-read
-per call — same pattern as api/YouTube/GetAllYoutubeContent.test.ts. Each test
-sets process.env *before* importing a fresh copy of the module via
-vi.resetModules() so that module-scope read re-runs.
+The token now comes from `getInstagramToken` (Edge Config → env fallback), not a
+module-scope env read — mock that module. `refreshInstagramAccessToken` still
+lives here (exported for the cron) but `getAllInstagramFeedContent` no longer
+calls it.
 ----------------------------------------------------------------------------- */
 
-const originalEnv = { ...process.env };
+const { mockGetInstagramToken } = vi.hoisted(() => ({ mockGetInstagramToken: vi.fn() }));
+
+vi.mock("@/config/instagramToken", () => ({
+	getInstagramToken: mockGetInstagramToken,
+	persistInstagramToken: vi.fn(),
+}));
 
 const importFreshModule = async () => {
 	vi.resetModules();
 	return import("./GetAllInstagramFeedContent");
 };
 
-const setInstagramEnv = () => {
-	process.env.INSTAGRAM_ACCESS_TOKEN = "test-long-lived-token";
-};
+const feedResponse = (data: unknown[]) => ({ ok: true, json: async () => ({ data }) });
 
 describe("getAllInstagramFeedContent", () => {
 	afterEach(() => {
-		process.env = { ...originalEnv };
 		vi.unstubAllGlobals();
+		vi.clearAllMocks();
 	});
 
-	it("throws when INSTAGRAM_ACCESS_TOKEN is missing and no override is passed", async () => {
-		delete process.env.INSTAGRAM_ACCESS_TOKEN;
+	it("throws when no token is available and no override is passed", async () => {
+		mockGetInstagramToken.mockResolvedValue(undefined);
 
 		const { getAllInstagramFeedContent } = await importFreshModule();
 
@@ -35,96 +38,66 @@ describe("getAllInstagramFeedContent", () => {
 		);
 	});
 
-	it("refreshes the token first, then fetches the feed using the refreshed token", async () => {
-		setInstagramEnv();
+	it("fetches the feed with the token from getInstagramToken", async () => {
+		mockGetInstagramToken.mockResolvedValue("stored-token");
 
-		const mockFetch = vi.fn()
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
-					access_token: "refreshed-token",
-					token_type: "bearer",
-					expires_in: 5184000,
-				}),
-			})
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
-					data: [
-						{
-							id: "1",
-							media_type: "IMAGE",
-							media_url: "https://cdninstagram.com/img.jpg",
-							timestamp: "2026-01-01T00:00:00Z",
-							caption: "Test post",
-							permalink: "https://instagram.com/p/1",
-							username: "creator",
-						},
-					],
-				}),
-			});
+		const mockFetch = vi.fn().mockResolvedValue(
+			feedResponse([
+				{
+					id: "1",
+					media_type: "IMAGE",
+					media_url: "https://cdninstagram.com/img.jpg",
+					timestamp: "2026-01-01T00:00:00Z",
+					caption: "Test post",
+					permalink: "https://instagram.com/p/1",
+					username: "creator",
+				},
+			]),
+		);
 		vi.stubGlobal("fetch", mockFetch);
 
 		const { getAllInstagramFeedContent } = await importFreshModule();
 		const result = await getAllInstagramFeedContent();
 
-		expect(mockFetch).toHaveBeenCalledTimes(2);
-		expect(mockFetch).toHaveBeenNthCalledWith(
-			1,
-			expect.stringContaining("/refresh_access_token?grant_type=ig_refresh_token&access_token=test-long-lived-token"),
+		expect(mockFetch).toHaveBeenCalledTimes(1);
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.stringContaining("/me/media?fields="),
 			expect.any(Object),
 		);
-		expect(mockFetch).toHaveBeenNthCalledWith(
-			2,
-			expect.stringContaining("access_token=refreshed-token"),
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.stringContaining("access_token=stored-token"),
 			expect.any(Object),
 		);
-		expect(result).toEqual([
-			expect.objectContaining({ id: "1", username: "creator" }),
-		]);
+		expect(result).toEqual([expect.objectContaining({ id: "1", username: "creator" })]);
 	});
 
-	it("falls back to the configured token when the refresh call fails", async () => {
-		setInstagramEnv();
+	it("accepts an accessTokenOverride instead of the stored token", async () => {
+		mockGetInstagramToken.mockResolvedValue(undefined);
 
-		const mockFetch = vi.fn()
-			.mockResolvedValueOnce({
-				ok: false,
-				status: 400,
-				json: async () => ({ error: { message: "Invalid token" } }),
-			})
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({ data: [] }),
-			});
+		const mockFetch = vi.fn().mockResolvedValue(feedResponse([]));
 		vi.stubGlobal("fetch", mockFetch);
 
 		const { getAllInstagramFeedContent } = await importFreshModule();
-		const result = await getAllInstagramFeedContent();
+		await getAllInstagramFeedContent("override-token");
 
-		expect(mockFetch).toHaveBeenNthCalledWith(
-			2,
-			expect.stringContaining("access_token=test-long-lived-token"),
+		expect(mockGetInstagramToken).not.toHaveBeenCalled();
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.stringContaining("access_token=override-token"),
 			expect.any(Object),
 		);
-		expect(result).toEqual([]);
 	});
 
 	it("wraps a failed feed-fetch response in a generic error", async () => {
-		setInstagramEnv();
+		mockGetInstagramToken.mockResolvedValue("stored-token");
 
-		const mockFetch = vi.fn()
-			.mockResolvedValueOnce({
-				ok: false,
-				status: 400,
-				json: async () => ({ error: { message: "Invalid token" } }),
-			})
-			.mockResolvedValueOnce({
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
 				ok: false,
 				status: 401,
 				json: async () => ({ error: { message: "Unauthorized" } }),
-			});
-		vi.stubGlobal("fetch", mockFetch);
+			}),
+		);
 
 		const { getAllInstagramFeedContent } = await importFreshModule();
 
@@ -132,28 +105,37 @@ describe("getAllInstagramFeedContent", () => {
 			"Failed to retrieve Instagram feed content",
 		);
 	});
+});
 
-	it("accepts an accessTokenOverride instead of requiring INSTAGRAM_ACCESS_TOKEN", async () => {
-		delete process.env.INSTAGRAM_ACCESS_TOKEN;
+describe("refreshInstagramAccessToken", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.clearAllMocks();
+	});
 
-		const mockFetch = vi.fn()
-			.mockResolvedValueOnce({
+	it("returns the rotated token and its expiry on success", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
 				ok: true,
-				json: async () => ({ access_token: "refreshed", token_type: "bearer", expires_in: 5184000 }),
-			})
-			.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({ data: [] }),
-			});
-		vi.stubGlobal("fetch", mockFetch);
-
-		const { getAllInstagramFeedContent } = await importFreshModule();
-		await getAllInstagramFeedContent("override-token");
-
-		expect(mockFetch).toHaveBeenNthCalledWith(
-			1,
-			expect.stringContaining("access_token=override-token"),
-			expect.any(Object),
+				json: async () => ({ access_token: "rotated", token_type: "bearer", expires_in: 5184000 }),
+			}),
 		);
+
+		const { refreshInstagramAccessToken } = await importFreshModule();
+		const result = await refreshInstagramAccessToken("old-token");
+
+		expect(result?.accessToken).toBe("rotated");
+		expect(result?.expiresAt).toBeInstanceOf(Date);
+	});
+
+	it("returns null (swallowed) when the refresh call fails", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({ ok: false, status: 400, json: async () => ({ error: { message: "bad" } }) }),
+		);
+
+		const { refreshInstagramAccessToken } = await importFreshModule();
+		expect(await refreshInstagramAccessToken("old-token")).toBeNull();
 	});
 });

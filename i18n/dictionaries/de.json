@@ -12,6 +12,12 @@
 		"decline": "Ablehnen",
 		"declineAriaLabel": "Cookies ablehnen"
 	},
+	"instagramFeed": {
+		"empty": "Der Instagram-Feed ist derzeit nicht verfügbar.",
+		"previous": "Vorheriges Bild",
+		"next": "Nächstes Bild",
+		"viewOnInstagram": "Auf Instagram ansehen"
+	},
 	"breadcrumbs": {
 		"home": "Startseite",
 		"posts": "Beiträge",

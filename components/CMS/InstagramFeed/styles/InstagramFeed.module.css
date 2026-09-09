@@ -2,9 +2,171 @@
 @import "../../../../styles/theme.css";
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+A title over an Instagram grid (feed fetched server-side via api/Instagram):
+9 tiles, then a "Show more" button reveals the rest of the fetched batch.
 ----------------------------------------------------------------------------- */
 
 .instagramFeed {
-    @apply w-full h-full;
+	@apply py-10;
+}
+
+.instagramFeed .instagramFeedTitle {
+	@apply w-full max-w-3xl mx-auto mb-10 p-4 text-center font-bold text-black
+		leading-snug text-4xl lg:text-5xl;
+}
+
+/* The @handle the CMS editor drops into the title as a link. */
+.instagramFeed .instagramFeedTitle a {
+	@apply text-accent-two underline underline-offset-4 decoration-2 transition-opacity;
+}
+
+.instagramFeed .instagramFeedTitle a:hover {
+	@apply opacity-80;
+}
+
+.instagramFeed .instagramFeedContainer {
+	@apply container px-4 mx-auto bg-white;
+}
+
+.instagramFeed .instagramFeedGrid {
+	@apply grid grid-cols-2 md:grid-cols-3 gap-2 lg:gap-6 items-center justify-center;
+}
+
+.instagramFeed .instagramFeedItem {
+	@apply relative h-62.5 sm:h-87.5 lg:h-93.75 xl:h-118.75 overflow-hidden bg-black/5;
+}
+
+/* Scroll-snap strip — one slide wide, native swipe on touch/trackpad. */
+.instagramFeed .instagramFeedTrack {
+	@apply flex h-full w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+	scroll-behavior: smooth;
+}
+
+.instagramFeed .instagramFeedTrack::-webkit-scrollbar {
+	display: none;
+}
+
+.instagramFeed .instagramFeedSlide {
+	@apply relative flex h-full w-full shrink-0 snap-start items-center justify-center
+		bg-cover bg-center bg-no-repeat;
+}
+
+.instagramFeed .instagramFeedPlay {
+	@apply pointer-events-none h-12 w-12 drop-shadow-lg;
+}
+
+/* Prev / next arrows — fade in on hover, hidden at the ends and on touch. */
+.instagramFeed .instagramFeedArrow {
+	@apply absolute top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 place-items-center
+		rounded-full bg-black/45 text-white opacity-0 transition
+		duration-300 cursor-pointer;
+}
+
+.instagramFeed .instagramFeedArrow svg {
+	@apply h-4 w-4;
+}
+
+.instagramFeed .instagramFeedArrowPrev {
+	@apply left-2;
+}
+
+.instagramFeed .instagramFeedArrowNext {
+	@apply right-2;
+}
+
+.instagramFeed .instagramFeedItem:hover .instagramFeedArrow {
+	@apply opacity-100;
+}
+
+.instagramFeed .instagramFeedArrow:hover {
+	@apply bg-black/65;
+}
+
+.instagramFeed .instagramFeedArrow:disabled {
+	@apply pointer-events-none opacity-0;
+}
+
+/* Dot indicators — wrap to a second row rather than overflow a narrow tile
+   when a carousel has many slides. */
+.instagramFeed .instagramFeedDots {
+	@apply absolute bottom-2.5 left-1/2 z-20 flex max-w-[85%] -translate-x-1/2
+		flex-wrap justify-center gap-1.5 opacity-0 transition duration-300;
+}
+
+.instagramFeed .instagramFeedItem:hover .instagramFeedDots {
+	@apply opacity-100;
+}
+
+.instagramFeed .instagramFeedDot {
+	@apply h-1.5 w-1.5 rounded-full bg-white/50 transition cursor-pointer;
+}
+
+.instagramFeed .instagramFeedDot[data-active] {
+	@apply w-3 bg-white;
+}
+
+/* Full-bleed link + centred like/comment overlay. */
+.instagramFeed .instagramFeedOverlay {
+	@apply absolute inset-0 z-10 flex items-center justify-center p-4
+		bg-black/0 transition-colors duration-300;
+}
+
+.instagramFeed .instagramFeedItem:hover .instagramFeedOverlay {
+	@apply bg-black/45;
+}
+
+.instagramFeed .instagramFeedStats {
+	@apply flex gap-6 lg:gap-8 text-xl lg:text-2xl font-bold text-white opacity-0
+		drop-shadow-lg transition duration-300;
+}
+
+.instagramFeed .instagramFeedItem:hover .instagramFeedStats {
+	@apply opacity-100;
+}
+
+.instagramFeed .instagramFeedStat {
+	@apply inline-flex items-center gap-2;
+}
+
+.instagramFeed .instagramFeedStat svg {
+	@apply h-7 w-7 lg:h-8 lg:w-8;
+}
+
+/* Touch devices have no hover: drop the arrows (swipe instead) and keep the dot
+   indicators visible so a carousel still reads as swipeable. The stats overlay
+   stays hover-only, same as desktop — it doesn't sit permanently over the
+   image on mobile. */
+@media (hover: none) {
+	.instagramFeed .instagramFeedArrow {
+		@apply hidden;
+	}
+
+	.instagramFeed .instagramFeedDots {
+		@apply opacity-100;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.instagramFeed .instagramFeedTrack {
+		scroll-behavior: auto;
+	}
+}
+
+.instagramFeed .instagramFeedEmpty {
+	@apply py-10 text-center text-dark-grey;
+}
+
+.instagramFeed .instagramFeedShowMoreWrapper {
+	@apply flex justify-center pt-8 mt-6 border-t border-pure-black/10;
+}
+
+.instagramFeed .instagramFeedShowMoreButton {
+	@apply inline-flex items-center px-6 py-4 text-sm font-semibold text-pure-black
+		bg-pure-black/5 rounded-full transition duration-300 cursor-pointer;
+}
+
+.instagramFeed .instagramFeedShowMoreButton:hover {
+	@apply bg-pure-black/10;
 }

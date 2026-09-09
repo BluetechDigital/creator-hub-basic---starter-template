@@ -16,8 +16,6 @@ import ContactForm from "@/components/CMS/ContactForm/ContactForm";
 import contactFormStyles from "@/components/CMS/ContactForm/styles/ContactForm.module.css";
 import CookiePolicies from "@/components/CMS/CookiePolicies/CookiePolicies";
 import cookiePoliciesStyles from "@/components/CMS/CookiePolicies/styles/CookiePolicies.module.css";
-import InstagramFeed from "@/components/CMS/InstagramFeed/InstagramFeed";
-import instagramFeedStyles from "@/components/CMS/InstagramFeed/styles/InstagramFeed.module.css";
 import PrivacyPolicies from "@/components/CMS/PrivacyPolicies/PrivacyPolicies";
 import privacyPoliciesStyles from "@/components/CMS/PrivacyPolicies/styles/PrivacyPolicies.module.css";
 import SponsorshipInfo from "@/components/CMS/SponsorshipInfo/SponsorshipInfo";
@@ -36,11 +34,12 @@ class. As blocks get built out, replace an entry's assertion with real
 prop-behaviour tests (see TitleParagraph.test.tsx for the pattern) rather than
 leaving it here once it stops being an empty div.
 
-AllYoutubeVideos/AllYoutubeShortsVideos are excluded — they're async Server
-Components (they fetch data in their own function body) and React Testing
-Library's render() does not support awaiting a Server Component today; that data
--fetching path is covered instead by their underlying api/YouTube functions'
-own tests.
+AllYoutubeVideos/AllYoutubeShortsVideos/InstagramFeed are excluded — they're
+async Server Components (they fetch data in their own function body) and React
+Testing Library's render() does not support awaiting a Server Component today;
+that data-fetching path is covered instead by their underlying api/YouTube and
+api/Instagram functions' own tests, with InstagramFeed's client-rendered
+fragments (InstagramGrid, InstagramTile) covered by their own component tests.
 ----------------------------------------------------------------------------- */
 
 // A generic component map, same as DynamicComponentLoaders in RenderFlexibleContent.tsx —
@@ -55,7 +54,6 @@ const blocks: [name: string, Component: ComponentType<any>, rootClass: string][]
 	["CallToActionTwo", CallToActionTwo, callToActionTwoStyles.callToActionTwo],
 	["ContactForm", ContactForm, contactFormStyles.contactForm],
 	["CookiePolicies", CookiePolicies, cookiePoliciesStyles.cookiePolicies],
-	["InstagramFeed", InstagramFeed, instagramFeedStyles.instagramFeed],
 	["PrivacyPolicies", PrivacyPolicies, privacyPoliciesStyles.privacyPolicies],
 	["SponsorshipInfo", SponsorshipInfo, sponsorshipInfoStyles.sponsorshipInfo],
 	["YoutubeVideoGrid", YoutubeVideoGrid, youtubeVideoGridStyles.youtubeVideoGrid],

@@ -12,6 +12,12 @@
 		"decline": "Decline",
 		"declineAriaLabel": "Decline cookies"
 	},
+	"instagramFeed": {
+		"empty": "The Instagram feed is unavailable right now.",
+		"previous": "Previous image",
+		"next": "Next image",
+		"viewOnInstagram": "View on Instagram"
+	},
 	"breadcrumbs": {
 		"home": "Home",
 		"posts": "Posts",
