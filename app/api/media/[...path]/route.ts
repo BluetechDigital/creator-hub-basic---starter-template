@@ -53,6 +53,20 @@ export const GET = async (
 	}
 
 	const { path } = await params;
+
+	// Reject a `..`/`.` segment (or an empty one, from a doubled slash) before
+	// the prefix check below, not after — `relativePath.startsWith(...)` is a
+	// pure string comparison and does NOT stop a path like
+	// `wp-content/uploads/../../wp-login.php` from passing it: that string
+	// genuinely starts with "wp-content/uploads/", but `fetch()` resolves the
+	// `..` segments when it parses the resulting URL, reaching
+	// `${CMS_URL}/wp-login.php` — exactly the path this allowlist exists to
+	// block. Confirmed live while reviewing this route: without this check,
+	// the prefix restriction below is bypassable, not enforced.
+	if (path.length === 0 || path.some((segment) => !segment || segment === "." || segment === "..")) {
+		return NextResponse.json({ error: "Not found." }, { status: 404 });
+	}
+
 	const relativePath = path.join("/");
 
 	if (!ALLOWED_PREFIXES.some((prefix) => relativePath.startsWith(prefix))) {

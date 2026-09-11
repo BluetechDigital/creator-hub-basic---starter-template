@@ -42,6 +42,20 @@ describe("GET /api/media/[...path]", () => {
 		expect(mockFetch).not.toHaveBeenCalled();
 	});
 
+	it("responds 404 for a path-traversal attempt disguised behind the allowed prefix", async () => {
+		process.env.CMS_URL = "https://cms.example.test";
+		const mockFetch = vi.fn();
+		vi.stubGlobal("fetch", mockFetch);
+
+		// "wp-content/uploads/../../wp-login.php" starts with the allowed
+		// prefix as a plain string, but resolves to /wp-login.php once fetch()
+		// parses it as a URL — this must be rejected before ever reaching fetch.
+		const res = await requestWithPath(["wp-content", "uploads", "..", "..", "wp-login.php"]);
+
+		expect(res.status).toBe(404);
+		expect(mockFetch).not.toHaveBeenCalled();
+	});
+
 	it("streams a successful upstream response with the right headers", async () => {
 		process.env.CMS_URL = "https://cms.example.test";
 		const mockFetch = vi.fn().mockResolvedValue(
