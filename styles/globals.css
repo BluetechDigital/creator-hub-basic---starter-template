@@ -25,11 +25,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX FONTS-FACE IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 @font-face {
     font-family: TelkaRegular;
     src: url("./fonts/TelkaRegular.woff");
+    /* Without this, the default is effectively font-display: block in most
+    browsers — text using this face stays invisible for up to ~3s while the
+    font downloads (FOIT) instead of rendering in a fallback immediately. */
+    font-display: swap;
 }
 
 @font-face {
     font-family: PlusJakartaSans;
     src: url("./fonts/PlusJakartaSans.woff");
+    font-display: swap;
 }
 
 /* -----------------------------------------------------------------------------
