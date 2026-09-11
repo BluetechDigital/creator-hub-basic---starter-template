@@ -24,7 +24,20 @@ describe("cmsMediaUrl", () => {
 			const { rewriteCmsMediaUrl } = await importFreshModule();
 
 			expect(rewriteCmsMediaUrl("https://cms.example.test/wp-content/uploads/2024/example.pdf"))
-				.toBe("/api/media/wp-content/uploads/2024/example.pdf");
+				.toBe("/api/media/2024/example.pdf");
+		});
+
+		it("drops wp-content/uploads specifically but keeps the YYYY/MM/filename structure underneath it", async () => {
+			// The one string that unambiguously identifies the CMS as
+			// WordPress is gone; the date path stays — that's what keeps two
+			// different uploads with the same generic filename
+			// (banner.jpg in January vs. banner.jpg in June) from colliding
+			// once flattened, with no lookup store required.
+			process.env.CMS_URL = "https://cms.example.test";
+			const { rewriteCmsMediaUrl } = await importFreshModule();
+
+			expect(rewriteCmsMediaUrl("https://cms.example.test/wp-content/uploads/2024/01/about-us-banner-1.jpg"))
+				.toBe("/api/media/2024/01/about-us-banner-1.jpg");
 		});
 
 		it("rewrites a DEV_CMS_URL-origin URL the same way", async () => {
@@ -32,7 +45,7 @@ describe("cmsMediaUrl", () => {
 			const { rewriteCmsMediaUrl } = await importFreshModule();
 
 			expect(rewriteCmsMediaUrl("https://dev-cms.example.test/wp-content/uploads/x.png"))
-				.toBe("/api/media/wp-content/uploads/x.png");
+				.toBe("/api/media/x.png");
 		});
 
 		it("leaves a non-CMS URL (an external image, a Gravatar avatar) unchanged", async () => {
@@ -68,7 +81,7 @@ describe("cmsMediaUrl", () => {
 
 				expect(
 					rewriteCmsMediaUrl("https://i0.wp.com/cbf.example.test/wp-content/uploads/2024/01/photo-scaled.jpg?fit=2560%2C1661&ssl=1"),
-				).toBe("/api/media/wp-content/uploads/2024/01/photo-scaled.jpg");
+				).toBe("/api/media/2024/01/photo-scaled.jpg");
 			});
 
 			it("recognizes all four Photon subdomains (i0-i3.wp.com)", async () => {
@@ -77,7 +90,7 @@ describe("cmsMediaUrl", () => {
 
 				for (const sub of ["i0", "i1", "i2", "i3"]) {
 					expect(rewriteCmsMediaUrl(`https://${sub}.wp.com/cbf.example.test/wp-content/uploads/x.jpg?ssl=1`))
-						.toBe("/api/media/wp-content/uploads/x.jpg");
+						.toBe("/api/media/x.jpg");
 				}
 			});
 
@@ -86,7 +99,7 @@ describe("cmsMediaUrl", () => {
 				const { rewriteCmsMediaUrl } = await importFreshModule();
 
 				expect(rewriteCmsMediaUrl("https://i0.wp.com/dev-cbf.example.test/wp-content/uploads/x.jpg?ssl=1"))
-					.toBe("/api/media/wp-content/uploads/x.jpg");
+					.toBe("/api/media/x.jpg");
 			});
 
 			it("leaves a Photon URL wrapping an unrelated site unchanged", async () => {
@@ -114,7 +127,7 @@ describe("cmsMediaUrl", () => {
 
 			const html = '<p><img src="https://cms.example.test/wp-content/uploads/photo.jpg" alt=""></p>';
 			expect(rewriteCmsUrlsInHtml(html)).toBe(
-				'<p><img src="/api/media/wp-content/uploads/photo.jpg" alt=""></p>',
+				'<p><img src="/api/media/photo.jpg" alt=""></p>',
 			);
 		});
 
@@ -124,7 +137,7 @@ describe("cmsMediaUrl", () => {
 
 			const html = '<a href="https://cms.example.test/wp-content/uploads/2024/report.pdf">Download</a>';
 			expect(rewriteCmsUrlsInHtml(html)).toBe(
-				'<a href="/api/media/wp-content/uploads/2024/report.pdf">Download</a>',
+				'<a href="/api/media/2024/report.pdf">Download</a>',
 			);
 		});
 
@@ -137,8 +150,8 @@ describe("cmsMediaUrl", () => {
 				'<img src="https://cms.example.test/wp-content/uploads/b.jpg">';
 
 			expect(rewriteCmsUrlsInHtml(html)).toBe(
-				'<img src="/api/media/wp-content/uploads/a.jpg">' +
-				'<img src="/api/media/wp-content/uploads/b.jpg">',
+				'<img src="/api/media/a.jpg">' +
+				'<img src="/api/media/b.jpg">',
 			);
 		});
 
@@ -174,7 +187,7 @@ describe("cmsMediaUrl", () => {
 
 				const html = '<img src="https://i0.wp.com/cbf.example.test/wp-content/uploads/2024/01/photo-scaled.jpg?fit=2560%2C1661&ssl=1" alt="">';
 				expect(rewriteCmsUrlsInHtml(html)).toBe(
-					'<img src="/api/media/wp-content/uploads/2024/01/photo-scaled.jpg" alt="">',
+					'<img src="/api/media/2024/01/photo-scaled.jpg" alt="">',
 				);
 			});
 
@@ -184,7 +197,7 @@ describe("cmsMediaUrl", () => {
 
 				const html = '<a href="https://i2.wp.com/cbf.example.test/wp-content/uploads/2024/report.pdf?ssl=1">Download</a>';
 				expect(rewriteCmsUrlsInHtml(html)).toBe(
-					'<a href="/api/media/wp-content/uploads/2024/report.pdf">Download</a>',
+					'<a href="/api/media/2024/report.pdf">Download</a>',
 				);
 			});
 
@@ -197,8 +210,8 @@ describe("cmsMediaUrl", () => {
 					'<img src="https://i0.wp.com/cbf.example.test/wp-content/uploads/photon.jpg?ssl=1">';
 
 				expect(rewriteCmsUrlsInHtml(html)).toBe(
-					'<img src="/api/media/wp-content/uploads/direct.jpg">' +
-					'<img src="/api/media/wp-content/uploads/photon.jpg">',
+					'<img src="/api/media/direct.jpg">' +
+					'<img src="/api/media/photon.jpg">',
 				);
 			});
 

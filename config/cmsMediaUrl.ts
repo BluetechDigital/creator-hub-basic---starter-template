@@ -8,10 +8,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * Rewrites CMS-origin media URLs (featured images, SEO OG images, and any
  * `<img>`/`<a href>` inside CMS-authored WYSIWYG HTML — including document
  * links, e.g. a PDF under `/wp-content/uploads/...`) to a same-origin path
- * this app proxies itself (`app/api/media/[...path]/route.ts`), so the CMS's
- * real hostname never appears in anything a visitor's browser renders or can
- * copy — not an `<img src>`, not a "copy link address" on a document, not
- * page source. `import "server-only"` guards against this ever being pulled
+ * this app proxies itself (`app/api/media/[...path]/route.ts`) — e.g.
+ * `https://cbf.crdbbankfoundation.co.tz/wp-content/uploads/2024/01/photo.jpg`
+ * becomes `/api/media/2024/01/photo.jpg`, not just the domain swapped out —
+ * so the CMS's real hostname never appears in anything a visitor's browser
+ * renders or can copy — not an `<img src>`, not a "copy link address" on a
+ * document, not page source — and `wp-content/uploads`, the one path segment
+ * that unambiguously identifies the CMS as WordPress at all (independent of
+ * whose domain it's on), doesn't either; see `stripWpUploadsPrefix` for why
+ * the `YYYY/MM` date path underneath it is kept rather than flattened
+ * further. `import "server-only"` guards against this ever being pulled
  * into a Client Component bundle by accident: `CMS_URL`/`DEV_CMS_URL` aren't
  * `NEXT_PUBLIC_`-prefixed, so Next wouldn't inline a real value into client
  * code either way, but a silent `undefined` there would just as silently stop
@@ -61,6 +67,47 @@ const CMS_HOSTNAMES: string[] = CMS_ORIGINS
 	.filter((hostname): hostname is string => Boolean(hostname));
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXX Dropping the WordPress-specific prefix XXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// The one path segment that unambiguously identifies the CMS as WordPress at
+// all — every proxied URL drops it, not just the domain.
+const WP_UPLOADS_PREFIX = "/wp-content/uploads";
+
+/**
+ * Strips the WordPress-specific `/wp-content/uploads` segment from a path,
+ * keeping the `/YYYY/MM/filename` structure underneath it —
+ * `/wp-content/uploads/2024/01/about-us-banner-1.jpg` becomes
+ * `/2024/01/about-us-banner-1.jpg`, not just `/about-us-banner-1.jpg`.
+ *
+ * Deliberately not flattened all the way to the bare filename: WordPress
+ * buckets uploads by year/month *specifically* to avoid filename collisions
+ * (generic names like `banner.jpg` get reused across unrelated
+ * pages/months constantly) — the date segments are what keep that guarantee,
+ * not an implementation detail to throw away. Flattening further would need
+ * a filename -> real-path lookup (a persistent key-value store, built at
+ * content-fetch time and read at proxy-fetch time) for what's a fairly
+ * marginal secrecy gain on top of what dropping this one string already
+ * achieves, and this project deliberately doesn't carry that kind of shared
+ * state anywhere — `config/rateLimit.ts`'s own doc comment flags the same
+ * "would need Upstash/Vercel KV for a cross-instance guarantee" trade-off
+ * for a different feature and stays without it too.
+ *
+ * `app/api/media/[...path]/route.ts` re-inserts this exact same prefix
+ * before fetching from the real CMS — the two must agree on this constant,
+ * which is why it's dropping the prefix, not a name they each hardcode
+ * separately. Every proxied path is implicitly scoped to this directory as a
+ * result: the route no longer needs (or has) an allowlist-of-prefixes check,
+ * just the path-traversal guard it already had.
+ * @param path A path starting with `/wp-content/uploads/...`.
+ * @returns The same path with that prefix removed. Returns `path` unchanged
+ * if it doesn't actually start with the expected prefix — every call site
+ * here has already confirmed the URL is CMS-origin by the time this runs.
+ */
+const stripWpUploadsPrefix = (path: string): string =>
+	path.startsWith(WP_UPLOADS_PREFIX) ? path.slice(WP_UPLOADS_PREFIX.length) : path;
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Jetpack Photon CDN XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -71,8 +118,10 @@ const PHOTON_HOST_PATTERN = /^https:\/\/i[0-3]\.wp\.com\//i;
 /**
  * Resolves a Photon-wrapped URL directly to its `/api/media/...` proxy path,
  * when `url` wraps a *known* CMS host — e.g.
- * `https://i0.wp.com/cbf.crdbbankfoundation.co.tz/wp-content/uploads/x.jpg?fit=800%2C600&ssl=1`
- * becomes `/api/media/wp-content/uploads/x.jpg`. Matched by **hostname alone**,
+ * `https://i0.wp.com/cbf.crdbbankfoundation.co.tz/wp-content/uploads/2024/01/x.jpg?fit=800%2C600&ssl=1`
+ * becomes `/api/media/2024/01/x.jpg` (see `stripWpUploadsPrefix` for why the
+ * `wp-content/uploads` segment specifically is dropped but the date path
+ * underneath it is kept). Matched by **hostname alone**,
  * not by comparing against the full `CMS_URL`/`DEV_CMS_URL` origin string the
  * way a direct URL is (see `resolveToMediaProxyPath` below) — Photon discards
  * the original scheme and port entirely when it wraps a URL, so a
@@ -105,16 +154,24 @@ const resolvePhotonUrl = (url: string): string | null => {
 
 	const pathAndQuery = afterPhotonHost.slice(wrappedHostname.length);
 	const pathOnly = pathAndQuery.split("?")[0];
-	return `/api/media${pathOnly}`;
+	return `/api/media${stripWpUploadsPrefix(pathOnly)}`;
 };
 
 /**
  * The shared resolver both functions below build on: given any raw URL,
  * returns its `/api/media/...` path if it's CMS-origin — Photon-wrapped
  * (matched by hostname, see `resolvePhotonUrl`) or direct (matched by exact
- * origin string, which preserves any query string a direct URL carried) —
- * or `null` if it isn't CMS-origin at all (an external image, a Gravatar
- * avatar, a YouTube/Instagram CDN URL, a Photon URL wrapping some other site).
+ * origin string) — or `null` if it isn't CMS-origin at all (an external
+ * image, a Gravatar avatar, a YouTube/Instagram CDN URL, a Photon URL
+ * wrapping some other site). Either way, `/wp-content/uploads` is dropped
+ * from the result — see `stripWpUploadsPrefix`.
+ *
+ * The direct-URL branch drops any query string too (`url.split("?")[0]`,
+ * matching the Photon branch) — a genuine CMS media URL this codebase ever
+ * hands to `next/image`/an `<a href>` doesn't carry a meaningful one (no
+ * cache-busting `?ver=` convention in use here), and dropping it uniformly
+ * keeps both branches' output shape identical rather than direct URLs
+ * silently being allowed to carry query noise Photon URLs never could.
  * @param url Any absolute URL.
  */
 const resolveToMediaProxyPath = (url: string): string | null => {
@@ -122,7 +179,10 @@ const resolveToMediaProxyPath = (url: string): string | null => {
 	if (photonResolved) return photonResolved;
 
 	const origin = CMS_ORIGINS.find((candidate) => url.startsWith(candidate));
-	return origin ? `/api/media${url.slice(origin.length)}` : null;
+	if (!origin) return null;
+
+	const pathOnly = url.slice(origin.length).split("?")[0];
+	return `/api/media${stripWpUploadsPrefix(pathOnly)}`;
 };
 
 /* -----------------------------------------------------------------------------
@@ -132,9 +192,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Single URL fields XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Rewrites one absolute CMS-origin URL (`featuredImage.sourceUrl`,
  * `opengraphImage.mediaItemUrl`, a theme-options `backgroundImage.sourceUrl`,
- * ...) to `/api/media/...` — Photon-wrapped or not, see `unwrapPhotonUrl`
- * above. Anything that isn't CMS-origin — an external image, a Gravatar
- * avatar, a YouTube/Instagram CDN URL — is returned completely unchanged.
+ * ...) to `/api/media/...` — Photon-wrapped or not, see `resolvePhotonUrl`
+ * above (and `stripWpUploadsPrefix` for why the result is
+ * `/api/media/2024/01/x.jpg`, not `/api/media/wp-content/uploads/2024/01/x.jpg`).
+ * Anything that isn't CMS-origin — an external image, a Gravatar avatar, a
+ * YouTube/Instagram CDN URL — is returned completely unchanged.
  * @param url The raw URL as returned by WPGraphQL, or `null`/`undefined`.
  * @returns The rewritten same-origin path, or `url` unchanged if it wasn't
  * CMS-origin (or was empty).

@@ -146,11 +146,12 @@ by default that's exactly what ends up in the rendered HTML.
 **The fix is two pieces, both required — either alone does nothing:**
 
 1. **`app/api/media/[...path]/route.ts`** — a Route Handler that proxies a WordPress media
-   file (`wp-content/uploads/...` only — never `wp-admin`, `wp-login.php`, or the CMS's own
-   `wp-json` REST API, so this can't become a general-purpose reverse proxy onto the CMS)
-   through this app's own domain: it fetches the real file server-side using `CMS_URL` and
-   streams it back, so a proxied URL (`/api/media/wp-content/uploads/...`) is a genuine
-   same-origin path a visitor's browser can load.
+   file through this app's own domain: it re-adds WordPress's own `wp-content/uploads/`
+   directory server-side and fetches the real file using `CMS_URL` (never `wp-admin`,
+   `wp-login.php`, or the CMS's own `wp-json` REST API — every request this route serves is
+   unconditionally scoped under that one directory, so it can't become a general-purpose
+   reverse proxy onto the CMS), then streams it back — so a proxied URL
+   (`/api/media/2024/01/photo.jpg`) is a genuine same-origin path a visitor's browser can load.
 2. **`config/cmsMediaUrl.ts`** — rewrites every CMS-origin URL to that proxy path, at the
    point each `graphql/CMS/*.ts` query unwraps its response (a featured image's `sourceUrl`,
    an SEO `opengraphImage`/`twitterImage`, the error page's `backgroundImage`) or a flexible-
@@ -159,6 +160,18 @@ by default that's exactly what ends up in the rendered HTML.
    specifically handles WYSIWYG HTML strings (`content`/`excerpt`, a block's `paragraph`
    field) — it rewrites both `<img src>` *and* `<a href>` in one pass, so a document link a CMS
    editor pasted directly (not through a dedicated ACF file field) is covered too, not just images.
+   `stripWpUploadsPrefix` drops `wp-content/uploads` specifically from the result — the one path
+   segment that unambiguously identifies the CMS as WordPress at all, independent of whose
+   domain it's on — while keeping the `YYYY/MM/filename` structure underneath it: WordPress
+   buckets uploads by month *specifically* to avoid filename collisions (a generic name like
+   `banner.jpg` gets reused across unrelated pages constantly), so that date path is what keeps
+   two different uploads with the same name from colliding once the WordPress-specific segment
+   is gone — flattening further would need a filename → real-path lookup (a persistent
+   key-value store, written at content-fetch time and read at proxy-fetch time) for a fairly
+   marginal secrecy gain on top of what dropping this one string already achieves, and this
+   project deliberately doesn't carry that kind of shared state anywhere (`config/rateLimit.ts`'s
+   own doc comment flags the identical "would need Upstash/Vercel KV for a cross-instance
+   guarantee" trade-off for a different feature, and stays without it too).
 
 Rewriting happens **once, upstream, at the data layer** — never at the component that finally
 renders a URL. That means no render path can forget to call this by omission: `ArticleContent.tsx`

@@ -11,18 +11,23 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const CMS_URL: string | undefined = process.env.CMS_URL;
 
 /* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Allowed path prefixes XXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX WordPress uploads root XXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * The only WordPress paths this proxy will forward a request for. This must
- * never become a general-purpose reverse proxy onto the CMS — `wp-admin`,
- * `wp-login.php`, `wp-json` (the CMS's own public REST API, separate from the
- * GraphQL endpoint this app actually uses), and everything else stay
- * unreachable through it. `uploads/` is WordPress's own media-library
- * directory, the only thing `config/cmsMediaUrl.ts` ever rewrites a URL into.
+ * Every request this route serves is implicitly scoped under WordPress's own
+ * media-library directory — this must never become a general-purpose reverse
+ * proxy onto the CMS (`wp-admin`, `wp-login.php`, `wp-json`, the CMS's own
+ * public REST API separate from the GraphQL endpoint this app actually uses,
+ * and everything else stay unreachable through it). `config/cmsMediaUrl.ts`
+ * strips this exact same segment before handing a URL to the browser
+ * (`/api/media/2024/01/photo.jpg`, not `/api/media/wp-content/uploads/2024/01/photo.jpg`
+ * — one fewer string that unambiguously identifies the CMS as WordPress at
+ * all) — this constant is what re-inserts it before the real fetch, so the
+ * two files have to agree on it, which is why it isn't duplicated as a
+ * literal in both places.
  */
-const ALLOWED_PREFIXES = ["wp-content/uploads/"];
+const WP_UPLOADS_PREFIX = "/wp-content/uploads";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Media Proxy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -34,13 +39,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Media Proxy XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * rewrites every CMS-sourced URL this app renders into `/api/media/...`
  * before it ever reaches the browser — so a visitor's page source, a "copy
  * image address", or a document's "copy link address" only ever shows this
- * app's own domain, never the CMS's real hostname (see that file's own doc
- * comment for the full rationale).
+ * app's own domain, never the CMS's real hostname, and never
+ * `wp-content/uploads` either (see that file's own doc comment for the full
+ * rationale).
  *
- * `path` is the WordPress-relative path with `wp-content/uploads/` already
- * included (a proxied URL looks like `/api/media/wp-content/uploads/2024/…`)
- * — this handler just re-prefixes it with `CMS_URL` and forwards the
- * request; it never accepts or trusts a client-supplied CMS origin.
+ * `path` is the file's location *under* `wp-content/uploads/` — a proxied
+ * URL looks like `/api/media/2024/01/photo.jpg`, not
+ * `/api/media/wp-content/uploads/2024/01/photo.jpg` — this handler re-adds
+ * `WP_UPLOADS_PREFIX` and `CMS_URL` to reconstruct the real fetch and forwards
+ * the request; it never accepts or trusts a client-supplied CMS origin.
  * @param params Route params promise; resolves to `{path}`, the dynamic
  * catch-all segments after `/api/media/`.
  */
@@ -54,29 +61,23 @@ export const GET = async (
 
 	const { path } = await params;
 
-	// Reject a `..`/`.` segment (or an empty one, from a doubled slash) before
-	// the prefix check below, not after — `relativePath.startsWith(...)` is a
-	// pure string comparison and does NOT stop a path like
-	// `wp-content/uploads/../../wp-login.php` from passing it: that string
-	// genuinely starts with "wp-content/uploads/", but `fetch()` resolves the
-	// `..` segments when it parses the resulting URL, reaching
-	// `${CMS_URL}/wp-login.php` — exactly the path this allowlist exists to
-	// block. Confirmed live while reviewing this route: without this check,
-	// the prefix restriction below is bypassable, not enforced.
+	// Reject a `..`/`.` segment (or an empty one, from a doubled slash).
+	// `fetch()` resolves `..` segments when it parses the resulting URL, so a
+	// request like `/api/media/../../wp-login.php` would otherwise walk back
+	// up out of `WP_UPLOADS_PREFIX` and reach `${CMS_URL}/wp-login.php` —
+	// exactly the path this route exists to keep unreachable. Confirmed live
+	// while first building this route: without this check, that escape is
+	// possible regardless of what prefix the fetch URL is built from.
 	if (path.length === 0 || path.some((segment) => !segment || segment === "." || segment === "..")) {
 		return NextResponse.json({ error: "Not found." }, { status: 404 });
 	}
 
 	const relativePath = path.join("/");
 
-	if (!ALLOWED_PREFIXES.some((prefix) => relativePath.startsWith(prefix))) {
-		return NextResponse.json({ error: "Not found." }, { status: 404 });
-	}
-
 	let upstreamResponse: Response;
 
 	try {
-		upstreamResponse = await fetch(`${CMS_URL}/${relativePath}`, {
+		upstreamResponse = await fetch(`${CMS_URL}${WP_UPLOADS_PREFIX}/${relativePath}`, {
 			// Media is effectively immutable once uploaded — WordPress doesn't
 			// version a filename on re-upload — so this matches the same
 			// 24-hour revalidate window every graphql/CMS/*.ts fetch already

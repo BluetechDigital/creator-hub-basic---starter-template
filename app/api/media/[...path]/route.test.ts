@@ -27,36 +27,43 @@ describe("GET /api/media/[...path]", () => {
 	it("responds 503 when CMS_URL isn't configured", async () => {
 		delete process.env.CMS_URL;
 
-		const res = await requestWithPath(["wp-content", "uploads", "x.png"]);
+		const res = await requestWithPath(["2024", "01", "x.png"]);
 		expect(res.status).toBe(503);
 	});
 
-	it("responds 404 for a path outside wp-content/uploads/ (never becomes an open proxy)", async () => {
+	it("fetches from under wp-content/uploads/ even for a path that looks like a WP core file — it can never reach outside that directory without a traversal segment", async () => {
+		process.env.CMS_URL = "https://cms.example.test";
+		const mockFetch = vi.fn().mockResolvedValue(new Response(null, { status: 404 }));
+		vi.stubGlobal("fetch", mockFetch);
+
+		// "wp-login.php" here is just a filename under uploads/, not the CMS's
+		// actual wp-login.php at the root — there's no longer an
+		// allowlist-of-prefixes check to bypass; every request this route
+		// serves is unconditionally scoped under wp-content/uploads/.
+		await requestWithPath(["wp-login.php"]);
+
+		expect(mockFetch).toHaveBeenCalledWith(
+			"https://cms.example.test/wp-content/uploads/wp-login.php",
+			expect.anything(),
+		);
+	});
+
+	it("responds 404 for a path-traversal attempt trying to escape wp-content/uploads/", async () => {
 		process.env.CMS_URL = "https://cms.example.test";
 		const mockFetch = vi.fn();
 		vi.stubGlobal("fetch", mockFetch);
 
-		const res = await requestWithPath(["wp-login.php"]);
+		// "../../wp-login.php" would resolve to ${CMS_URL}/wp-login.php once
+		// fetch() parses it as a URL, walking back up out of
+		// wp-content/uploads/ entirely — this must be rejected before ever
+		// reaching fetch.
+		const res = await requestWithPath(["..", "..", "wp-login.php"]);
 
 		expect(res.status).toBe(404);
 		expect(mockFetch).not.toHaveBeenCalled();
 	});
 
-	it("responds 404 for a path-traversal attempt disguised behind the allowed prefix", async () => {
-		process.env.CMS_URL = "https://cms.example.test";
-		const mockFetch = vi.fn();
-		vi.stubGlobal("fetch", mockFetch);
-
-		// "wp-content/uploads/../../wp-login.php" starts with the allowed
-		// prefix as a plain string, but resolves to /wp-login.php once fetch()
-		// parses it as a URL — this must be rejected before ever reaching fetch.
-		const res = await requestWithPath(["wp-content", "uploads", "..", "..", "wp-login.php"]);
-
-		expect(res.status).toBe(404);
-		expect(mockFetch).not.toHaveBeenCalled();
-	});
-
-	it("streams a successful upstream response with the right headers", async () => {
+	it("streams a successful upstream response with the right headers, from under wp-content/uploads/", async () => {
 		process.env.CMS_URL = "https://cms.example.test";
 		const mockFetch = vi.fn().mockResolvedValue(
 			new Response("%PDF-1.4 fake bytes", {
@@ -66,7 +73,7 @@ describe("GET /api/media/[...path]", () => {
 		);
 		vi.stubGlobal("fetch", mockFetch);
 
-		const res = await requestWithPath(["wp-content", "uploads", "2024", "example.pdf"]);
+		const res = await requestWithPath(["2024", "example.pdf"]);
 
 		expect(mockFetch).toHaveBeenCalledWith(
 			"https://cms.example.test/wp-content/uploads/2024/example.pdf",
@@ -82,7 +89,7 @@ describe("GET /api/media/[...path]", () => {
 		process.env.CMS_URL = "https://cms.example.test";
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 404 })));
 
-		const res = await requestWithPath(["wp-content", "uploads", "missing.png"]);
+		const res = await requestWithPath(["missing.png"]);
 		expect(res.status).toBe(404);
 	});
 
@@ -90,7 +97,7 @@ describe("GET /api/media/[...path]", () => {
 		process.env.CMS_URL = "https://cms.example.test";
 		vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
 
-		const res = await requestWithPath(["wp-content", "uploads", "x.png"]);
+		const res = await requestWithPath(["x.png"]);
 		expect(res.status).toBe(502);
 	});
 });
