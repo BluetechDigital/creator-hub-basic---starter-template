@@ -134,9 +134,13 @@ enters the RSC payload. Full threat model, rollout and the infra checklist:
 
 ## Testing
 
-Vitest + React Testing Library (`npm test` / `npm run test:watch` / `npm run test:coverage`).
-Config: `vitest.config.mts`, `vitest.setup.ts`. There's no E2E/Playwright layer yet — this is
-component- and unit-level only.
+Two layers: Vitest + React Testing Library for units/components, Playwright for end-to-end.
+
+### Unit / component (Vitest)
+
+`npm test` / `npm run test:watch` / `npm run test:coverage`. Config: `vitest.config.mts`,
+`vitest.setup.ts`. `vitest.config.mts` excludes `e2e/**` — the two runners' glob patterns
+(`*.test.{ts,tsx}` vs `*.spec.ts`) never collide, but the exclusion is explicit anyway.
 
 - **API layer** (`api/<Platform>/*.test.ts`): `global.fetch` is mocked with `vi.stubGlobal`.
   Because each platform file reads its env vars into module-scope consts on import rather than
@@ -154,3 +158,60 @@ component- and unit-level only.
   `components/CMS/` folders and `DynamicComponentLoaders` — the exact shape of bug this repo
   shipped with (`YoutubeVideoGrid` vs `YouTubeVideoGrid` casing). Doesn't gate what's allowed
   to be registered — see the note in [§1](#1-cms-flexible-content-blocks) above.
+
+### End-to-end (Playwright)
+
+`npm run e2e` / `npm run e2e:ui` (installs its own browser: `npx playwright install --with-deps
+chromium`). Config: `playwright.config.ts`, specs in `e2e/*.spec.ts`, shared setup in
+`e2e/support/fixtures.ts`. Covers `proxy.ts` locale routing + the `LocaleSwitcher`, the CMS
+flexible-content pipeline end to end (slug → GraphQL → rendered blocks), comment submission,
+the contact form, and a lean route/SEO smoke suite (`robots.txt`/`sitemap.xml`).
+
+**Why `next dev`, not a production build.** The Vitest suite above tests units in isolation;
+this suite needs a real running app. `playwright.config.ts`'s `webServer` array runs `next dev`
+(not `next start`) for two reasons: `next dev` sets `NODE_ENV=development`, which makes
+`config/recaptcha.ts` *skip* verification when the reCAPTCHA secret is unset — `next start`
+fails **closed** in that state (by design, so a misconfigured production deploy doesn't silently
+accept unverified submissions), which would block every comment/contact-form test. Dev is also
+where this project's actual runtime bugs have surfaced (a missing `'use client'`, a null-content
+crash — see `RenderFlexibleContent.tsx`'s `content ?? []` guard), and its dev-only React/Next
+error overlay gives specs a strong "the route didn't crash" signal via the browser's `pageerror`
+event. Production-compile correctness is still covered separately, by the `quality` CI job's own
+`npm run build` step (see below).
+
+**No real WordPress, no real credentials.** `graphql/CMS/*.ts`/reCAPTCHA/Azure
+Translator/Nodemailer all call out over plain `fetch`/SMTP, so `webServer` also starts
+`e2e/fixtures/server.mjs` — one Node process serving a fake WPGraphQL + YouTube Data API +
+Azure Translator endpoint (`e2e/fixtures/router.mjs`/`data.mjs` hold the canned responses) plus
+a fake SMTP server (the `smtp-server` package) the contact form's Nodemailer transporter
+connects to. `e2e/fixtures/env.mjs` points the app at all of it and — importantly — explicitly
+blanks (`""`, not omitted) reCAPTCHA, `CREATOR_HUB_GRAPHQL_PROXY_SECRET`, and
+`NEXT_PUBLIC_GTM_ID`: leaving a key out of that object doesn't mean "unset" the way it sounds —
+`next dev`'s own `.env`/`.env.local` loading fills in any key not already present in
+`process.env`, so an unset var here silently inherited this project's real, git-ignored `.env`
+values (confirmed live: the real reCAPTCHA site key leaking in made every form submission hang
+trying to load Google's actual widget).
+
+**Two caveats specific to this approach, both confirmed live:**
+
+- `playwright.config.ts`'s `next dev` command wipes the entire `.next` directory before
+  starting, not just `.next/cache` — every `graphql/CMS/*.ts` fetch uses
+  `next: { revalidate: 86400 }`, and Next's on-disk Data Cache/build artifacts survive a
+  `next dev` restart. A leftover `next build` output sitting alongside `next dev`'s own
+  `.next/dev` (from `quality`'s own build step running locally, or a stray `npm run build`) made
+  `next dev` serve build-time prerendered HTML instead of ever calling the fake backend — pages
+  rendered with real-looking content while the fixture server's request log stayed empty.
+- That same 24-hour revalidate means a query's *first* successful request in a given `next dev`
+  process's lifetime is cached for the rest of that run — including Playwright's own webServer
+  readiness probe (`GET /en`), which fires before any spec runs. A fixture-side "make this next
+  request fail" scenario switch has no way to reach a request that's already served from cache.
+  This is why the suite doesn't attempt to exercise the Home-page null-content regression (see
+  `RenderFlexibleContent.test.tsx`'s unit tests for that one, and `e2e/fixtures/server.mjs`'s own
+  doc comment) live through the browser — a fresh, never-before-requested slug (`broken-page`)
+  isn't affected and works exactly as expected.
+
+**Rate-limit isolation.** `config/rateLimit.ts` is a per-process in-memory `Map` keyed by IP
+(`"comment:"+ip` / `"contact:"+ip`), shared across every spec against the same `next dev`
+process. `e2e/support/fixtures.ts`'s `ip` fixture hands each test a unique `x-forwarded-for`
+value so one spec's submissions never trip another's bucket — except the two rate-limit specs
+themselves, which deliberately reuse one IP for 4 rapid submissions.

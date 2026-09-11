@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",
@@ -33,6 +35,7 @@
     "validator": "^13.15.10"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
@@ -47,6 +50,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.0.8",
     "jsdom": "^30.0.1",
+    "smtp-server": "^3.19.10",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",
     "vite": "^8.2.1",

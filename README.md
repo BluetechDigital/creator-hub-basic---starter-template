@@ -50,6 +50,27 @@ social API integrations are structured.
 | `npm test` | Run the Vitest suite once |
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run test:coverage` | Run the suite with coverage |
+| `npm run e2e` | Run the Playwright E2E suite once |
+| `npm run e2e:ui` | Run the Playwright suite in UI mode |
+
+## End-to-end tests
+
+The Playwright suite in `e2e/` covers the flows every client fork inherits — locale routing,
+the CMS flexible-content pipeline, the comment form, the contact form, and a route/SEO smoke
+check — running against **local fake backends**, not a real WordPress site:
+
+```bash
+npx playwright install --with-deps chromium   # once
+npm run e2e
+```
+
+No real credentials or `.env`/`.env.local` are needed — `playwright.config.ts` starts a fake
+WPGraphQL/YouTube/Azure-Translator server (`e2e/fixtures/server.mjs`) and a fake SMTP server
+alongside `next dev`, all pointed at each other via `e2e/fixtures/env.mjs`'s own dummy env
+(reCAPTCHA is left unset, which `config/recaptcha.ts` treats as "skip" outside production).
+See `ARCHITECTURE.md`'s Testing section for why this runs against `next dev` rather than a
+production build, and for the one caveat that shapes what the suite can and can't assert
+(Next's fetch Data Cache).
 
 ## Environment Variables
 

@@ -11,6 +11,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variable XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const EMAIL_USER: string | undefined = process.env.EMAIL_USER;
 const EMAIL_PASS: string | undefined = process.env.EMAIL_PASS;
 const EMAIL_HOST: string | undefined = process.env.EMAIL_HOST;
+// Optional SMTP port override. Defaults to 587 (submission) when unset; some
+// providers use 465 or 2525.
+const EMAIL_PORT: number = process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : 587;
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Well-Known Service Shorthands XXXXXXXXXXXXXXXXXXXXXX
@@ -69,7 +72,7 @@ export const getEmailTransporter = (): IEmailTransporter => {
 	cachedTransporter = nodemailer.createTransport({
 		...(isWellKnownService
 			? { service: EMAIL_HOST }
-			: { host: EMAIL_HOST, port: 587, secure: false }),
+			: { host: EMAIL_HOST, port: EMAIL_PORT, secure: EMAIL_PORT === 465 }),
 		auth: {
 			user: EMAIL_USER,
 			pass: EMAIL_PASS,

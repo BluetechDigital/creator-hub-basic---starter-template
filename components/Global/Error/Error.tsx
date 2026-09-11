@@ -50,7 +50,18 @@ const Error: FC = memo(() => {
 	const { locale } = useParams<{ locale: string }>();
 	const dict = getClientDictionary(locale);
 
-	const errorPageContent = globalContext.themesOptionsContent.errorPageContent;
+	// `themesOptionsContent` is typed as always-present (IGlobal.IProps), but
+	// `getThemesOptionsContent()` actually resolves to `undefined` whenever the
+	// WP "Global Content" ACF options page is missing or unpublished (a fresh
+	// fork, before anyone's created it in wp-admin — see that function's own
+	// doc comment) — confirmed live, this 404/error page is the one place that
+	// content reaches, and it crashed outright rather than degrading. Renders
+	// nothing rather than a half-populated error page in that state.
+	const errorPageContent = globalContext.themesOptionsContent?.errorPageContent;
+
+	if (!errorPageContent) {
+		return null;
+	}
 
 	return (
 		<div className={styles.error}>

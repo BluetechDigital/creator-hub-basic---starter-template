@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref (e.g. a force-push to a PR branch).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · unit tests · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (Vitest)
+        run: npm test
+
+      - name: Start fake CMS backend
+        # `npm run build` prerenders /sitemap.xml and /robots.txt at build
+        # time (app/sitemap.ts), which makes a real fetch to
+        # NEXT_PUBLIC_CMS_API_URL — confirmed live, an unreachable dummy host
+        # here (e.g. `cms.example.com`) fails the whole build with
+        # `getaddrinfo ENOTFOUND`. Reuses the same fake WPGraphQL/YouTube
+        # server the `e2e` job's Playwright config starts, standalone.
+        run: |
+          node e2e/fixtures/server.mjs &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4711/__health && exit 0
+            sleep 1
+          done
+          echo "fake CMS backend did not become healthy" >&2
+          exit 1
+
+      - name: Production build
+        # Points at the fake backend started above — real build-time fetches
+        # (the sitemap), no real credentials, no network beyond localhost.
+        env:
+          NEXT_PUBLIC_CMS_API_URL: http://localhost:4711/graphql
+          CMS_URL: http://localhost:4711
+          SITE_NAME: Creator Hub CI
+          SITE_URL: http://localhost:3000
+          IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE: i0.wp.com
+          IMAGE_REMOTE_PATHNAME_ONE: /**
+          IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO: localhost
+          IMAGE_REMOTE_PATHNAME_TWO: /**
+          YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME: i.ytimg.com
+          YOUTUBE_IMAGE_REMOTE_PATHNAME: /**
+          YOUTUBE_EMBED_REMOTE_PATTERNS_HOSTNAME: https://www.youtube-nocookie.com
+          YOUTUBE_EMBED_REMOTE_PATHNAME: /embed/**
+          INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME: scontent.cdninstagram.com
+          INSTAGRAM_IMAGE_REMOTE_PATHNAME: /**
+          INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO: scontent-2.cdninstagram.com
+          INSTAGRAM_IMAGE_REMOTE_PATHNAME_TWO: /**
+          YOUTUBE_API_BASE_URL: http://localhost:4711/youtube
+          YOUTUBE_KEY: ci-dummy-key
+          YOUTUBE_CHANNEL_ID: ci-channel
+          YOUTUBE_PLAYLIST_ID: ci-playlist
+        run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        # Playwright's webServer array boots the fake WPGraphQL + SMTP server
+        # (e2e/fixtures/server.mjs) and `next dev` with e2e/fixtures/env.mjs.
+        # No real credentials, no network beyond localhost.
+        run: npm run e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

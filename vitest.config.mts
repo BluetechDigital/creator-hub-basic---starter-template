@@ -17,6 +17,9 @@ export default defineConfig({
 		environment: "jsdom",
 		setupFiles: ["./vitest.setup.ts"],
 		include: ["**/*.test.{ts,tsx}"],
-		exclude: ["node_modules", ".next"],
+		// `e2e/` is Playwright's — its specs are `*.spec.ts` so the glob above already
+		// skips them, but exclude the directory outright so a stray `*.test.ts` helper
+		// there never gets pulled into the jsdom unit run.
+		exclude: ["node_modules", ".next", "e2e"],
 	},
 });
