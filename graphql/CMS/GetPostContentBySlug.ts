@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import * as IPost from "@/graphql/CMS/types/post";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+import { rewriteCmsMediaUrl, rewriteCmsUrlsInHtml } from "@/config/cmsMediaUrl";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -120,7 +121,17 @@ export const getPostContentBySlug = async (slug: string): Promise<IPost.IProps |
 			return undefined;
 		}
 
-		return response?.data?.posts?.edges?.[0]?.node;
+		const post = response?.data?.posts?.edges?.[0]?.node;
+		if (!post) return post;
+
+		return {
+			...post,
+			content: rewriteCmsUrlsInHtml(post.content),
+			excerpt: rewriteCmsUrlsInHtml(post.excerpt),
+			featuredImage: post.featuredImage?.node?.sourceUrl
+				? { node: { ...post.featuredImage.node, sourceUrl: rewriteCmsMediaUrl(post.featuredImage.node.sourceUrl) } }
+				: post.featuredImage,
+		};
 
 	} catch (error: unknown) {
 		console.log(error);

@@ -31,7 +31,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Helpers XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 const FALLBACK_WIDTH = 1200;
 const FALLBACK_HEIGHT = 800;
 
-const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
+// Accepts an absolute http(s) URL (an external image a CMS editor pasted in
+// directly) as well as a root-relative path — the shape every CMS-origin
+// image arrives in by the time it gets here, already rewritten to
+// `/api/media/...` by `getPostContentBySlug` before `content` is ever passed
+// down (see `config/cmsMediaUrl.ts`). Excludes `data:`/`blob:` URIs, which
+// `next/image` can't optimize.
+const isRenderableImageSrc = (value: string): boolean => /^(https?:\/\/|\/)/i.test(value);
 
 /** Parses an inline `style="a:b;c:d"` string into a React style object so the
  * CMS's per-image `aspect-ratio` / `object-fit` crop survives the swap to
@@ -66,9 +72,14 @@ const parserOptions: HTMLReactParserOptions = {
 
 		// Route content images through `next/image`: proxied via the app's own
 		// origin (so an ad-blocker or a CDN geo-restriction on the CMS host can't
-		// break them for real visitors) and served as AVIF/WebP. The CMS's inline
-		// crop style is preserved.
-		if (node.name === "img" && node.attribs.src && isHttpUrl(node.attribs.src)) {
+		// break them for real visitors) and served as AVIF/WebP. By the time
+		// `content` reaches this component `src` is already `/api/media/...`,
+		// not the real CMS host — `getPostContentBySlug` rewrites every
+		// CMS-origin `src`/`href` in the raw HTML before returning it (see
+		// `config/cmsMediaUrl.ts`), so the CMS's real hostname never actually
+		// reaches the browser, not just the image bytes. The CMS's inline crop
+		// style is preserved.
+		if (node.name === "img" && node.attribs.src && isRenderableImageSrc(node.attribs.src)) {
 			const width = Number(node.attribs.width) || FALLBACK_WIDTH;
 			const height = Number(node.attribs.height) || FALLBACK_HEIGHT;
 

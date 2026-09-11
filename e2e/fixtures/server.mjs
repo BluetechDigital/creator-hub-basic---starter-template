@@ -5,6 +5,10 @@ Fake backend for the E2E suite — one process serving:
   ALL  /youtube/*          fake YouTube Data API v3 (empty lists / one channel)
   POST /azure/translate    fake Azure Translator — echoes each string, "[<loc>] "
                            prefixed, so specs can assert a non-en page translated
+  GET  /wp-content/uploads/* fake WP media library — the CMS-media-proxy spec's
+                           fixture post links to a "PDF" here; also exercises
+                           the never-hit-this-directly assumption the proxy
+                           route (app/api/media/[...path]/route.ts) is built on
   GET  /__health           readiness probe (Playwright waits on this)
   POST /__reset            clears the GraphQL request log + SMTP inbox
   GET  /__graphql-log      the recorded GraphQL requests (op + variables)
@@ -113,6 +117,16 @@ const server = http.createServer(async (req, res) => {
 	if (path.startsWith("/youtube/")) {
 		if (path.endsWith("/channels")) return json(res, 200, YT_CHANNEL);
 		return json(res, 200, YT_EMPTY_LIST);
+	}
+
+	// --- fake WP media library ---
+	// A real WordPress upload — the exact thing app/api/media/[...path]/route.ts
+	// proxies. cms-pipeline.spec.ts's fixture post links to one of these
+	// directly (never through the app/api/media proxy) to prove the proxy is
+	// the ONLY path a visitor's browser ever reaches this from.
+	if (path.startsWith("/wp-content/uploads/")) {
+		res.writeHead(200, { "Content-Type": "application/pdf" });
+		return res.end("%PDF-1.4 fixture document bytes");
 	}
 
 	console.warn(`[fixture] unhandled ${req.method} ${path}`);

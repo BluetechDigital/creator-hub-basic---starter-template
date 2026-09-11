@@ -4,7 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import * as IPost from "@/graphql/CMS/types/post";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
-import { POST_SUMMARY_FIELDS } from "@/graphql/CMS/postSummaryFields";
+import { POST_SUMMARY_FIELDS, rewritePostSummaryMediaUrls } from "@/graphql/CMS/postSummaryFields";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -144,7 +144,7 @@ export const getAllPostsSummaries = async (
 
 		if (!response?.data?.posts) return undefined;
 
-		return { posts: response.data.posts.nodes, pageInfo: response.data.posts.pageInfo };
+		return { posts: rewritePostSummaryMediaUrls(response.data.posts.nodes), pageInfo: response.data.posts.pageInfo };
 
 	} catch (error: unknown) {
 		console.log(error);

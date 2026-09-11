@@ -1,6 +1,6 @@
 # Architecture
 
-Three things in this codebase aren't obvious from folder names alone. Everything else
+Four things in this codebase aren't obvious from folder names alone. Everything else
 (app routes, global providers, animation components) follows standard Next.js App Router
 conventions and doesn't need its own section here.
 
@@ -131,6 +131,51 @@ Server Action adds a honeypot, link cap, per-IP rate limit and reCAPTCHA v3 scor
 comment HTML is sanitized server-side (`graphql/CMS/sanitizeCommentHtml.ts`) before it
 enters the RSC payload. Full threat model, rollout and the infra checklist:
 [`docs/comment-security.md`](./docs/comment-security.md).
+
+## 4. Hiding the CMS origin
+
+Nothing a visitor's browser loads should ever reveal the real WordPress hostname — not an
+`<img src>`, not a "copy link address" on a document, not page source. A headless-CMS setup
+that redirects a human visitor away from the CMS domain (e.g. a `wp-login`/homepage redirect
+plugin) doesn't achieve this on its own: that only handles someone navigating *to* the CMS
+directly. It does nothing about the CMS's own hostname appearing in URLs *this app itself
+renders* — a featured image, a PDF a CMS editor linked from the media library, an SEO share
+image — since WPGraphQL returns those as absolute URLs pointing at the real CMS origin, and
+by default that's exactly what ends up in the rendered HTML.
+
+**The fix is two pieces, both required — either alone does nothing:**
+
+1. **`app/api/media/[...path]/route.ts`** — a Route Handler that proxies a WordPress media
+   file (`wp-content/uploads/...` only — never `wp-admin`, `wp-login.php`, or the CMS's own
+   `wp-json` REST API, so this can't become a general-purpose reverse proxy onto the CMS)
+   through this app's own domain: it fetches the real file server-side using `CMS_URL` and
+   streams it back, so a proxied URL (`/api/media/wp-content/uploads/...`) is a genuine
+   same-origin path a visitor's browser can load.
+2. **`config/cmsMediaUrl.ts`** — rewrites every CMS-origin URL to that proxy path, at the
+   point each `graphql/CMS/*.ts` query unwraps its response (a featured image's `sourceUrl`,
+   an SEO `opengraphImage`/`twitterImage`, the error page's `backgroundImage`) or a flexible-
+   content block's WYSIWYG prose field is resolved (`RenderFlexibleContent.tsx`'s
+   `rewriteBlockMediaUrls`, alongside its existing i18n translation pass). `rewriteCmsUrlsInHtml`
+   specifically handles WYSIWYG HTML strings (`content`/`excerpt`, a block's `paragraph`
+   field) — it rewrites both `<img src>` *and* `<a href>` in one pass, so a document link a CMS
+   editor pasted directly (not through a dedicated ACF file field) is covered too, not just images.
+
+Rewriting happens **once, upstream, at the data layer** — never at the component that finally
+renders a URL. That means no render path can forget to call this by omission: `ArticleContent.tsx`
+(which parses WYSIWYG HTML element-by-element via `html-react-parser`) and `Paragraph.tsx`
+(which injects it directly via `dangerouslySetInnerHTML`) both just render whatever HTML string
+they're handed — by the time either one sees it, it's already safe, because the string itself
+was already rewritten before either component ever received it as a prop.
+
+**What this does not cover, on purpose:** `opengraphImage`/`twitterImage` are rewritten for
+consistency and future-proofing, but neither is actually rendered into a `<meta>` tag anywhere
+in this codebase yet — `rewriteCmsMediaUrl` returns a root-relative path, correct for an
+`<img>`/`next/image` `src`, but the Open Graph/Twitter Card spec needs an *absolute* URL for
+external crawlers (Facebook, Twitter, LinkedIn) to fetch a share-card image at all. Whoever
+wires `openGraph.images` up later must prefix the rewritten path with `SITE_URL` first — see
+the comment in `GetAllSeoContent.ts`. YouTube/Instagram/Gravatar URLs are untouched entirely —
+`rewriteCmsMediaUrl`/`rewriteCmsUrlsInHtml` only ever match a URL that actually starts with
+`CMS_URL`/`DEV_CMS_URL`; a different host is a different concern from what this section covers.
 
 ## Testing
 

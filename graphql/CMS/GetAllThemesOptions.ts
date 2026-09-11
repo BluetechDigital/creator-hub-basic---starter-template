@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import * as IThemesOptions from "@/graphql/CMS/types/themesOptions";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+import { rewriteCmsMediaUrl, rewriteCmsUrlsInHtml } from "@/config/cmsMediaUrl";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -149,7 +150,22 @@ export const getThemesOptionsContent =
 				return undefined;
 			}
 
-			return response?.data?.themeOptions?.edges?.[0]?.node?.themeOptions;
+			const themeOptions = response?.data?.themeOptions?.edges?.[0]?.node?.themeOptions;
+			if (!themeOptions) return themeOptions;
+
+			return {
+				...themeOptions,
+				errorPageContent: {
+					...themeOptions.errorPageContent,
+					paragraph: rewriteCmsUrlsInHtml(themeOptions.errorPageContent?.paragraph),
+					backgroundImage: themeOptions.errorPageContent?.backgroundImage?.sourceUrl
+						? {
+							...themeOptions.errorPageContent.backgroundImage,
+							sourceUrl: rewriteCmsMediaUrl(themeOptions.errorPageContent.backgroundImage.sourceUrl),
+						}
+						: themeOptions.errorPageContent?.backgroundImage,
+				},
+			};
 
 		} catch (error: unknown) {
 			console.log(error);

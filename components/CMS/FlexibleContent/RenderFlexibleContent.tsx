@@ -6,6 +6,7 @@ import { FC, Suspense, ComponentType } from 'react';
 import * as IFlexibleContent from "@/graphql/CMS/types/flexibleContent";
 import * as IPost from "@/graphql/CMS/types/post";
 import { translateFields } from "@/i18n/translateContent";
+import { rewriteCmsUrlsInHtml } from "@/config/cmsMediaUrl";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXX Dynamic Component Loaders XXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -111,6 +112,32 @@ export const translateBlockProse = async (
     return translateFields(fields, prose.html ?? []) as Promise<Record<string, string>>;
 };
 
+/**
+ * Rewrites CMS-origin `src`/`href` URLs (an embedded image, a linked
+ * document) inside a block's `html`-flagged prose fields — see
+ * `config/cmsMediaUrl.ts`'s own doc comment for why this exists at all.
+ * Applied unconditionally, unlike `translateBlockProse` above: this must run
+ * for every locale (including English), not just as part of the i18n path,
+ * since it's a security property of the rendered output, not a translation.
+ * @param item The block's raw ACF fields, exactly as WPGraphQL returned them.
+ * @param prose This block's entry from `PROSE_FIELDS`, if it has one.
+ * @returns Just the rewritten `html` fields (not the whole `item`), meant to
+ * be spread back over `item` by the caller — same shape as `translateBlockProse`.
+ */
+const rewriteBlockMediaUrls = (
+    item: Record<string, unknown>,
+    prose: { plain?: string[]; html?: string[] } | undefined,
+): Record<string, string> => {
+    const fields: Record<string, string> = {};
+
+    for (const key of prose?.html ?? []) {
+        const value = item[key];
+        if (typeof value === "string" && value) fields[key] = rewriteCmsUrlsInHtml(value);
+    }
+
+    return fields;
+};
+
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Resolved Block XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
@@ -135,19 +162,28 @@ type IResolvedBlockProps = IFlexibleContent.IBaseFlexibleContentProps & {
  * `item`'s fields don't apply to it.
  *
  * Before rendering, this block's allowlisted ACF prose fields (`PROSE_FIELDS`,
- * if it has an entry) are machine-translated for non-English locales — the
- * ACF-content half of this project's i18n plan's Phase 2, complementing
- * `translateFields`'s existing use on post content/SEO text. Every other ACF
- * field (colors, URLs, IDs, booleans) passes through `item` completely
- * untouched, translated or not.
+ * if it has an entry) go through two passes: `rewriteBlockMediaUrls` first
+ * rewrites any CMS-origin `src`/`href` inside its `html` fields to this app's
+ * own `/api/media/...` proxy path (see `config/cmsMediaUrl.ts`), then
+ * `translateBlockProse` machine-translates the (already-rewritten) prose for
+ * non-English locales — the ACF-content half of this project's i18n plan's
+ * Phase 2, complementing `translateFields`'s existing use on post
+ * content/SEO text. Every other ACF field (colors, IDs, booleans) passes
+ * through `item` completely untouched.
  */
 const ResolvedBlock = async ({ simpleName, filters, page, ...item }: IResolvedBlockProps) => {
     const mod = await DynamicComponentLoaders[simpleName]();
     const Component = mod.default;
 
-    const translatedFields = await translateBlockProse(item, PROSE_FIELDS[simpleName]);
+    const prose = PROSE_FIELDS[simpleName];
+    // Media-URL rewriting has to happen before translation, not after: it
+    // becomes the base every other field — plain or translated — renders
+    // from, so a locale where translateFields is a no-op (English) still
+    // gets the rewritten URL rather than the raw CMS one.
+    const itemWithMediaUrlsRewritten = { ...item, ...rewriteBlockMediaUrls(item, prose) };
+    const translatedFields = await translateBlockProse(itemWithMediaUrlsRewritten, prose);
 
-    return <Component {...item} {...translatedFields} filters={filters} page={page} />;
+    return <Component {...itemWithMediaUrlsRewritten} {...translatedFields} filters={filters} page={page} />;
 };
 
 /* -----------------------------------------------------------------------------

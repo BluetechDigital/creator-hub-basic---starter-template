@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import * as ISeo from "@/graphql/CMS/types/seo";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
+import { rewriteCmsMediaUrl } from "@/config/cmsMediaUrl";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -89,7 +90,28 @@ export const getAllSeoContent = async (
 			return undefined;
 		}
 
-		return response?.data?.seo?.edges?.[0]?.node?.seo;
+		const seo = response?.data?.seo?.edges?.[0]?.node?.seo;
+		if (!seo) return seo;
+
+		// Neither field is rendered into an actual `<meta>` tag anywhere in this
+		// codebase yet (confirmed live — no `generateMetadata` call sets
+		// `openGraph.images`), so this is future-proofing, not a fix for a
+		// currently-exposed URL. `rewriteCmsMediaUrl` returns a root-relative
+		// `/api/media/...` path — correct for an `<img>`/`next/image` `src`, but
+		// the Open Graph/Twitter Card spec requires an *absolute* image URL for
+		// external crawlers (Facebook, Twitter, LinkedIn) to fetch it at all.
+		// Whoever wires this into `openGraph.images`/`twitter.images` must
+		// prefix it with `SITE_URL` first (`${SITE_URL}${rewritten}`) — a bare
+		// relative path here will silently produce a broken share-card image.
+		return {
+			...seo,
+			opengraphImage: seo.opengraphImage?.mediaItemUrl
+				? { ...seo.opengraphImage, mediaItemUrl: rewriteCmsMediaUrl(seo.opengraphImage.mediaItemUrl) }
+				: seo.opengraphImage,
+			twitterImage: seo.twitterImage?.mediaItemUrl
+				? { ...seo.twitterImage, mediaItemUrl: rewriteCmsMediaUrl(seo.twitterImage.mediaItemUrl) }
+				: seo.twitterImage,
+		};
 
 	} catch (error: unknown) {
 		console.log(error);

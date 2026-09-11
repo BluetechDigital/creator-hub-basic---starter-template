@@ -12,6 +12,8 @@ Page slugs the CMS pipeline knows about:
   - "broken-page" GraphQL returns { errors } (null-content regression guard)
 ----------------------------------------------------------------------------- */
 
+import { FIXTURE_ORIGIN } from "./env.mjs";
+
 const FC_PREFIX = "DefaultTemplate_Flexiblecontent_FlexibleContent";
 const block = (name, fields = {}) => ({
 	fieldGroupName: `${FC_PREFIX}_${name}`,
@@ -146,7 +148,11 @@ export const postBySlug = (slug) => ({
 	slug,
 	date: "2026-03-01T09:00:00",
 	modified: "2026-03-02T09:00:00",
-	content: "<h2>A heading</h2><p>The article body, authored in WordPress.</p>",
+	// Links directly to the fixture CMS's own origin (never through
+	// /api/media) — cms-media-proxy.spec.ts asserts the rendered page never
+	// shows this raw origin anywhere, proving getPostContentBySlug's
+	// rewriteCmsUrlsInHtml pass (config/cmsMediaUrl.ts) actually ran.
+	content: `<h2>A heading</h2><p>The article body, authored in WordPress.</p><a href="${FIXTURE_ORIGIN}/wp-content/uploads/2024/fixture-report.pdf">Download the report</a>`,
 	excerpt: "<p>Article excerpt.</p>",
 	featuredImage: FEATURED,
 	author: { node: { name: "Fixture Author", url: "", description: "", avatar: { url: AVATAR } } },
