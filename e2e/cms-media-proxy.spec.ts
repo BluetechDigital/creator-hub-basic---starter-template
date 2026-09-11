@@ -28,6 +28,30 @@ test("a document link rewrites to the same-origin proxy, never the raw CMS origi
 	expect(html).not.toContain(FIXTURE_ORIGIN);
 });
 
+test("a Jetpack-Photon-wrapped image also rewrites to the proxy — not just a direct CMS URL", async ({ page }) => {
+	// Regression case: WPGraphQL returns image URLs shaped like
+	// https://i0.wp.com/<cms-host>/wp-content/uploads/... when Photon/Site
+	// Accelerator is on, not ${CMS_URL}/wp-content/uploads/... directly — a
+	// plain CMS-origin string match never catches that, and the CMS's real
+	// hostname leaked straight through it, embedded in the Photon path.
+	await page.goto(POST_URL);
+
+	const image = page.getByRole("img", { name: "A Photon-wrapped photo" });
+	await expect(image).toBeVisible();
+
+	const src = await image.getAttribute("src");
+	// next/image still runs a local (root-relative) src through its own
+	// /_next/image optimizer — asserting the *fixture CMS's* origin is gone
+	// is the meaningful check, not asserting an exact optimizer URL shape.
+	expect(src).not.toContain("i0.wp.com");
+	expect(src).not.toContain(new URL(FIXTURE_ORIGIN).hostname + ":");
+	expect(decodeURIComponent(src ?? "")).toContain("/api/media/wp-content/uploads/2024/01/photon-photo-scaled.jpg");
+
+	const html = await page.content();
+	expect(html).not.toContain("i0.wp.com");
+	expect(html).not.toContain(FIXTURE_ORIGIN);
+});
+
 test("the proxied document URL actually serves the CMS file", async ({ page }) => {
 	const response = await page.request.get("/api/media/wp-content/uploads/2024/fixture-report.pdf");
 

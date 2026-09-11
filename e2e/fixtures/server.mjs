@@ -121,10 +121,26 @@ const server = http.createServer(async (req, res) => {
 
 	// --- fake WP media library ---
 	// A real WordPress upload — the exact thing app/api/media/[...path]/route.ts
-	// proxies. cms-pipeline.spec.ts's fixture post links to one of these
+	// proxies. cms-media-proxy.spec.ts's fixture post links/embeds these
 	// directly (never through the app/api/media proxy) to prove the proxy is
-	// the ONLY path a visitor's browser ever reaches this from.
+	// the ONLY path a visitor's browser ever reaches this from. Content-type
+	// (and, for images, real decodable bytes — a 1x1 PNG) has to match the
+	// extension: next/image's own optimizer fetches the proxied URL and
+	// rejects it outright if what comes back isn't a real image, which a
+	// blanket "everything is a PDF" response broke the moment a fixture image
+	// (the Jetpack-Photon-wrapped one) was added alongside the existing PDF.
 	if (path.startsWith("/wp-content/uploads/")) {
+		if (/\.(png|jpe?g|webp|gif)$/i.test(path)) {
+			// A minimal valid 1x1 transparent PNG — sharp (next/image's
+			// optimizer) decodes by magic bytes, not by file extension, so
+			// this works regardless of the fixture path's own extension.
+			const onePixelPng = Buffer.from(
+				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+				"base64",
+			);
+			res.writeHead(200, { "Content-Type": "image/png" });
+			return res.end(onePixelPng);
+		}
 		res.writeHead(200, { "Content-Type": "application/pdf" });
 		return res.end("%PDF-1.4 fixture document bytes");
 	}

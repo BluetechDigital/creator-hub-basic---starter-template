@@ -60,6 +60,51 @@ describe("cmsMediaUrl", () => {
 			const url = "https://cms.example.test/wp-content/uploads/x.png";
 			expect(rewriteCmsMediaUrl(url)).toBe(url);
 		});
+
+		describe("Jetpack Photon-wrapped URLs", () => {
+			it("unwraps a Photon URL wrapping the configured CMS host, dropping Photon's own query params", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsMediaUrl } = await importFreshModule();
+
+				expect(
+					rewriteCmsMediaUrl("https://i0.wp.com/cbf.example.test/wp-content/uploads/2024/01/photo-scaled.jpg?fit=2560%2C1661&ssl=1"),
+				).toBe("/api/media/wp-content/uploads/2024/01/photo-scaled.jpg");
+			});
+
+			it("recognizes all four Photon subdomains (i0-i3.wp.com)", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsMediaUrl } = await importFreshModule();
+
+				for (const sub of ["i0", "i1", "i2", "i3"]) {
+					expect(rewriteCmsMediaUrl(`https://${sub}.wp.com/cbf.example.test/wp-content/uploads/x.jpg?ssl=1`))
+						.toBe("/api/media/wp-content/uploads/x.jpg");
+				}
+			});
+
+			it("matches DEV_CMS_URL's host through Photon too", async () => {
+				process.env.DEV_CMS_URL = "https://dev-cbf.example.test";
+				const { rewriteCmsMediaUrl } = await importFreshModule();
+
+				expect(rewriteCmsMediaUrl("https://i0.wp.com/dev-cbf.example.test/wp-content/uploads/x.jpg?ssl=1"))
+					.toBe("/api/media/wp-content/uploads/x.jpg");
+			});
+
+			it("leaves a Photon URL wrapping an unrelated site unchanged", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsMediaUrl } = await importFreshModule();
+
+				const url = "https://i0.wp.com/some-other-wordpress-site.example/wp-content/uploads/x.jpg?ssl=1";
+				expect(rewriteCmsMediaUrl(url)).toBe(url);
+			});
+
+			it("leaves an i0.wp.com URL that isn't wrapping anything CMS-shaped unchanged", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsMediaUrl } = await importFreshModule();
+
+				const url = "https://i0.wp.com/some-random-path";
+				expect(rewriteCmsMediaUrl(url)).toBe(url);
+			});
+		});
 	});
 
 	describe("rewriteCmsUrlsInHtml", () => {
@@ -120,6 +165,50 @@ describe("cmsMediaUrl", () => {
 
 			const html = '<img src="https://cms.example.test/wp-content/uploads/a.jpg">';
 			expect(rewriteCmsUrlsInHtml(html)).toBe(html);
+		});
+
+		describe("Jetpack Photon-wrapped URLs", () => {
+			it("rewrites a Photon-wrapped <img src>, the exact shape this was found missing for (a homepage FAQ block)", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsUrlsInHtml } = await importFreshModule();
+
+				const html = '<img src="https://i0.wp.com/cbf.example.test/wp-content/uploads/2024/01/photo-scaled.jpg?fit=2560%2C1661&ssl=1" alt="">';
+				expect(rewriteCmsUrlsInHtml(html)).toBe(
+					'<img src="/api/media/wp-content/uploads/2024/01/photo-scaled.jpg" alt="">',
+				);
+			});
+
+			it("rewrites a Photon-wrapped <a href> the same way", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsUrlsInHtml } = await importFreshModule();
+
+				const html = '<a href="https://i2.wp.com/cbf.example.test/wp-content/uploads/2024/report.pdf?ssl=1">Download</a>';
+				expect(rewriteCmsUrlsInHtml(html)).toBe(
+					'<a href="/api/media/wp-content/uploads/2024/report.pdf">Download</a>',
+				);
+			});
+
+			it("handles a mix of direct and Photon-wrapped URLs in the same document", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsUrlsInHtml } = await importFreshModule();
+
+				const html =
+					'<img src="https://cbf.example.test/wp-content/uploads/direct.jpg">' +
+					'<img src="https://i0.wp.com/cbf.example.test/wp-content/uploads/photon.jpg?ssl=1">';
+
+				expect(rewriteCmsUrlsInHtml(html)).toBe(
+					'<img src="/api/media/wp-content/uploads/direct.jpg">' +
+					'<img src="/api/media/wp-content/uploads/photon.jpg">',
+				);
+			});
+
+			it("leaves a Photon URL wrapping an unrelated site unchanged", async () => {
+				process.env.CMS_URL = "https://cbf.example.test";
+				const { rewriteCmsUrlsInHtml } = await importFreshModule();
+
+				const html = '<img src="https://i0.wp.com/some-other-site.example/wp-content/uploads/x.jpg?ssl=1">';
+				expect(rewriteCmsUrlsInHtml(html)).toBe(html);
+			});
 		});
 	});
 });

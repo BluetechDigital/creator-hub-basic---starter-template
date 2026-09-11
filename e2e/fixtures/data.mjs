@@ -151,8 +151,14 @@ export const postBySlug = (slug) => ({
 	// Links directly to the fixture CMS's own origin (never through
 	// /api/media) — cms-media-proxy.spec.ts asserts the rendered page never
 	// shows this raw origin anywhere, proving getPostContentBySlug's
-	// rewriteCmsUrlsInHtml pass (config/cmsMediaUrl.ts) actually ran.
-	content: `<h2>A heading</h2><p>The article body, authored in WordPress.</p><a href="${FIXTURE_ORIGIN}/wp-content/uploads/2024/fixture-report.pdf">Download the report</a>`,
+	// rewriteCmsUrlsInHtml pass (config/cmsMediaUrl.ts) actually ran. The
+	// <img> is Jetpack-Photon-wrapped (the shape WPGraphQL actually returns
+	// when Photon/Site Accelerator is on — this project's own
+	// IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE=i0.wp.com already assumed it is),
+	// wrapping FIXTURE_ORIGIN's *hostname* the way Photon really does (no
+	// scheme, no port) — proving the masking survives that wrapping too, not
+	// just a direct CMS-origin URL.
+	content: `<h2>A heading</h2><p>The article body, authored in WordPress.</p><a href="${FIXTURE_ORIGIN}/wp-content/uploads/2024/fixture-report.pdf">Download the report</a><img src="https://i0.wp.com/${new URL(FIXTURE_ORIGIN).hostname}/wp-content/uploads/2024/01/photon-photo-scaled.jpg?fit=2560%2C1661&ssl=1" alt="A Photon-wrapped photo" width="1024" height="683" />`,
 	excerpt: "<p>Article excerpt.</p>",
 	featuredImage: FEATURED,
 	author: { node: { name: "Fixture Author", url: "", description: "", avatar: { url: AVATAR } } },

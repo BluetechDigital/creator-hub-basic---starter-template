@@ -167,6 +167,20 @@ renders a URL. That means no render path can forget to call this by omission: `A
 they're handed — by the time either one sees it, it's already safe, because the string itself
 was already rewritten before either component ever received it as a prop.
 
+**Jetpack Photon (Site Accelerator).** If it's active on the CMS — this project's own
+`IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE=i0.wp.com` and `ArticleContent.test.tsx`'s own fixture
+content both already assumed it is — WPGraphQL hands back image URLs shaped like
+`https://i0.wp.com/<cms-hostname>/wp-content/uploads/...`, not `${CMS_URL}/wp-content/uploads/...`
+directly: Photon wraps the *original* URL into its own path instead of proxying through the
+CMS's own domain. A plain `startsWith(CMS_URL)` check never matches that, so the CMS's real
+hostname was leaking straight through, embedded in the Photon path — the same class of gap
+the sibling CBF-Rebuild project independently found first, in its homepage FAQ block.
+`config/cmsMediaUrl.ts`'s `resolvePhotonUrl` recognizes and unwraps this before the normal
+CMS-origin check runs, matched by **hostname alone** (not the full origin string, the way a
+direct URL is) — Photon discards the original scheme and port entirely when it wraps a URL,
+so an origin-string match could never work here even in production, let alone against this
+project's own local `http://localhost:<port>` dev/E2E CMS.
+
 **What this does not cover, on purpose:** `opengraphImage`/`twitterImage` are rewritten for
 consistency and future-proofing, but neither is actually rendered into a `<meta>` tag anywhere
 in this codebase yet — `rewriteCmsMediaUrl` returns a root-relative path, correct for an

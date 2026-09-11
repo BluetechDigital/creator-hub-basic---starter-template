@@ -22,6 +22,21 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * flexible-content block's prose field (`RenderFlexibleContent.tsx`) — never
  * at the component that finally renders it, so no render path can forget to
  * call this and leak the origin by omission.
+ *
+ * **Jetpack Photon (Site Accelerator).** If it's active on the CMS — this
+ * project's own `IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE=i0.wp.com`
+ * (`.env.example`) and `ArticleContent.test.tsx`'s own fixture content both
+ * already assumed it is — WPGraphQL hands back image URLs shaped like
+ * `https://i0.wp.com/<cms-hostname>/wp-content/uploads/...`, not
+ * `${CMS_URL}/wp-content/uploads/...` directly: Photon wraps the *original*
+ * URL into its *own* path instead of proxying through the CMS's own domain.
+ * A plain `url.startsWith(CMS_URL)` check never matches that (the URL's real
+ * origin is `i0.wp.com`), so the CMS's real hostname was leaking straight
+ * through, embedded in the Photon path — confirmed live, the same class of
+ * gap the sibling CBF-Rebuild project independently found and fixed first.
+ * `resolvePhotonUrl` below handles the wrapping (matched by hostname, not by
+ * origin string — see its own doc comment for why that distinction matters),
+ * so a Photon URL and a direct one both resolve to the same proxy path shape.
  */
 
 const CMS_URL: string | undefined = process.env.CMS_URL;
@@ -32,7 +47,83 @@ const DEV_CMS_URL: string | undefined = process.env.DEV_CMS_URL;
 // environment this app is currently running in.
 const CMS_ORIGINS: string[] = [CMS_URL, DEV_CMS_URL].filter((url): url is string => Boolean(url));
 
-const escapeForRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Just the hostnames (no protocol), for matching against what Photon wraps
+// into its own URL path — e.g. "cbf.crdbbankfoundation.co.tz", not
+// "https://cbf.crdbbankfoundation.co.tz".
+const CMS_HOSTNAMES: string[] = CMS_ORIGINS
+	.map((origin) => {
+		try {
+			return new URL(origin).hostname;
+		} catch {
+			return undefined;
+		}
+	})
+	.filter((hostname): hostname is string => Boolean(hostname));
+
+/* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Jetpack Photon CDN XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+// Jetpack rotates image requests across four subdomains (i0-i3.wp.com), not
+// just one.
+const PHOTON_HOST_PATTERN = /^https:\/\/i[0-3]\.wp\.com\//i;
+
+/**
+ * Resolves a Photon-wrapped URL directly to its `/api/media/...` proxy path,
+ * when `url` wraps a *known* CMS host — e.g.
+ * `https://i0.wp.com/cbf.crdbbankfoundation.co.tz/wp-content/uploads/x.jpg?fit=800%2C600&ssl=1`
+ * becomes `/api/media/wp-content/uploads/x.jpg`. Matched by **hostname alone**,
+ * not by comparing against the full `CMS_URL`/`DEV_CMS_URL` origin string the
+ * way a direct URL is (see `resolveToMediaProxyPath` below) — Photon discards
+ * the original scheme and port entirely when it wraps a URL, so a
+ * `startsWith(CMS_URL)`-style check could never match here even for a
+ * perfectly genuine Photon URL, production `https://` CMS or a plain `http://
+ * localhost:PORT` dev one alike. Confirmed live while building this: an
+ * origin-string match against a reconstructed `https://<hostname>` URL
+ * silently failed for exactly this project's own local dev/E2E setup, where
+ * `CMS_URL` is `http://localhost:<port>` — matching by hostname avoids that
+ * entirely. Photon's own query params (resize/crop/quality directives,
+ * `ssl=1`) are dropped — meaningless against a direct file fetch, and this
+ * app's own `next/image` optimizer re-does resizing anyway once the URL is
+ * proxied through `/api/media`.
+ *
+ * A Photon URL wrapping some *other* site (a CMS editor could technically
+ * paste any wordpress.com-accelerated image URL into content) resolves to
+ * `null` — only unwraps this project's own configured CMS origin(s), never
+ * treated as a signal to trust arbitrary Photon URLs.
+ * @param url Any URL — only resolved if it actually matches the Photon host
+ * pattern *and* wraps a known CMS hostname.
+ * @returns The `/api/media/...` path, or `null` if `url` isn't a Photon URL
+ * wrapping a known CMS host.
+ */
+const resolvePhotonUrl = (url: string): string | null => {
+	if (!PHOTON_HOST_PATTERN.test(url)) return null;
+
+	const afterPhotonHost = url.replace(PHOTON_HOST_PATTERN, "");
+	const wrappedHostname = CMS_HOSTNAMES.find((hostname) => afterPhotonHost.startsWith(hostname));
+	if (!wrappedHostname) return null;
+
+	const pathAndQuery = afterPhotonHost.slice(wrappedHostname.length);
+	const pathOnly = pathAndQuery.split("?")[0];
+	return `/api/media${pathOnly}`;
+};
+
+/**
+ * The shared resolver both functions below build on: given any raw URL,
+ * returns its `/api/media/...` path if it's CMS-origin — Photon-wrapped
+ * (matched by hostname, see `resolvePhotonUrl`) or direct (matched by exact
+ * origin string, which preserves any query string a direct URL carried) —
+ * or `null` if it isn't CMS-origin at all (an external image, a Gravatar
+ * avatar, a YouTube/Instagram CDN URL, a Photon URL wrapping some other site).
+ * @param url Any absolute URL.
+ */
+const resolveToMediaProxyPath = (url: string): string | null => {
+	const photonResolved = resolvePhotonUrl(url);
+	if (photonResolved) return photonResolved;
+
+	const origin = CMS_ORIGINS.find((candidate) => url.startsWith(candidate));
+	return origin ? `/api/media${url.slice(origin.length)}` : null;
+};
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXX Single URL fields XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -41,21 +132,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Single URL fields XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /**
  * Rewrites one absolute CMS-origin URL (`featuredImage.sourceUrl`,
  * `opengraphImage.mediaItemUrl`, a theme-options `backgroundImage.sourceUrl`,
- * ...) to `/api/media/...`. Anything that isn't CMS-origin — an external
- * image, a Gravatar avatar, a YouTube/Instagram CDN URL — is returned
- * completely unchanged; this only ever touches URLs that actually start with
- * a configured CMS origin.
+ * ...) to `/api/media/...` — Photon-wrapped or not, see `unwrapPhotonUrl`
+ * above. Anything that isn't CMS-origin — an external image, a Gravatar
+ * avatar, a YouTube/Instagram CDN URL — is returned completely unchanged.
  * @param url The raw URL as returned by WPGraphQL, or `null`/`undefined`.
  * @returns The rewritten same-origin path, or `url` unchanged if it wasn't
  * CMS-origin (or was empty).
  */
 export const rewriteCmsMediaUrl = <T extends string | null | undefined>(url: T): T => {
 	if (!url) return url;
-
-	const origin = CMS_ORIGINS.find((candidate) => url.startsWith(candidate));
-	if (!origin) return url;
-
-	return `/api/media${url.slice(origin.length)}` as T;
+	return (resolveToMediaProxyPath(url) ?? url) as T;
 };
 
 /* -----------------------------------------------------------------------------
@@ -63,12 +149,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXX WYSIWYG HTML string fields XXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Rewrites every `src="..."`/`href="..."` attribute pointing at a CMS origin
- * inside a raw WYSIWYG HTML string — a post's `content`/`excerpt`, a
- * TitleParagraph block's `paragraph` field, the error page's
- * `errorPageContent.paragraph`. Catches both embedded images and document
- * links (a PDF a CMS editor linked directly from the media library) in one
- * pass, since both attributes carry the same CMS-origin URL shape.
+ * Rewrites every `src="..."`/`href="..."` attribute pointing at a CMS
+ * origin — Photon-wrapped or direct — inside a raw WYSIWYG HTML string: a
+ * post's `content`/`excerpt`, a TitleParagraph block's `paragraph` field,
+ * the error page's `errorPageContent.paragraph`. Catches both embedded
+ * images and document links (a PDF a CMS editor linked directly from the
+ * media library) in one pass, since both attributes carry the same URL shape.
  *
  * A plain regex over the serialized markup rather than a full DOM
  * parse/rebuild — this runs on WordPress's own generated WYSIWYG output,
@@ -76,7 +162,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXX WYSIWYG HTML string fields XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * sanitizes the result with DOMPurify afterwards regardless of what this pass
  * does to it (`ArticleContent.tsx`, `Paragraph.tsx`), so a pass that's a
  * no-op on malformed markup fails safe rather than needing to be
- * XSS-hardened itself.
+ * XSS-hardened itself. Matches any `http(s)://` URL in a `src`/`href` — not
+ * `https://` only; `CMS_URL` is legitimately plain `http://` in local/dev
+ * environments (confirmed live: this project's own E2E fixture CMS runs on
+ * `http://localhost:<port>`, and a `https://`-only match silently left every
+ * direct-URL rewrite in this function dead there) — and defers the "is this
+ * actually CMS-origin" decision entirely to `resolveToMediaProxyPath` (same
+ * shared logic `rewriteCmsMediaUrl` uses) rather than only matching a fixed
+ * origin string — that's what lets this one pass catch a Photon-wrapped URL
+ * too, not just a direct one.
  * @param html The raw WYSIWYG HTML, or `""`/`undefined`.
  * @returns The same markup with every CMS-origin `src`/`href` rewritten to
  * `/api/media/...`; anything not CMS-origin is left untouched.
@@ -84,12 +178,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXX WYSIWYG HTML string fields XXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const rewriteCmsUrlsInHtml = (html: string | null | undefined): string => {
 	if (!html || CMS_ORIGINS.length === 0) return html ?? "";
 
-	return CMS_ORIGINS.reduce(
-		(markup, origin) =>
-			markup.replace(
-				new RegExp(`(src|href)="${escapeForRegExp(origin)}([^"]*)"`, "g"),
-				(_match, attribute: string, rest: string) => `${attribute}="/api/media${rest}"`,
-			),
-		html,
+	return html.replace(
+		/(src|href)="(https?:\/\/[^"]*)"/gi,
+		(match, attribute: string, url: string) => {
+			const resolved = resolveToMediaProxyPath(url);
+			return resolved ? `${attribute}="${resolved}"` : match;
+		},
 	);
 };
