@@ -4,6 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import type { Metadata } from "next";
 import { Suspense, ReactNode, JSX } from 'react';
+import { headers } from "next/headers";
 
 // Global CSS
 import "@/styles/globals.css";
@@ -153,6 +154,11 @@ const RootLayout = async ({ children, params }: { children: ReactNode; params: P
 
   const { locale } = await params;
 
+  // This request's CSP nonce (proxy.ts) — GoogleTagManager is a Client
+  // Component and can't call `headers()` itself, so it's read here and
+  // passed down as a prop.
+  const nonce = (await headers()).get("x-nonce");
+
   /* PUBLIC PAGES  */
   const promises: Promise<unknown>[] = [
     // Custom Post Types
@@ -249,7 +255,7 @@ const RootLayout = async ({ children, params }: { children: ReactNode; params: P
           {/* GoogleTagManager reads consent from CookiePolicyContext, so it must be
           rendered inside this provider — not in <head> — to never load before consent. */}
           <Suspense fallback={null}>
-            <GoogleTagManager />
+            <GoogleTagManager nonce={nonce} />
           </Suspense>
           
           {/* Main Page Content */}

@@ -4,13 +4,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import type { NextConfig } from "next";
 
-/* -----------------------------------------------------------------------------
-XXXXXXXXXXXXXXXXXXXXXXX Load environment variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
------------------------------------------------------------------------------ */
-
-// `'unsafe-eval'` is only needed by Next's dev/HMR runtime — never ship it.
-const cspAllowUnsafeEval = process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : "";
-
 const nextConfig: NextConfig = {
 	
   /* config options here */
@@ -61,23 +54,13 @@ const nextConfig: NextConfig = {
 						key: "X-XSS-Protection",
 						value: "1; mode=block",
 					},
-					// Content Security Policy (CSP) to allow the CMS and Instagram
-					{
-						key: "Content-Security-Policy",
-						value: `
-							default-src 'self';
-							img-src 'self' ${process.env.CMS_URL} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_ONE} ${process.env.IMAGE_REMOTE_PATTERNS_HOSTNAME_TWO} ${process.env.YOUTUBE_IMAGE_REMOTE_PATTERNS_HOSTNAME} ${process.env.INSTAGRAM_IMAGE_REMOTE_PATTERNS_HOSTNAME} https://secure.gravatar.com https://www.googletagmanager.com https://www.google-analytics.com data:;
-							script-src 'self' 'unsafe-inline'${cspAllowUnsafeEval} https://www.googletagmanager.com https://www.google.com https://www.gstatic.com;
-							style-src 'self' 'unsafe-inline';
-							connect-src 'self' ${process.env.CMS_URL} https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://www.google.com;
-							frame-src 'self' ${process.env.YOUTUBE_EMBED_REMOTE_PATTERNS_HOSTNAME} https://www.googletagmanager.com https://www.google.com; /* Allow embedding YouTube videos, the GTM noscript fallback, and the reCAPTCHA v3 frame */
-							object-src 'none';
-							base-uri 'none';
-							form-action 'self';
-							frame-ancestors 'none';`
-							.replace(/\s{2,}/g, " ")
-							.trim(),
-					},
+					// Content-Security-Policy is NOT set here — it needs a fresh,
+					// unpredictable nonce on every single request (script-src allows
+					// only a <script> carrying that request's own nonce, not
+					// 'unsafe-inline'), and this headers() config is static, evaluated
+					// once at build/start time, not per-request. It's generated fresh
+					// per-request in proxy.ts instead — see that file's own doc comment.
+
 					// Referrer Policy
 					{
 						key: "Referrer-Policy",

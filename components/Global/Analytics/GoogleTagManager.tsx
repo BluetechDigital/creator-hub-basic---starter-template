@@ -46,14 +46,21 @@ XXXXXXXXXXXXXXXXXXXXXXX Google Tag Manager Component XXXXXXXXXXXXXXXXXXXXXXXXXXX
  * context here means this component re-renders (and the script mounts) the moment
  * consent is granted, with no extra plumbing needed.
  *
+ * `nonce` comes from `app/[locale]/layout.tsx` (a Server Component reading it via
+ * `headers()`, set per-request by `proxy.ts`) — a Client Component can't read request
+ * headers itself. The CSP's `script-src` only allows a `<script>` carrying this
+ * request's own nonce (no more `'unsafe-inline'`), so without it the GTM bootstrap
+ * script below would be silently blocked, not just unauthenticated.
+ *
  * For the `<noscript>` fallback rendered alongside it, see {@link GoogleTagManagerNoScript}
  * — that one is intentionally NOT consent-gated the same way, since a visitor without
  * JavaScript can never see or interact with the cookie-consent banner in the first
  * place (it's a React component); gating it accurately would require reading the
  * consent cookie server-side, which would force this entire app out of static
  * rendering. Left as a known limitation rather than solved here.
+ * @param nonce This request's CSP nonce (see `proxy.ts`), or `null` if unavailable.
  */
-const GoogleTagManager = () => {
+const GoogleTagManager = ({ nonce }: { nonce?: string | null }) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { hasConsent } = useCookiePolicy();
@@ -83,6 +90,7 @@ const GoogleTagManager = () => {
         <Script
             id="gtm-script"
             strategy="afterInteractive" // Load this script after the page is interactive.
+            nonce={nonce ?? undefined}
             dangerouslySetInnerHTML={{
                 __html: `
                     window.dataLayer = window.dataLayer || []; // Ensure dataLayer is initialized
