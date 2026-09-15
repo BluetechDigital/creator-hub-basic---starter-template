@@ -5,7 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { gsap } from "gsap";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { FC, RefObject, useEffect, useRef } from "react";
 import DOMPurify from "isomorphic-dompurify";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -81,7 +81,7 @@ const BlurEffectTwo: FC<IBlurEffectTwo> = ({content, className}) => {
 	}, []);
 
 	return (
-		<motion.div
+		<m.div
 			ref={wordsRef}
 			className={content ? className : `hidden`}
 			dangerouslySetInnerHTML={createParagraphMarkup(content)}

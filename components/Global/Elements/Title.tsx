@@ -6,7 +6,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import { FC, memo, useMemo } from "react";
 import DOMPurify from "isomorphic-dompurify";
-import { motion, MotionValue } from "framer-motion";
+import { m, MotionValue } from "framer-motion";
 import { fadeIn, initialTwo } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ const Title: FC<ITitle> = memo(({
     }, [content, className]);
 
     return (
-        <motion.div
+        <m.div
             initial={initialTwo}
             whileInView={fadeIn}
             viewport={{once: true}}

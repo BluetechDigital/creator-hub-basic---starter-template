@@ -5,7 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { initialTwo, fadeIn } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ XXXXXXXXXXX Hook to format numbers into short form (e.g., 613k) XXXXXXXXXXXXXXXX
 
 /**
  * Formats a numeric string into short form (e.g., 613000 -> "613k") and renders it
- * inside an animated `<motion.h4>` that fades/slides in when scrolled into view.
+ * inside an animated `<m.h4>` that fades/slides in when scrolled into view.
  *
  * Despite the `use` prefix (kept for naming consistency with the other hooks in this
  * folder), this is not a plain value-returning hook — it returns JSX directly, so it
@@ -33,8 +33,8 @@ XXXXXXXXXXX Hook to format numbers into short form (e.g., 613k) XXXXXXXXXXXXXXXX
  *
  * @param number - The raw number, passed as a string, to format.
  * @param decimals - Number of decimal places to keep after formatting (default 0).
- * @param className - Class name applied to the rendered `<motion.h4>`.
- * @returns A `<motion.h4>` element containing the formatted number.
+ * @param className - Class name applied to the rendered `<m.h4>`.
+ * @returns A `<m.h4>` element containing the formatted number.
  */
 const useFormatNumber: FC<IFormatNumber> = ({
 	number,
@@ -55,14 +55,14 @@ const useFormatNumber: FC<IFormatNumber> = ({
 	const formattedNumber = formatNumber(parseFloat(number.toString()));
 
 	return (
-		<motion.h4
+		<m.h4
 			initial={initialTwo}
 			whileInView={fadeIn}
 			viewport={{once: true}}
 			className={className}
 		>
 			{formattedNumber}
-		</motion.h4>
+		</m.h4>
 	);
 };
 

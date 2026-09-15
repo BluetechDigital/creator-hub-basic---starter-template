@@ -50,6 +50,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import PixelatedWavePageTransition from "@/components/Global/PageTransition/PixelatedWave/PixelatedWave";
 
 // Other Components
+import LazyMotionProvider from "@/components/Global/LazyMotionProvider";
 import SmoothScrolling from "@/components/Global/SmoothScrolling";
 import CookiePolicy from "@/components/Global/CookiePolicy/CookiePolicy";
 import LocaleSwitcher from "@/components/Global/LocaleSwitcher/LocaleSwitcher";
@@ -238,34 +239,41 @@ const RootLayout = async ({ children, params }: { children: ReactNode; params: P
         GoogleTagManagerNoScript's doc comment for why. */}
         <GoogleTagManagerNoScript />
 
-        {/* No Navbar exists yet in this starter (confirmed via a full repo search) to
-        host the locale switcher inside — placed here as a simple, always-visible
-        element in the meantime; its exact page placement is a decision for whoever
-        builds one, not assumed here. */}
-        <LocaleSwitcher currentLocale={locale} />
+        {/* Wraps literally everything below — every <m.X> component anywhere in the
+        tree (LocaleSwitcher's dropdown, GlobalContextProvider's <m.main>, every
+        scroll-reveal/animated heading a page renders) needs to be inside this
+        boundary to load Framer Motion's feature bundle lazily rather than eagerly;
+        see LazyMotionProvider.tsx's own doc comment. */}
+        <LazyMotionProvider>
+          {/* No Navbar exists yet in this starter (confirmed via a full repo search) to
+          host the locale switcher inside — placed here as a simple, always-visible
+          element in the meantime; its exact page placement is a decision for whoever
+          builds one, not assumed here. */}
+          <LocaleSwitcher currentLocale={locale} />
 
-        {/* Mouse Tracking, Loaders and Transitions (Mounted Globally) */}
-        <BlurryCursorMouse />
-        <ChangePageTitleOnLeave />
-        
-        {/* <IntroLoadingAnimation /> */}
-        <PixelatedWavePageTransition />
-        
-        <CookiePolicyContextProvider>
-          {/* GoogleTagManager reads consent from CookiePolicyContext, so it must be
-          rendered inside this provider — not in <head> — to never load before consent. */}
-          <Suspense fallback={null}>
-            <GoogleTagManager nonce={nonce} />
-          </Suspense>
-          
-          {/* Main Page Content */}
-          <GlobalContextProvider globalProps={globalProps}>
-            <SmoothScrolling>
-              {children}
-              <CookiePolicy dict={dict.cookiePolicy} />
-            </SmoothScrolling>
-          </GlobalContextProvider>
-        </CookiePolicyContextProvider>
+          {/* Mouse Tracking, Loaders and Transitions (Mounted Globally) */}
+          <BlurryCursorMouse />
+          <ChangePageTitleOnLeave />
+
+          {/* <IntroLoadingAnimation /> */}
+          <PixelatedWavePageTransition />
+
+          <CookiePolicyContextProvider>
+            {/* GoogleTagManager reads consent from CookiePolicyContext, so it must be
+            rendered inside this provider — not in <head> — to never load before consent. */}
+            <Suspense fallback={null}>
+              <GoogleTagManager nonce={nonce} />
+            </Suspense>
+
+            {/* Main Page Content */}
+            <GlobalContextProvider globalProps={globalProps}>
+              <SmoothScrolling>
+                {children}
+                <CookiePolicy dict={dict.cookiePolicy} />
+              </SmoothScrolling>
+            </GlobalContextProvider>
+          </CookiePolicyContextProvider>
+        </LazyMotionProvider>
       </body>
     </html>
   );

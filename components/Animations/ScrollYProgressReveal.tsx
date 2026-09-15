@@ -3,7 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, useRef } from "react";
-import { motion, useScroll } from "framer-motion";
+import { m, useScroll } from "framer-motion";
 import { fadeIn, offsetFinish, offsetStart } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
@@ -28,13 +28,13 @@ const ScrollYProgressReveal: FC<IProps> = ({children, className}) => {
 		offset: [`start ${offsetStart}`, `start ${offsetFinish}`],
 	});
 	return (
-		<motion.div
+		<m.div
 			ref={container}
 			style={{opacity: fadeIn ? scrollYProgress : 1}}
 			className={children ? ` ${className}` : `hidden`}
 		>
 			{children}
-		</motion.div>
+		</m.div>
 	);
 };
 

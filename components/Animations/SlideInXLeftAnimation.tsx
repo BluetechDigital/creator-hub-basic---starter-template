@@ -3,7 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { m, useScroll, useTransform } from "framer-motion";
 import { fadeIn, offsetFinish, offsetStart } from "@/animations/animations";
 
 /* -----------------------------------------------------------------------------
@@ -31,13 +31,13 @@ const SlideInXLeftAnimation: FC<IProps> = ({children, className}) => {
 	const slideInX = useTransform(scrollYProgress, [0, 1], ["-500px", "0px"]);
 
 	return (
-		<motion.div
+		<m.div
 			ref={container}
 			className={children ? ` ${className}` : `hidden`}
 			style={{x: slideInX, opacity: fadeIn ? scrollYProgress : 1}}
 		>
 			{children}
-		</motion.div>
+		</m.div>
 	);
 };
 

@@ -5,7 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { FC, memo, useMemo } from "react";
 import { useParams } from "next/navigation";
 import useGlobalContext from "@/context/global";
@@ -68,23 +68,23 @@ const Error: FC = memo(() => {
 			<div className={styles.container}>
 				<div className={styles.contentWrapper}>
 					<div className={styles.topSection}>
-						<motion.span
+						<m.span
 							initial={initialTwo}
 							whileInView={fadeIn}
 							viewport={{once: true}}
 							className={styles.span}
 						>
 							{dict.notFound.errorBadge}
-						</motion.span>
+						</m.span>
 						<ContentSliceRevealMaskAnimation>
-							<motion.h1
+							<m.h1
 								initial={initialTwo}
 								whileInView={fadeIn}
 								viewport={{once: true}}
 								className={styles.title}
 							>
 								{errorPageContent.title}
-							</motion.h1>
+							</m.h1>
 						</ContentSliceRevealMaskAnimation>
 						<Paragraph
 							className={styles.paragraph}

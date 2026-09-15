@@ -4,7 +4,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import DOMPurify from "isomorphic-dompurify";
 import { FC, memo, useRef, useMemo } from "react";
-import { motion, useScroll, MotionValue } from "framer-motion";
+import { m, useScroll, MotionValue } from "framer-motion";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -69,7 +69,7 @@ const Paragraph: FC<IParagraph> = memo(({
 	}, [content, className]);
 	
 	return (
-		<motion.div
+		<m.div
 			ref={container}
 			style={{
 				color: styleTextColor,

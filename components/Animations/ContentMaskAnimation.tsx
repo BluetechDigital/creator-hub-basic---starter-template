@@ -3,7 +3,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC, useRef } from "react";
-import { motion, useInView, Variants } from "framer-motion";
+import { m, useInView, Variants } from "framer-motion";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -41,13 +41,13 @@ const ContentMaskAnimation: FC<IContentMaskAnimation> = ({children}) => {
 
 	return (
 		<div ref={body} className="overflow-hidden">
-			<motion.div
+			<m.div
 				initial="initial"
 				animate={isInView ? "enter" : ""}
 				variants={TextSlicedSlantMaskAnimation}
 			>
 				{children}
-			</motion.div>
+			</m.div>
 		</div>
 	);
 };

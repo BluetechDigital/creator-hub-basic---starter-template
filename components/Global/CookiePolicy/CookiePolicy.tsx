@@ -5,7 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import { FC } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import useCookiePolicy from "@/context/cookies";
 import { fadeInUp, initial } from "@/animations/animations";
 
@@ -69,7 +69,7 @@ const CookiePolicy: FC<IProps> = ({ dict }) => {
                     content={`<p>${dict.body}</p>`}
                 />
                 <div className={styles.buttonSection}>
-                    <motion.button
+                    <m.button
                         initial={initial}
                         whileInView={fadeInUp}
                         onClick={acceptCookies}
@@ -78,8 +78,8 @@ const CookiePolicy: FC<IProps> = ({ dict }) => {
                         className={styles.acceptButton}
                     >
                         {dict.accept}
-                    </motion.button>
-                    <motion.button
+                    </m.button>
+                    <m.button
                         initial={initial}
                         whileInView={fadeInUp}
                         onClick={refuseCookies}
@@ -88,7 +88,7 @@ const CookiePolicy: FC<IProps> = ({ dict }) => {
                         className={styles.declineButton}
                     >
                         {dict.decline}
-                    </motion.button>
+                    </m.button>
                 </div>
             </div>
         </section>

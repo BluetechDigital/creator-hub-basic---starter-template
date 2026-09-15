@@ -4,7 +4,7 @@
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Import XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
-import { motion, useInView, useAnimation, Variants, LegacyAnimationControls } from 'framer-motion';
+import { m, useInView, useAnimation, Variants, LegacyAnimationControls } from 'framer-motion';
 import { FC, memo, useRef, useEffect, RefObject, useMemo } from 'react';
 
 /* -----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ const SlideUpDivMaskReveal: FC<IProps> = memo(({
         <div className={styles.revealContentWrapper}>
           {children}
         </div>
-        <motion.div
+        <m.div
           initial="hidden"
           animate={controls}
           variants={revealVariants}
