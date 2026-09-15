@@ -53,6 +53,9 @@ const FeaturedVideoCard: FC<IAllYoutubeVideos.IFeaturedVideoCard> = memo(({ vide
 					alt={video.snippet.title}
 					width={1200}
 					height={640}
+					// .featuredVideoImageWrapper is `w-full` — genuinely full-bleed,
+					// same reasoning as FeaturedPostCard's own sizes prop.
+					sizes="100vw"
 					className={styles.featuredVideoImage}
 					priority
 				/>

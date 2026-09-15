@@ -54,6 +54,11 @@ const PostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
                         alt={post.featuredImage.node.altText || post.title}
                         width={480}
                         height={320}
+                        // .postThumbnailWrapper sits in .postsGridColumns
+                        // (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) — one card's
+                        // real width is a third of the viewport at lg, half at
+                        // sm, full below that, not a flat 480px at every size.
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                         className={styles.postThumbnail}
                     />
                 </div>

@@ -104,7 +104,15 @@ export const GET = async (
 			// same way it would loading straight from the CMS, not force a
 			// download the CMS URL itself wouldn't have forced either.
 			"Content-Disposition": "inline",
-			"Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+			// Browser-facing cache, separate from the server-to-CMS fetch's own
+			// 24h revalidate window above: a WordPress media URL never changes
+			// once uploaded (a re-upload gets a new filename, not an overwrite),
+			// so there's no correctness reason to keep the browser re-checking
+			// this often — 30 days + a 1-year stale-while-revalidate tail means
+			// a repeat visitor effectively never re-fetches an image they
+			// already have, without ever risking stale content on a genuinely
+			// new upload (a new URL, so nothing here is cached under it yet).
+			"Cache-Control": "public, max-age=2592000, stale-while-revalidate=31536000",
 		},
 	});
 };

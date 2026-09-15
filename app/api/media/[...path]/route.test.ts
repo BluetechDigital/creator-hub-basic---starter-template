@@ -82,6 +82,13 @@ describe("GET /api/media/[...path]", () => {
 		expect(res.status).toBe(200);
 		expect(res.headers.get("content-type")).toBe("application/pdf");
 		expect(res.headers.get("content-disposition")).toBe("inline");
+		// 30-day browser cache + a 1-year stale-while-revalidate tail — a WP
+		// media URL never changes once uploaded, so there's no correctness
+		// reason for a repeat visitor to ever re-fetch it. Separate from (and
+		// much longer than) the server-to-CMS fetch's own 24h revalidate
+		// window asserted above — two different cache layers, two different
+		// lifetimes, on purpose.
+		expect(res.headers.get("cache-control")).toBe("public, max-age=2592000, stale-while-revalidate=31536000");
 		expect(await res.text()).toBe("%PDF-1.4 fake bytes");
 	});
 

@@ -53,6 +53,14 @@ const FeaturedPostCard: FC<IAllBlogPosts.IPostCard> = memo(({ post }) => {
 					alt={post.featuredImage.node.altText || post.title}
 					width={1200}
 					height={640}
+					// .featuredPostImageWrapper is `w-full` (see AllBlogPosts.module.css)
+					// — without `sizes`, the browser defaults to assuming 100vw
+					// anyway, so this was already fetching viewport-appropriate
+					// sizes on desktop, but capped at a 1200/2400w ceiling with no
+					// smaller mobile-sized candidate offered at all. `sizes="100vw"`
+					// tells next/image this is genuinely full-bleed so it generates
+					// the full responsive ladder, not just two fixed candidates.
+					sizes="100vw"
 					className={styles.featuredPostImage}
 					priority
 				/>

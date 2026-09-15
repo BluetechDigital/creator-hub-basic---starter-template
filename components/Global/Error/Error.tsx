@@ -99,6 +99,16 @@ const Error: FC = memo(() => {
 					src={errorPageContent.backgroundImage.sourceUrl}
 					width={errorPageContent.backgroundImage.mediaDetails?.width || 1000}
 					height={errorPageContent.backgroundImage.mediaDetails?.height || 1000}
+					// width/height above are the CMS upload's native resolution
+					// (can be a multi-thousand-pixel photo), but styles.image
+					// renders it at `w-full` — without `sizes`, next/image assumes
+					// a fixed-size image and the browser defaults to treating it
+					// as 100vw anyway, so a real device fetches at (or near) that
+					// native resolution regardless of how small w-full actually
+					// renders on a narrow viewport. `sizes="100vw"` tells it the
+					// truth: this is genuinely full-bleed, so serve the size that
+					// matches the viewport, not the original upload.
+					sizes="100vw"
 					className={errorPageContent.backgroundImage.sourceUrl ? styles.image : `hidden`}
 				/>
 			</div>

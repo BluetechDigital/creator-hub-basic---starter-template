@@ -59,6 +59,10 @@ const LatestPostCard = async ({ post }: ILatestPostCard) => {
 						alt={post.featuredImage.node.altText || post.title}
 						width={480}
 						height={320}
+						// .latestPostImageWrapper sits in .latestPostsGrid
+						// (grid-cols-1 md:grid-cols-2 lg:grid-cols-3) — a third
+						// of the viewport at lg, half at md, full below that.
+						sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
 						className={styles.latestPostImage}
 					/>
 				</div>

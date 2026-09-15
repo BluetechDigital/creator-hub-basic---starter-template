@@ -55,6 +55,10 @@ const VideoCard: FC<IAllYoutubeVideos.IVideoCard> = memo(({ video, dict }) => {
 					alt={video.snippet.title}
 					width={480}
 					height={320}
+					// .videoThumbnailWrapper sits in .videosGridColumns
+					// (grid-cols-2 sm:grid-cols-3 lg:grid-cols-4) — a quarter of
+					// the viewport at lg, a third at sm, half below that.
+					sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
 					className={styles.videoThumbnail}
 				/>
 			</div>
