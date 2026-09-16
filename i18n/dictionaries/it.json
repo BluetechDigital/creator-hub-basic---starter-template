@@ -52,7 +52,9 @@
 		"next": "Successivo",
 		"views": "{count} visualizzazioni",
 		"likes": "{count} mi piace",
-		"comments": "{count} commenti"
+		"comments": "{count} commenti",
+		"articleAvailable": "Questo video è disponibile anche come articolo scritto.",
+		"readArticle": "Leggi l'articolo"
 	},
 	"latestPosts": {
 		"eyebrow": "Le ultime notizie",

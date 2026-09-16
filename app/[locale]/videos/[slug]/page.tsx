@@ -26,6 +26,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 import Breadcrumbs from "@/app/[locale]/videos/[slug]/fragments/Breadcrumbs";
 import VideoHero from "@/app/[locale]/videos/[slug]/fragments/VideoHero";
+import VideoArticleLink from "@/app/[locale]/videos/[slug]/fragments/VideoArticleLink";
 import LatestVideos from "@/app/[locale]/videos/[slug]/fragments/LatestVideos";
 import StructuredData from "@/components/Global/StructuredData/StructuredData";
 import { buildVideoObjectSchema } from "@/components/Global/StructuredData/builders";
@@ -125,7 +126,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX Single Video Page Component XXXXXXXXXXXXXXXXXXXXXXXXX
  * `/videos/{id}` link (this route's older URL shape) still resolves
  * correctly under the same parsing.
  *
- * Composes `Breadcrumbs`, `VideoHero` (embed + title/channel/date/stats), and
+ * Composes `Breadcrumbs`, `VideoHero` (embed + title/channel/date/stats),
+ * `VideoArticleLink` (links to this video's generated written article, when
+ * one's been published — see that component's own doc comment), and
  * `LatestVideos` — mirroring the single-post page's
  * `Breadcrumbs`/`PostHero`/`LatestPosts` composition shape in
  * `app/[locale]/posts/[slug]/page.tsx`.
@@ -163,6 +166,7 @@ const SingleVideoPage = async ({ params }: { params: Promise<{ locale: string; s
 			<StructuredData data={videoSchema} />
 			<Breadcrumbs videoTitle={video.snippet.title} />
 			<VideoHero video={video} />
+			<VideoArticleLink videoId={video.videoId} />
 			<LatestVideos excludeVideoId={video.videoId} />
 		</article>
 	);

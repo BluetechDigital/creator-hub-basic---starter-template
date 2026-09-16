@@ -87,6 +87,28 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     }
 }
 
+/* ---- Article link — teaser for this video's generated article, when one's been published ---- */
+
+.videoArticleLink {
+    @apply w-full max-w-360 mx-auto px-4 sm:px-8 pt-12;
+
+    & .videoArticleLinkCard {
+        @apply flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-accent-dark/5 px-8 py-6;
+
+        & .videoArticleLinkText {
+            @apply text-sm text-pure-black/70;
+        }
+
+        & .videoArticleLinkCta {
+            @apply inline-flex items-center gap-2 text-sm font-medium text-accent-dark transition duration-300;
+
+            &:hover {
+                @apply text-pure-black;
+            }
+        }
+    }
+}
+
 /* ---- Latest videos ---- */
 
 .latestVideos {
