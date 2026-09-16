@@ -15,6 +15,12 @@ import { getYoutubeVideoById, getVideoIdFromSlug, buildVideoSlug } from "@/api/Y
 import { buildLocaleAlternates } from "@/i18n/buildAlternates";
 
 /* -----------------------------------------------------------------------------
+XXXXXXXXXXXXXXXXXXXXXXXXXXX Environment Variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------------------------------------------- */
+
+const SITE_NAME: string | undefined = process.env.SITE_NAME;
+
+/* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Components XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
@@ -62,6 +68,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `alternates` is still rebuilt locale-aware via `buildLocaleAlternates`, since
  * the route itself is now locale-prefixed regardless of whether the video's
  * own text is translated.
+ *
+ * `title` is set via `title.absolute`, not a plain string — the root
+ * layout's `title.template` (`%s | ${SITE_NAME}`) would otherwise apply,
+ * giving `${videoTitle} | ${SITE_NAME}` with no indication the page is a
+ * video at all. `absolute` skips that template entirely, so the full string
+ * is built by hand here instead: `${videoTitle} | YouTube Video - ${SITE_NAME}`.
+ * Confirmed live: without `absolute`, the video's own title was reaching
+ * `<title>` correctly, but with no "YouTube Video" marker in it at all —
+ * not a bug in the video-title lookup itself, just the wrong metadata API
+ * for a page that wants to override its parent's template rather than
+ * extend it.
  * @param params - Route params promise; resolves to `{locale, slug}`.
  * @returns Next.js `Metadata` for this video, or minimal no-index metadata if the slug
  * doesn't resolve to a video — `SingleVideoPage` below is what actually 404s; this
@@ -85,7 +102,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ locale: s
 	}
 
 	return {
-		title: video.snippet.title,
+		title: { absolute: `${video.snippet.title} | YouTube Video - ${SITE_NAME}` },
 		description: video.snippet.description,
 		alternates: buildLocaleAlternates(locale, `/videos/${buildVideoSlug(video.snippet.title, video.videoId)}`),
 		robots: { follow: true, index: true },
