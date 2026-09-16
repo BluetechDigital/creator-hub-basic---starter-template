@@ -85,13 +85,21 @@ const downloadCaptionTrack = async (captionId: string, accessToken: string): Pro
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX SRT Parsing XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+// Matches YouTube caption-track conventions for non-speech sound description
+// (auto-generated tracks use these liberally on music/instrumental videos,
+// e.g. "[Music]", "[Music playing]", "(applause continues)") — these aren't
+// spoken content and would otherwise read as real transcript material to
+// both `getVideoTranscript`'s substance check and the rewrite prompt itself.
+const NON_SPEECH_MARKER_PATTERN = /[[(]\s*(music|applause|laughter|inaudible|silence|background noise)[^\])]*[\])]/gi;
+
 /**
  * Reduces a raw SRT caption file down to plain, continuous transcript text —
  * dropping every cue's index number and `HH:MM:SS,mmm --> HH:MM:SS,mmm`
  * timestamp line (matched by pattern, not fixed line position, since a
  * malformed or multi-line cue block would otherwise silently drop real
- * spoken text), stripping any inline markup tags (e.g. `<i>`), and
- * collapsing the whole thing to single-spaced prose ready to hand to the
+ * spoken text), stripping any inline markup tags (e.g. `<i>`) and non-speech
+ * sound-description markers (e.g. `[Music]` — see `NON_SPEECH_MARKER_PATTERN`),
+ * and collapsing the whole thing to single-spaced prose ready to hand to the
  * article-rewrite step — a raw SRT dump has neither sentence structure nor
  * paragraph breaks, both of which `generateArticleFromTranscript` is
  * responsible for imposing, not this parser.
@@ -114,6 +122,7 @@ export const parseSrtToPlainText = (srt: string): string => {
 		.filter(Boolean)
 		.join(" ")
 		.replace(/<[^>]+>/g, "")
+		.replace(NON_SPEECH_MARKER_PATTERN, "")
 		.replace(/\s+/g, " ")
 		.trim();
 };
@@ -121,6 +130,18 @@ export const parseSrtToPlainText = (srt: string): string => {
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Video Transcript XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
+
+// Below this many words, a transcript isn't real source material — confirmed
+// live: a music-only video's caption track (nothing but "[Music]" markers,
+// stripped to an empty/near-empty string by the pattern above) still reached
+// the rewrite step, and rather than skipping it, Claude correctly followed
+// its "don't invent details" instruction by writing an article *about* the
+// absence of spoken content instead of the video itself — technically
+// faithful to the transcript, but not a usable article. Gating here, before
+// spending an Anthropic call, treats "not enough to write about" the same as
+// "no captions at all" rather than publishing a draft that explains why it
+// has nothing to say.
+const MIN_TRANSCRIPT_WORD_COUNT = 40;
 
 /**
  * Fetches a plain-text transcript for a video: lists its caption tracks,
@@ -130,8 +151,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Video Transcript XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `generateArticleFromTranscript`.
  * @param videoId The video to transcribe.
  * @returns The transcript as plain text, or `undefined` if the video has no
- * caption tracks (or its only track produced no usable text) — not an error
- * state, callers should skip that video rather than fail the whole run.
+ * caption tracks, or its only track produced no usable text, or what's left
+ * after stripping non-speech markers falls under `MIN_TRANSCRIPT_WORD_COUNT`
+ * — none of these are an error state, callers should skip that video rather
+ * than fail the whole run.
  */
 export const getVideoTranscript = async (videoId: string): Promise<string | undefined> => {
 	if (!YOUTUBE_API_BASE_URL) throw new Error("Missing YOUTUBE_API_BASE_URL environment variable.");
@@ -145,5 +168,10 @@ export const getVideoTranscript = async (videoId: string): Promise<string | unde
 	const srt = await downloadCaptionTrack(track.id, accessToken);
 	const transcript = parseSrtToPlainText(srt);
 
-	return transcript || undefined;
+	if (!transcript) return undefined;
+
+	const wordCount = transcript.split(/\s+/).filter(Boolean).length;
+	if (wordCount < MIN_TRANSCRIPT_WORD_COUNT) return undefined;
+
+	return transcript;
 };

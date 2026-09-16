@@ -28,6 +28,44 @@ const SAMPLE_SRT = [
 	"",
 ].join("\n");
 
+// 48 words of real cue text — above MIN_TRANSCRIPT_WORD_COUNT, for tests that
+// exercise getVideoTranscript's full pipeline (track selection, download)
+// rather than the substance gate itself.
+const LONG_SAMPLE_SRT = [
+	"1",
+	"00:00:00,000 --> 00:00:04,000",
+	"Welcome back to the channel everyone today we are going to walk through",
+	"",
+	"2",
+	"00:00:04,000 --> 00:00:08,000",
+	"a really detailed breakdown of how this entire project actually came together",
+	"",
+	"3",
+	"00:00:08,000 --> 00:00:12,000",
+	"from the very first sketch all the way through to the finished piece",
+	"",
+	"4",
+	"00:00:12,000 --> 00:00:15,000",
+	"that you are watching right now so let's get started.",
+	"",
+].join("\n");
+
+const LONG_SAMPLE_SRT_TEXT =
+	"Welcome back to the channel everyone today we are going to walk through a really detailed breakdown of how this entire project actually came together from the very first sketch all the way through to the finished piece that you are watching right now so let's get started.";
+
+// A music-only video's real-world caption track: nothing but non-speech
+// markers, no actual dialogue.
+const MUSIC_ONLY_SRT = [
+	"1",
+	"00:00:00,000 --> 00:00:03,000",
+	"[Music]",
+	"",
+	"2",
+	"00:00:03,000 --> 00:00:06,000",
+	"[Music playing]",
+	"",
+].join("\n");
+
 describe("parseSrtToPlainText", () => {
 	it("drops index numbers and timestamp lines, strips tags, and joins cue text", async () => {
 		const { parseSrtToPlainText } = await importFresh();
@@ -43,6 +81,17 @@ describe("parseSrtToPlainText", () => {
 	it("returns an empty string for a file with no cue text", async () => {
 		const { parseSrtToPlainText } = await importFresh();
 		expect(parseSrtToPlainText("")).toBe("");
+	});
+
+	it("strips non-speech markers like [Music] and (applause)", async () => {
+		const { parseSrtToPlainText } = await importFresh();
+		expect(parseSrtToPlainText(MUSIC_ONLY_SRT)).toBe("");
+
+		const mixed = "1\n00:00:00,000 --> 00:00:02,000\nGreat shot [Music] right there\n";
+		expect(parseSrtToPlainText(mixed)).toBe("Great shot right there");
+
+		const parens = "1\n00:00:00,000 --> 00:00:02,000\n(applause continues) thank you all\n";
+		expect(parseSrtToPlainText(parens)).toBe("thank you all");
 	});
 });
 
@@ -86,14 +135,14 @@ describe("getVideoTranscript", () => {
 					}),
 				});
 			}
-			return Promise.resolve({ ok: true, text: async () => SAMPLE_SRT });
+			return Promise.resolve({ ok: true, text: async () => LONG_SAMPLE_SRT });
 		});
 		vi.stubGlobal("fetch", mockFetch);
 
 		const { getVideoTranscript } = await importFresh();
 		const transcript = await getVideoTranscript("abc");
 
-		expect(transcript).toBe("Hello and welcome to this video.");
+		expect(transcript).toBe(LONG_SAMPLE_SRT_TEXT);
 
 		const downloadCall = mockFetch.mock.calls.find(([url]) => String(url).includes("/captions/"));
 		expect(String(downloadCall?.[0])).toContain("/captions/human-track?tfmt=srt");
@@ -111,12 +160,50 @@ describe("getVideoTranscript", () => {
 					json: async () => ({ items: [{ id: "asr-track", snippet: { language: "en", trackKind: "ASR" } }] }),
 				});
 			}
+			return Promise.resolve({ ok: true, text: async () => LONG_SAMPLE_SRT });
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getVideoTranscript } = await importFresh();
+		expect(await getVideoTranscript("abc")).toBe(LONG_SAMPLE_SRT_TEXT);
+	});
+
+	it("returns undefined for a transcript under the minimum word count (e.g. a short greeting)", async () => {
+		setEnv();
+		mockGetAccessToken.mockResolvedValue("access-token");
+
+		const mockFetch = vi.fn().mockImplementation((url: string) => {
+			if (String(url).includes("/captions?")) {
+				return Promise.resolve({
+					ok: true,
+					json: async () => ({ items: [{ id: "human-track", snippet: { language: "en", trackKind: "standard" } }] }),
+				});
+			}
 			return Promise.resolve({ ok: true, text: async () => SAMPLE_SRT });
 		});
 		vi.stubGlobal("fetch", mockFetch);
 
 		const { getVideoTranscript } = await importFresh();
-		expect(await getVideoTranscript("abc")).toBe("Hello and welcome to this video.");
+		expect(await getVideoTranscript("abc")).toBeUndefined();
+	});
+
+	it("returns undefined for a music-only video (transcript is entirely non-speech markers)", async () => {
+		setEnv();
+		mockGetAccessToken.mockResolvedValue("access-token");
+
+		const mockFetch = vi.fn().mockImplementation((url: string) => {
+			if (String(url).includes("/captions?")) {
+				return Promise.resolve({
+					ok: true,
+					json: async () => ({ items: [{ id: "asr-track", snippet: { language: "en", trackKind: "ASR" } }] }),
+				});
+			}
+			return Promise.resolve({ ok: true, text: async () => MUSIC_ONLY_SRT });
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getVideoTranscript } = await importFresh();
+		expect(await getVideoTranscript("abc")).toBeUndefined();
 	});
 
 	it("throws when captions.list fails", async () => {
