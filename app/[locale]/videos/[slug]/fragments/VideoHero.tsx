@@ -7,6 +7,7 @@ import { formatCount } from "@/api/YouTube/GetAllYoutubeContent";
 import { getLocale } from "@/i18n/getLocale";
 import { getDictionary, formatTemplate } from "@/i18n/dictionaries";
 import { formatLocaleDate } from "@/i18n/formatLocaleDate";
+import VideoDescription from "@/app/[locale]/videos/[slug]/fragments/VideoDescription";
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -64,11 +65,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX VideoHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * the current locale directly (`getLocale()`) for both.
  *
  * `video.snippet.description` — the video's own YouTube caption/description
- * text, unrelated to a generated article's `excerpt` — renders as its own
- * full-width block *below* `videoHeroInner` (the embed + title/meta row),
- * not squeezed into the narrower title column beside the embed. It's plain
- * text with embedded `\n` line breaks, not HTML, so `whitespace-pre-line`
- * (not `dangerouslySetInnerHTML`) is what preserves YouTube's own line breaks.
+ * text, unrelated to a generated article's `excerpt` — renders via
+ * `VideoDescription` as its own full-width block *below* `videoHeroInner`
+ * (the embed + title/meta row), not squeezed into the narrower title column
+ * beside the embed, behind a light grey divider. `VideoDescription` handles
+ * truncating it behind a "Show more" reveal when it runs long — see that
+ * component's own doc comment.
  * @param video The video's full details, as returned by `getYoutubeVideoById`.
  */
 const VideoHero = async ({ video }: IVideoHero) => {
@@ -106,7 +108,7 @@ const VideoHero = async ({ video }: IVideoHero) => {
 				</div>
 			</div>
 			{video.snippet.description && (
-				<p className={styles.videoDescription}>{video.snippet.description}</p>
+				<VideoDescription description={video.snippet.description} dict={dict.common} />
 			)}
 		</header>
 	);
