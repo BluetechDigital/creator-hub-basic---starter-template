@@ -47,6 +47,31 @@ describe("getAllPostsSummaries", () => {
 		expect(result).toEqual({ posts: [summary], pageInfo });
 	});
 
+	it("excludes video-article posts (they render on their video's own page, not /posts)", async () => {
+		setCmsEnv();
+
+		const normalPost = {
+			title: "A Post",
+			slug: "a-post",
+			date: "2026-01-01T00:00:00",
+			excerpt: "<p>Excerpt</p>",
+			featuredImage: null,
+		};
+		const videoArticlePost = { ...normalPost, title: "Generated Article", slug: "video-article-RQlRGCrzCEY" };
+		const pageInfo = { hasNextPage: false, endCursor: null };
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { posts: { nodes: [videoArticlePost, normalPost], pageInfo } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getAllPostsSummaries } = await importFreshModule();
+		const result = await getAllPostsSummaries(24);
+
+		expect(result).toEqual({ posts: [normalPost], pageInfo });
+	});
+
 	it("sends first/after as GraphQL variables rather than interpolating them into the query string", async () => {
 		setCmsEnv();
 

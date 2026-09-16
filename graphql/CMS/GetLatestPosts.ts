@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import * as IPost from "@/graphql/CMS/types/post";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import { POST_SUMMARY_FIELDS, rewritePostSummaryMediaUrls } from "@/graphql/CMS/postSummaryFields";
+import { isVideoArticleSlug } from "@/api/WordPress/CreateVideoArticleDraft";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -70,7 +71,12 @@ export const getLatestPosts = async (
 		}
 
 		const nodes = response?.data?.posts?.nodes;
-		return nodes ? rewritePostSummaryMediaUrls(nodes) : nodes;
+		if (!nodes) return nodes;
+
+		// Video-article posts render on their source video's own page, not
+		// /posts/[slug] — see isVideoArticleSlug's doc comment — so they never
+		// belong in a "Latest posts" widget either.
+		return rewritePostSummaryMediaUrls(nodes).filter((post) => !isVideoArticleSlug(post.slug));
 
 	} catch (error: unknown) {
 		console.log(error);

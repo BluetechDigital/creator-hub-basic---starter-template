@@ -125,20 +125,25 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Article Schema XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 /**
- * Builds an Article schema.org object for a single blog post.
+ * Builds an Article schema.org object for a piece of post content — used for
+ * the standalone single-post page (`path: /posts/{slug}`) and, for a
+ * video-to-article post, the video page it's embedded on instead
+ * (`path: /videos/{videoSlug}`) — the schema itself doesn't care where the
+ * content actually renders, only `mainEntityOfPage` needs to point at the
+ * real URL.
  * @param siteUrl The site's canonical URL, used to build `mainEntityOfPage`.
- * @param slug The post's slug, appended to `siteUrl`/`posts` for `mainEntityOfPage`.
+ * @param path The content's actual public path (e.g. `/posts/a-post` or `/videos/a-video-abc123`), appended to `siteUrl` for `mainEntityOfPage`.
  * @param post The post's content fields, as returned by `getPostContentBySlug`.
  * @returns A schema.org `Article` object, with `image`/`author` included only when
  * present.
  */
 export const buildArticleSchema = ({
 	siteUrl,
-	slug,
+	path,
 	post,
 }: {
 	siteUrl: string;
-	slug: string;
+	path: string;
 	post: IPost.IProps;
 }) => ({
 	"@context": "https://schema.org",
@@ -148,7 +153,7 @@ export const buildArticleSchema = ({
 	dateModified: parseWpDate(post.modified).toISOString(),
 	...(post.featuredImage?.node?.sourceUrl ? { image: [post.featuredImage.node.sourceUrl] } : {}),
 	...(post.author?.node?.name ? { author: { "@type": "Person", name: post.author.node.name } } : {}),
-	mainEntityOfPage: `${siteUrl}/posts/${slug}`,
+	mainEntityOfPage: `${siteUrl}${path}`,
 });
 
 /* -----------------------------------------------------------------------------

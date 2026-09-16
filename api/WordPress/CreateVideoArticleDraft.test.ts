@@ -20,6 +20,23 @@ describe("buildVideoArticleSlug", () => {
 	});
 });
 
+describe("isVideoArticleSlug", () => {
+	it("returns true for a slug built by buildVideoArticleSlug", async () => {
+		const { buildVideoArticleSlug, isVideoArticleSlug } = await importFreshModule();
+		expect(isVideoArticleSlug(buildVideoArticleSlug("RQlRGCrzCEY"))).toBe(true);
+	});
+
+	it("returns false for an ordinary post slug", async () => {
+		const { isVideoArticleSlug } = await importFreshModule();
+		expect(isVideoArticleSlug("how-we-built-ai-collections")).toBe(false);
+	});
+
+	it("returns false for a slug that merely contains the marker, not at the start", async () => {
+		const { isVideoArticleSlug } = await importFreshModule();
+		expect(isVideoArticleSlug("my-video-article-review")).toBe(false);
+	});
+});
+
 describe("videoArticleExists", () => {
 	afterEach(() => {
 		process.env = { ...originalEnv };

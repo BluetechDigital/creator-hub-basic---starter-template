@@ -13,6 +13,9 @@ import { getAllPostsSlugs } from "@/graphql/CMS/GetAllPostsSlugs";
 // Videos
 import { getAllQualifyingVideoSummaries, buildVideoSlug } from "@/api/YouTube/GetAllYoutubeContent";
 
+// Video-article posts render on their source video's own page, not /posts/[slug]
+import { isVideoArticleSlug } from "@/api/WordPress/CreateVideoArticleDraft";
+
 // Locale-aware hreflang
 import { defaultLocale } from "@/context/constants";
 import { buildLocaleAlternates } from "@/i18n/buildAlternates";
@@ -113,7 +116,10 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
 	});
 
 	/* POSTS */
-	(postsSlugs ?? []).map((keys: IKeys) => {
+	// Video-article posts (video-to-article transcription) are excluded — their
+	// content renders at /videos/[slug], not their own /posts/[slug] URL, which
+	// 404s for them (see app/[locale]/posts/[slug]/page.tsx).
+	(postsSlugs ?? []).filter((keys: IKeys) => !isVideoArticleSlug(keys.slug)).map((keys: IKeys) => {
 
 		const { canonical, languages } = buildLocaleAlternates(defaultLocale, `/posts/${keys.slug}`);
 

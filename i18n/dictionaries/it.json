@@ -53,8 +53,7 @@
 		"views": "{count} visualizzazioni",
 		"likes": "{count} mi piace",
 		"comments": "{count} commenti",
-		"articleAvailable": "Questo video è disponibile anche come articolo scritto.",
-		"readArticle": "Leggi l'articolo"
+		"articleAvailable": "Questo video è disponibile anche come articolo scritto."
 	},
 	"latestPosts": {
 		"eyebrow": "Le ultime notizie",

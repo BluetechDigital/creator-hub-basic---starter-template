@@ -5,6 +5,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX IMPORTS XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 import * as IPost from "@/graphql/CMS/types/post";
 import { IGraphQLResponse } from "@/graphql/CMS/types/graphqlResponse";
 import { POST_SUMMARY_FIELDS, rewritePostSummaryMediaUrls } from "@/graphql/CMS/postSummaryFields";
+import { isVideoArticleSlug } from "@/api/WordPress/CreateVideoArticleDraft";
 
 const GRAPHQL_ENDPOINT: string | undefined = process.env.NEXT_PUBLIC_CMS_API_URL;
 if (!GRAPHQL_ENDPOINT) throw new Error("NEXT_PUBLIC_CMS_API_URL not defined.");
@@ -144,7 +145,13 @@ export const getAllPostsSummaries = async (
 
 		if (!response?.data?.posts) return undefined;
 
-		return { posts: rewritePostSummaryMediaUrls(response.data.posts.nodes), pageInfo: response.data.posts.pageInfo };
+		// Video-article posts (video-to-article transcription) render on their
+		// source video's own page, not at /posts/[slug] — see isVideoArticleSlug's
+		// doc comment. Excluded here rather than via a WPGraphQL where-arg, since
+		// there's no slug-prefix filter in the schema to do that server-side.
+		const posts = rewritePostSummaryMediaUrls(response.data.posts.nodes).filter((post) => !isVideoArticleSlug(post.slug));
+
+		return { posts, pageInfo: response.data.posts.pageInfo };
 
 	} catch (error: unknown) {
 		console.log(error);

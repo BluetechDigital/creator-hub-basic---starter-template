@@ -17,6 +17,7 @@ import { getPostContentBySlug } from "@/graphql/CMS/GetPostContentBySlug";
 import { getPostReactions } from "@/graphql/CMS/GetPostReactions";
 import { getPostComments } from "@/graphql/CMS/GetPostComments";
 import { getCommentReactions } from "@/graphql/CMS/GetCommentReactions";
+import { isVideoArticleSlug } from "@/api/WordPress/CreateVideoArticleDraft";
 
 // CMS content translation + locale-aware SEO
 import { translateFields } from "@/i18n/translateContent";
@@ -81,6 +82,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Metadata XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> => {
 
 	const { locale, slug } = await params;
+
+	// Video-article posts render at /videos/[slug] now, not here — see
+	// isVideoArticleSlug's doc comment. No-index rather than a wasted SEO fetch.
+	if (isVideoArticleSlug(slug)) {
+		return { robots: { follow: false, index: false } };
+	}
 
 	const seo = await getAllSeoContent(slug, postType.posts) as ISeo.IProps | undefined;
 
@@ -157,6 +164,13 @@ const SinglePostPage = async ({ params }: { params: Promise<{ locale: string; sl
 
 	/* Extract locale/slug directly from params to ensure they're resolved before use. */
 	const { locale, slug } = await params;
+
+	// Video-article posts render at /videos/[slug] now, not here — see
+	// isVideoArticleSlug's doc comment.
+	if (isVideoArticleSlug(slug)) {
+		notFound();
+	}
+
 	const dict = await getDictionary(locale);
 
 	// getPostContentBySlug throws on a network/fetch-level failure, not just a
@@ -217,7 +231,7 @@ const SinglePostPage = async ({ params }: { params: Promise<{ locale: string; sl
 
 	const articleSchema = buildArticleSchema({
 		siteUrl: SITE_URL!,
-		slug,
+		path: `/posts/${slug}`,
 		post,
 	});
 

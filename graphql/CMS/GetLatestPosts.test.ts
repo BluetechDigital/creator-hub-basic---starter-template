@@ -67,6 +67,32 @@ describe("getLatestPosts", () => {
 		expect(body.query).not.toContain("307");
 	});
 
+	it("excludes video-article posts (they render on their video's own page, not /posts)", async () => {
+		setCmsEnv();
+
+		const normalPost = {
+			title: "Another Post",
+			slug: "another-post",
+			date: "2026-01-05T00:00:00",
+			excerpt: "<p>Excerpt</p>",
+			featuredImage: null,
+			categories: { nodes: [] },
+			seo: { readingTime: 3 },
+		};
+		const videoArticlePost = { ...normalPost, title: "Generated Article", slug: "video-article-RQlRGCrzCEY" };
+
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ data: { posts: { nodes: [videoArticlePost, normalPost] } } }),
+		});
+		vi.stubGlobal("fetch", mockFetch);
+
+		const { getLatestPosts } = await importFreshModule();
+		const result = await getLatestPosts(307, 3);
+
+		expect(result).toEqual([normalPost]);
+	});
+
 	it("returns undefined when the HTTP response is not ok", async () => {
 		setCmsEnv();
 

@@ -62,6 +62,13 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX VideoHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * `Intl.DateTimeFormat`), not the `dateformat` package this used to use —
  * see that helper's own doc comment for why. Async Server Component — reads
  * the current locale directly (`getLocale()`) for both.
+ *
+ * `video.snippet.description` — the video's own YouTube caption/description
+ * text, unrelated to a generated article's `excerpt` — renders directly
+ * beneath the title, in the same position `PostHero.tsx` renders a post's
+ * `excerpt`. It's plain text with embedded `\n` line breaks, not HTML, so
+ * `whitespace-pre-line` (not `dangerouslySetInnerHTML`) is what preserves
+ * YouTube's own line breaks.
  * @param video The video's full details, as returned by `getYoutubeVideoById`.
  */
 const VideoHero = async ({ video }: IVideoHero) => {
@@ -84,6 +91,9 @@ const VideoHero = async ({ video }: IVideoHero) => {
 				</div>
 				<div className={styles.videoHeroContent}>
 					<h1 className={styles.videoTitle}>{video.snippet.title}</h1>
+					{video.snippet.description && (
+						<p className={styles.videoDescription}>{video.snippet.description}</p>
+					)}
 					<div className={styles.videoMeta}>
 						<span className={styles.videoMetaText}>{video.snippet.channelTitle}</span>
 						<span className={styles.videoMetaDot} aria-hidden="true" />

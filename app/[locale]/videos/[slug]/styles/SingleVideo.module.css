@@ -65,6 +65,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             font-size: clamp(1.5rem, 1.236rem + 1.13vw, 2.25rem);
         }
 
+        & .videoDescription {
+            /* Same treatment as SinglePost.module.css's .postExcerpt — this is
+            YouTube's own video description/caption, in the same position an
+            excerpt occupies on the single-post page. whitespace-pre-line
+            preserves YouTube's own line breaks (plain text, not HTML). */
+            @apply text-lg text-pure-black/60 whitespace-pre-line;
+        }
+
         & .videoMeta {
             @apply flex flex-wrap items-center gap-3;
 
@@ -87,25 +95,26 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     }
 }
 
-/* ---- Article link — teaser for this video's generated article, when one's been published ---- */
+/* ---- Article sub-hero — introduces the generated article embedded below the video hero,
+   when one's been published. Reuses SinglePost.module.css's .postBody/.postSidebar/.postMain
+   and .postMeta/.postMetaText/.postMetaDot/.postAuthorAvatar directly (imported separately
+   into page.tsx) rather than duplicating that layout/styling here. ---- */
 
-.videoArticleLink {
-    @apply w-full max-w-360 mx-auto px-4 sm:px-8 pt-12;
+.articleSubHero {
+    @apply w-full px-4 sm:px-8 pt-16 pb-8 border-b border-pure-black/10;
 
-    & .videoArticleLinkCard {
-        @apply flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-accent-dark/5 px-8 py-6;
+    & .articleSubHeroInner {
+        @apply max-w-360 mx-auto flex flex-col gap-4;
+    }
 
-        & .videoArticleLinkText {
-            @apply text-sm text-pure-black/70;
-        }
+    & .articleSubHeroEyebrow {
+        @apply inline-block text-sm text-accent-dark font-medium;
+    }
 
-        & .videoArticleLinkCta {
-            @apply inline-flex items-center gap-2 text-sm font-medium text-accent-dark transition duration-300;
-
-            &:hover {
-                @apply text-pure-black;
-            }
-        }
+    & .articleSubHeroTitle {
+        @apply text-pure-black tracking-tight;
+        /* Smaller fluid scale than .videoTitle above — subordinate to the video hero, not competing with it. */
+        font-size: clamp(1.25rem, 1.086rem + 0.68vw, 1.75rem);
     }
 }
 

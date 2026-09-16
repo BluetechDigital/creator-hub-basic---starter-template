@@ -52,7 +52,6 @@ const dict = {
 	shortsDefaultHeading: "Latest shorts",
 	moreToWatch: "More to watch",
 	articleAvailable: "This video is also available as a written article.",
-	readArticle: "Read the article",
 };
 
 const titleLink = (title: string) => screen.getByText(title).closest("a");

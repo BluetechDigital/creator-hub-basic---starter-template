@@ -18,6 +18,8 @@ const WP_VIDEO_ARTICLE_CATEGORY_ID: string | undefined = process.env.WP_VIDEO_AR
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Video Article Slug XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
+const VIDEO_ARTICLE_SLUG_PREFIX = "video-article-";
+
 /**
  * Builds the deterministic WordPress post slug a generated article for `videoId`
  * always gets, regardless of whatever title the article rewrite actually
@@ -28,7 +30,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Video Article Slug XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * article came from.
  * @param videoId The source YouTube video's ID.
  */
-export const buildVideoArticleSlug = (videoId: string): string => `video-article-${videoId}`;
+export const buildVideoArticleSlug = (videoId: string): string => `${VIDEO_ARTICLE_SLUG_PREFIX}${videoId}`;
+
+/**
+ * Whether a post slug belongs to a generated video article — used to keep
+ * these posts out of every place that lists normal blog posts (the archive
+ * grid, "Latest posts", the sitemap) and to 404 the old `/posts/[slug]` route
+ * for them, now that their content renders directly on the video page
+ * (`app/[locale]/videos/[slug]/page.tsx`) instead of at their own URL.
+ * @param slug A post's slug.
+ */
+export const isVideoArticleSlug = (slug: string): boolean => slug.startsWith(VIDEO_ARTICLE_SLUG_PREFIX);
 
 /* -----------------------------------------------------------------------------
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX Existing Article Check XXXXXXXXXXXXXXXXXXXXXXXXXXX
