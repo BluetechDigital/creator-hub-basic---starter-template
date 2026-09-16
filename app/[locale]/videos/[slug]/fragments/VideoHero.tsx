@@ -64,11 +64,11 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX VideoHero Component XXXXXXXXXXXXXXXXXXXXXXXXXXXX
  * the current locale directly (`getLocale()`) for both.
  *
  * `video.snippet.description` — the video's own YouTube caption/description
- * text, unrelated to a generated article's `excerpt` — renders directly
- * beneath the title, in the same position `PostHero.tsx` renders a post's
- * `excerpt`. It's plain text with embedded `\n` line breaks, not HTML, so
- * `whitespace-pre-line` (not `dangerouslySetInnerHTML`) is what preserves
- * YouTube's own line breaks.
+ * text, unrelated to a generated article's `excerpt` — renders as its own
+ * full-width block *below* `videoHeroInner` (the embed + title/meta row),
+ * not squeezed into the narrower title column beside the embed. It's plain
+ * text with embedded `\n` line breaks, not HTML, so `whitespace-pre-line`
+ * (not `dangerouslySetInnerHTML`) is what preserves YouTube's own line breaks.
  * @param video The video's full details, as returned by `getYoutubeVideoById`.
  */
 const VideoHero = async ({ video }: IVideoHero) => {
@@ -91,9 +91,6 @@ const VideoHero = async ({ video }: IVideoHero) => {
 				</div>
 				<div className={styles.videoHeroContent}>
 					<h1 className={styles.videoTitle}>{video.snippet.title}</h1>
-					{video.snippet.description && (
-						<p className={styles.videoDescription}>{video.snippet.description}</p>
-					)}
 					<div className={styles.videoMeta}>
 						<span className={styles.videoMetaText}>{video.snippet.channelTitle}</span>
 						<span className={styles.videoMetaDot} aria-hidden="true" />
@@ -108,6 +105,9 @@ const VideoHero = async ({ video }: IVideoHero) => {
 					</div>
 				</div>
 			</div>
+			{video.snippet.description && (
+				<p className={styles.videoDescription}>{video.snippet.description}</p>
+			)}
 		</header>
 	);
 };
