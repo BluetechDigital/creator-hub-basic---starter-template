@@ -117,9 +117,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 }
 
 /* ---- Article sub-hero — introduces the generated article embedded below the video hero,
-   when one's been published. Reuses SinglePost.module.css's .postBody/.postSidebar/.postMain
-   and .postMeta/.postMetaText/.postMetaDot/.postAuthorAvatar directly (imported separately
-   into page.tsx) rather than duplicating that layout/styling here. ---- */
+   when one's been published. .postBody/.postSidebar/.postMain (page.tsx) ARE reused
+   directly from SinglePost.module.css — those are standalone top-level classes there.
+   The meta row below is NOT: SinglePost.module.css's .postMeta/.postMetaText/.postMetaDot/
+   .postAuthorAvatar are nested three levels deep (.postHero > .postHeroContent > .postMeta),
+   so reusing just the class name outside that DOM ancestry never matches anything — confirmed
+   live, this is what made the meta row render with zero spacing. Local equivalents below
+   instead, same pattern SinglePost.module.css itself already uses for
+   .commentReactionPill vs .reactionPill. ---- */
 
 .articleSubHero {
     @apply w-full px-4 sm:px-8 pt-16 pb-8;
@@ -136,6 +141,22 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         @apply text-pure-black tracking-tight;
         /* Smaller fluid scale than .videoTitle above — subordinate to the video hero, not competing with it. */
         font-size: clamp(1.25rem, 1.086rem + 0.68vw, 1.75rem);
+    }
+
+    & .postMeta {
+        @apply flex flex-wrap items-center gap-3;
+
+        & .postAuthorAvatar {
+            @apply w-8 h-8 rounded-full object-cover;
+        }
+
+        & .postMetaText {
+            @apply text-sm text-pure-black font-medium;
+        }
+
+        & .postMetaDot {
+            @apply w-1 h-1 rounded-full bg-pure-black/60;
+        }
     }
 }
 
