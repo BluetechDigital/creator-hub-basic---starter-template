@@ -3,7 +3,8 @@
 		"from": "From",
 		"to": "To",
 		"clearFilters": "Clear filters",
-		"showMore": "Show more"
+		"showMore": "Show more",
+		"showLess": "Show less"
 	},
 	"cookiePolicy": {
 		"body": "We use cookies to improve your browsing experience. Learn about our Privacy policy here.",

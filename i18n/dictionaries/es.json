@@ -3,7 +3,8 @@
 		"from": "Desde",
 		"to": "Hasta",
 		"clearFilters": "Borrar filtros",
-		"showMore": "Mostrar más"
+		"showMore": "Mostrar más",
+		"showLess": "Mostrar menos"
 	},
 	"cookiePolicy": {
 		"body": "Utilizamos cookies para mejorar su experiencia de navegación. Conozca aquí nuestra política de privacidad.",

@@ -52,9 +52,9 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         /* A full-width block stacked below .videoHeroInner (the embed +
         title/meta row) — not squeezed into .videoHeroContent's narrower
         column beside the embed — separated from it by a light grey divider.
-        VideoDescription.tsx's own "Show more" control (reused from
-        AllBlogPosts.module.css) carries a second, identical divider of its
-        own directly above the button, when the text is truncated. */
+        This is the ONLY divider in this section — the "Show more"/"Show
+        less" control below deliberately does NOT get one of its own (unlike
+        PostsGrid.tsx's, which does), see .showMoreWrapper below. */
         @apply w-full max-w-360 mx-auto border-t border-pure-black/10 pt-8 flex flex-col gap-4;
     }
 
@@ -63,6 +63,16 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         whitespace-pre-line preserves YouTube's own line breaks (plain text,
         not HTML). */
         @apply text-lg text-pure-black/60 whitespace-pre-line;
+    }
+
+    & .showMoreWrapper {
+        /* Deliberately its own class rather than reusing AllBlogPosts.module.css's
+        .showMoreWrapper — that one carries its own border-top divider (right for
+        the blog archive grid, where it's the only divider in that section), which
+        would double up with .videoDescriptionWrapper's divider above. The button
+        itself (blogStyles.showMoreButton, in VideoDescription.tsx) is still reused
+        as-is — only the bordered wrapper differs. */
+        @apply flex justify-center pt-4;
     }
 
     & .videoEmbedWrapper {
@@ -110,7 +120,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    into page.tsx) rather than duplicating that layout/styling here. ---- */
 
 .articleSubHero {
-    @apply w-full px-4 sm:px-8 pt-16 pb-8 border-b border-pure-black/10;
+    @apply w-full px-4 sm:px-8 pt-16 pb-8;
 
     & .articleSubHeroInner {
         @apply max-w-360 mx-auto flex flex-col gap-4;

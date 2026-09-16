@@ -30,6 +30,7 @@ const dict = {
 	eyebrow: "Blogs",
 	defaultHeading: "Latest from the blog",
 	showMore: "Show more",
+	showLess: "Show less",
 };
 
 describe("AllBlogPosts PostFilters", () => {

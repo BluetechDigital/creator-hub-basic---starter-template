@@ -11,9 +11,10 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Styling XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ----------------------------------------------------------------------------- */
 
 import styles from "@/app/[locale]/videos/[slug]/styles/SingleVideo.module.css";
-// .showMoreWrapper/.showMoreButton — the exact same "Show more" control (grey
-// divider + pill button) the blog archive grid's PostsGrid.tsx uses, reused
-// directly rather than recreated, per request.
+// .showMoreButton — the exact same pill button PostsGrid.tsx uses for its
+// "Show more" control, reused directly rather than recreated. Its wrapper's
+// divider is NOT reused here — see .showMoreWrapper's own comment in
+// SingleVideo.module.css for why this needed its own, divider-less wrapper.
 import blogStyles from "@/components/CMS/AllBlogPosts/styles/AllBlogPosts.module.css";
 
 /* -----------------------------------------------------------------------------
@@ -31,8 +32,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXX Props Interface XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 type IVideoDescription = {
 	description: string;
-	/** Only `common.showMore` is read — passed down from `VideoHero.tsx`'s own `dict.common` slice. */
-	dict: { showMore: string };
+	/** Only `common.showMore`/`.showLess` are read — passed down from `VideoHero.tsx`'s own `dict.common` slice. */
+	dict: { showMore: string; showLess: string };
 };
 
 /* -----------------------------------------------------------------------------
@@ -41,13 +42,15 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX VideoDescription Component XXXXXXXXXXXXXXXXXXXXXXXXX
 
 /**
  * Renders the video's own YouTube description, truncated to
- * `INITIAL_WORD_COUNT` words behind a "Show more" reveal when it runs longer
- * than that — the full text is already on the page (no second fetch), this
- * is local state only, same shape as `PostsGrid.tsx`'s `showAll` toggle.
+ * `INITIAL_WORD_COUNT` words behind a "Show more"/"Show less" toggle when it
+ * runs longer than that — the full text is already on the page (no second
+ * fetch), this is local state only, same idea as `PostsGrid.tsx`'s `showAll`
+ * toggle, except reversible here rather than a one-way reveal (a video
+ * description can be long enough that collapsing it back down matters).
  * `'use client'` for that state; `VideoHero.tsx` (an async Server Component)
  * renders this as a child rather than holding the toggle itself.
  * @param description The video's `snippet.description` — plain text with embedded `\n` line breaks, not HTML.
- * @param dict `{showMore}` — this route's `common` dictionary slice.
+ * @param dict `{showMore, showLess}` — this route's `common` dictionary slice.
  */
 const VideoDescription = ({ description, dict }: IVideoDescription) => {
 	const [showAll, setShowAll] = useState(false);
@@ -59,10 +62,10 @@ const VideoDescription = ({ description, dict }: IVideoDescription) => {
 	return (
 		<div className={styles.videoDescriptionWrapper}>
 			<p className={styles.videoDescription}>{visibleText}</p>
-			{isTruncated && !showAll && (
-				<div className={blogStyles.showMoreWrapper}>
-					<button type="button" className={blogStyles.showMoreButton} onClick={() => setShowAll(true)}>
-						{dict.showMore}
+			{isTruncated && (
+				<div className={styles.showMoreWrapper}>
+					<button type="button" className={blogStyles.showMoreButton} onClick={() => setShowAll((current) => !current)}>
+						{showAll ? dict.showLess : dict.showMore}
 					</button>
 				</div>
 			)}

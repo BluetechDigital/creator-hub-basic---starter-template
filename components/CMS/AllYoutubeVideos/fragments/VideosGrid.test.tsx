@@ -38,6 +38,7 @@ const dict = {
 	to: "To",
 	clearFilters: "Clear filters",
 	showMore: "Show more",
+	showLess: "Show less",
 	empty: "No videos published yet — check back soon.",
 	noMatches: "No videos match these filters.",
 	paginationAriaLabel: "Video archive pagination",
