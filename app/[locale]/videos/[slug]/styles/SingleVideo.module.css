@@ -59,10 +59,12 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSS Module Content XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     }
 
     & .videoDescription {
-        /* Same text treatment as SinglePost.module.css's .postExcerpt;
+        /* text-base to match ArticleContent.module.css's own `& p` font-size
+        (the embedded article's body text) — this and the article sit on the
+        same page, so their paragraph text reads at one consistent size.
         whitespace-pre-line preserves YouTube's own line breaks (plain text,
         not HTML). */
-        @apply text-lg text-pure-black/60 whitespace-pre-line;
+        @apply text-base text-pure-black/60 whitespace-pre-line;
     }
 
     & .showMoreWrapper {
